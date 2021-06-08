@@ -80,6 +80,30 @@ func createThing(id string, td mapAny, t *testing.T) mapAny {
 	return td
 }
 
+func retrieveAllThings(t *testing.T) []mapAny {
+	res, err := http.Get(serverURL + "/things")
+	if err != nil {
+		t.Fatalf("Error getting TD: %s", err)
+	}
+	defer res.Body.Close()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("Error retrieving test data: %d: %s", res.StatusCode, b)
+	}
+
+	var retrievedTDs []mapAny
+	err = json.Unmarshal(b, &retrievedTDs)
+	if err != nil {
+		t.Fatalf("Error decoding body: %s", err)
+	}
+	return retrievedTDs
+}
+
 func serializedEqual(td1 mapAny, td2 mapAny) bool {
 	// serialize to ease comparison of interfaces and concrete types
 	tdBytes, _ := json.Marshal(td1)
