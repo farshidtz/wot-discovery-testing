@@ -30,10 +30,9 @@ func TestMain(m *testing.M) {
 
 	writeReport := initReportWriter()
 
-	if m.Run() == 1 {
-		os.Exit(1)
-	}
+	code := m.Run()
 
 	writeReport()
-	os.Exit(0)
+
+	os.Exit(code)
 }

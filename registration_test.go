@@ -9,8 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/linksmart/thing-directory/wot"
 	uuid "github.com/satori/go.uuid"
+)
+
+const (
+	MediaTypeJSON             = "application/json"
+	MediaTypeJSONLD           = "application/ld+json"
+	MediaTypeThingDescription = "application/td+json"
+	MediaTypeMergePatch       = "application/merge-patch+json"
 )
 
 func TestCreateAnonymousThing(t *testing.T) {
@@ -21,7 +27,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
 
-	res, err := http.Post(serverURL+"/things/", wot.MediaTypeThingDescription, bytes.NewReader(b))
+	res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 	if err != nil {
 		t.Fatalf("Error posting: %s", err)
 	}
@@ -47,7 +53,8 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	storedTD := retrieveThing(location.String(), t)
 
-	// add the system-generated attributes
+	// manually change attributes of the reference TD
+	// set the system-generated attributes
 	td["id"] = storedTD["id"]
 	td["registration"] = storedTD["registration"]
 
@@ -67,7 +74,7 @@ func TestCreateThing(t *testing.T) {
 		td := mockedTD(id)
 		b, _ := json.Marshal(td)
 
-		res, err := httpPut(serverURL+"/things/"+id, wot.MediaTypeThingDescription, b)
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
 		}
@@ -84,7 +91,8 @@ func TestCreateThing(t *testing.T) {
 
 		storedTD := retrieveThing(id, t)
 
-		// add the system-generated attributes
+		// manually change attributes of the reference TD
+		// set the system-generated attributes
 		td["registration"] = storedTD["registration"]
 
 		if !serializedEqual(td, storedTD) {
@@ -92,12 +100,36 @@ func TestCreateThing(t *testing.T) {
 		}
 	})
 
-	t.Run("POST_fail", func(t *testing.T) {
+	t.Run("PUT fail id mismatch", func(t *testing.T) {
+		t.Skip("not normative")
+
+		id := "urn:uuid:" + uuid.NewV4().String()
+		anotherID := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(anotherID)
+		b, _ := json.Marshal(td)
+
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			t.Fatalf("Error posting: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err = ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusConflict {
+			t.Fatalf("Expected response %v, got: %d. Response body: %s", http.StatusConflict, res.StatusCode, b)
+		}
+	})
+
+	t.Run("POST fail", func(t *testing.T) {
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
 		b, _ := json.Marshal(td)
 
-		res, err := http.Post(serverURL+"/things/", wot.MediaTypeThingDescription, bytes.NewReader(b))
+		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
 		}
@@ -144,8 +176,8 @@ func TestRetrieveThing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error parsing media type: %s", err)
 	}
-	if mediaType != wot.MediaTypeThingDescription {
-		t.Fatalf("Expected Content-Type: %s, got %s", wot.MediaTypeThingDescription, res.Header.Get("Content-Type"))
+	if mediaType != MediaTypeThingDescription {
+		t.Fatalf("Expected Content-Type: %s, got %s", MediaTypeThingDescription, res.Header.Get("Content-Type"))
 	}
 
 	var retrievedTD mapAny
@@ -159,386 +191,309 @@ func TestRetrieveThing(t *testing.T) {
 	}
 }
 
-// func TestPut(t *testing.T) {
-// 	controller, testServer := setupTestHTTPServer(t)
-
-// 	// add through controller
-// 	id := "urn:example:test/thing_1"
-// 	td := mockedTD(id)
-// 	_, err := controller.add(td)
-// 	if err != nil {
-// 		t.Fatalf("Error adding through controller: %s", err)
-// 	}
-
-// 	t.Run("Update existing", func(t *testing.T) {
-// 		td["title"] = "updated title"
-// 		b, _ := json.Marshal(td)
-// 		// update over HTTP
-// 		res, err := httpDoRequest(http.MethodPut, testServer.URL+"/td/"+id, b)
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err = ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Create with ID", func(t *testing.T) {
-// 		id := "urn:example:test/thing_2"
-// 		td := mockedTD(id)
-// 		b, _ := json.Marshal(td)
-
-// 		// create over HTTP
-// 		res, err := httpDoRequest(http.MethodPut, testServer.URL+"/td/"+id, b)
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err = ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusCreated {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusCreated, res.StatusCode, b)
-// 		}
-
-// 		// retrieve through controller
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Put:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Create with different ID in body", func(t *testing.T) {
-// 		id := "urn:example:test/thing_3"
-// 		td := mockedTD("urn:example:test/thing_4")
-// 		b, _ := json.Marshal(td)
-
-// 		// create over HTTP
-// 		res, err := httpDoRequest(http.MethodPut, testServer.URL+"/td/"+id, b)
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err = ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusBadRequest {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-// }
-
-// func TestPatch(t *testing.T) {
-// 	controller, testServer := setupTestHTTPServer(t)
-
-// 	t.Run("Update title", func(t *testing.T) {
-// 		// add through controller
-// 		id := "urn:example:test/thing_1"
-// 		td := mockedTD(id)
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-
-// 		jsonTD := `{"title": "new title"}`
-
-// 		// patch over HTTP
-// 		res, err := httpDoRequest(http.MethodPatch, testServer.URL+"/td/"+id, []byte(jsonTD))
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		td["title"] = "new title"
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Remove description", func(t *testing.T) {
-// 		// add through controller
-// 		id := "urn:example:test/thing_2"
-// 		td := mockedTD(id)
-// 		td["description"] = "this is a test descr"
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-
-// 		// set null to remove
-// 		jsonTD := `{"description": null}`
-
-// 		// patch over HTTP
-// 		res, err := httpDoRequest(http.MethodPatch, testServer.URL+"/td/"+id, []byte(jsonTD))
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		delete(td, "description")
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Patch properties object", func(t *testing.T) {
-// 		// add through controller
-// 		id := "urn:example:test/thing_3"
-// 		td := mockedTD(id)
-// 		td["properties"] = map[string]interface{}{
-// 			"status": map[string]interface{}{
-// 				"forms": []map[string]interface{}{
-// 					{"href": "https://mylamp.example.com/status"},
-// 				},
-// 			},
-// 		}
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-
-// 		// patch with new property
-// 		jsonTD := `{"properties": {"new_property": {"forms": [{"href": "https://mylamp.example.com/new_property"}]}}}`
-
-// 		// patch over HTTP
-// 		res, err := httpDoRequest(http.MethodPatch, testServer.URL+"/td/"+id, []byte(jsonTD))
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		td["properties"] = map[string]interface{}{
-// 			"status": map[string]interface{}{
-// 				"forms": []map[string]interface{}{
-// 					{"href": "https://mylamp.example.com/status"},
-// 				},
-// 			},
-// 			"new_property": map[string]interface{}{
-// 				"forms": []map[string]interface{}{
-// 					{"href": "https://mylamp.example.com/new_property"},
-// 				},
-// 			},
-// 		}
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Patch array", func(t *testing.T) {
-// 		// add through controller
-// 		id := "urn:example:test/thing_4"
-// 		td := mockedTD(id)
-// 		td["properties"] = map[string]interface{}{
-// 			"status": map[string]interface{}{
-// 				"forms": []map[string]interface{}{
-// 					{"href": "https://mylamp.example.com/status"},
-// 				},
-// 			},
-// 		}
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-
-// 		// patch with different array
-// 		jsonTD := `{"properties": {"status": {"forms": [
-// 					{"href": "https://mylamp.example.com/status"},
-// 					{"href": "coaps://mylamp.example.com/status"}
-// 				]}}}`
-
-// 		// patch over HTTP
-// 		res, err := httpDoRequest(http.MethodPatch, testServer.URL+"/td/"+id, []byte(jsonTD))
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		storedTD, err := controller.get(id)
-// 		if err != nil {
-// 			t.Fatalf("Error getting through controller: %s", err)
-// 		}
-
-// 		td["properties"] = map[string]interface{}{
-// 			"status": map[string]interface{}{
-// 				"forms": []map[string]interface{}{
-// 					{"href": "https://mylamp.example.com/status"},
-// 					{"href": "coaps://mylamp.example.com/status"},
-// 				},
-// 			},
-// 		}
-// 		// set system-generated attributes
-// 		td["registration"] = storedTD["registration"]
-
-// 		if !serializedEqual(td, storedTD) {
-// 			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
-// 		}
-// 	})
-
-// 	t.Run("Remove mandatory title", func(t *testing.T) {
-// 		// add through controller
-// 		id := "urn:example:test/thing_5"
-// 		td := mockedTD(id)
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-
-// 		jsonTD := `{"title": null}`
-
-// 		// patch over HTTP
-// 		res, err := httpDoRequest(http.MethodPatch, testServer.URL+"/td/"+id, []byte(jsonTD))
-// 		if err != nil {
-// 			t.Fatalf("Error putting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusBadRequest {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-// }
-
-// func TestDelete(t *testing.T) {
-// 	controller, testServer := setupTestHTTPServer(t)
-
-// 	// add through controller
-// 	id := "urn:example:test/thing_1"
-// 	td := mockedTD(id)
-// 	_, err := controller.add(td)
-// 	if err != nil {
-// 		t.Fatalf("Error adding through controller: %s", err)
-// 	}
-
-// 	t.Run("Remove existing", func(t *testing.T) {
-// 		// delete over HTTP
-// 		res, err := httpDoRequest(http.MethodDelete, testServer.URL+"/td/"+id, nil)
-// 		if err != nil {
-// 			t.Fatalf("Error deleting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Server should return %v, got instead: %d", http.StatusOK, res.StatusCode)
-// 		}
-
-// 		// retrieve through controller
-// 		_, err = controller.get(id)
-// 		if err == nil {
-// 			t.Fatalf("No error on deleted item.")
-// 		}
-// 	})
-
-// 	t.Run("Remove non-existing", func(t *testing.T) {
-// 		// delete over HTTP
-// 		res, err := httpDoRequest(http.MethodDelete, testServer.URL+"/td/something-else", nil)
-// 		if err != nil {
-// 			t.Fatalf("Error deleting TD: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		if res.StatusCode != http.StatusNotFound {
-// 			t.Fatalf("Server should return %v, got instead: %d", http.StatusNotFound, res.StatusCode)
-// 		}
-// 	})
-
-// }
+func TestUpdateThing(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("update-thing", "", t)
+	})
+
+	// add a new TD
+	id := "urn:uuid:" + uuid.NewV4().String()
+	td := mockedTD(id)
+	createThing(id, td, t)
+
+	td["title"] = "updated title"
+	b, _ := json.Marshal(td)
+	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+	if err != nil {
+		t.Fatalf("Error putting TD: %s", err)
+	}
+	defer res.Body.Close()
+
+	b, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
+	}
+
+	storedTD := retrieveThing(id, t)
+
+	// manually change attributes of the reference TD
+	// set system-generated attributes
+	td["registration"] = storedTD["registration"]
+
+	if !serializedEqual(td, storedTD) {
+		t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+	}
+
+}
+
+func TestPatch(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("partially-update-thing", "", t)
+	})
+
+	t.Run("Update title", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, t)
+
+		// update the title
+		jsonTD := `{"title": "new title"}`
+
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Expected response %v, got: %d. Response body: %s", http.StatusOK, res.StatusCode, b)
+		}
+
+		// retrieve the changed TD
+		storedTD := retrieveThing(id, t)
+
+		// manually change attributes of the reference TD
+		td["title"] = "new title"
+		// set system-generated attributes
+		td["registration"] = storedTD["registration"]
+
+		if !serializedEqual(td, storedTD) {
+			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+		}
+	})
+
+	t.Run("Remove description", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		td["description"] = "this is a test descr"
+		createThing(id, td, t)
+
+		// set description to null to remove it
+		jsonTD := `{"description": null}`
+
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Expected response %v, got: %d. Response body: %s", http.StatusOK, res.StatusCode, b)
+		}
+
+		// retrieve the changed TD
+		storedTD := retrieveThing(id, t)
+
+		// manually change attributes of the reference TD
+		delete(td, "description")
+		// set system-generated attributes
+		td["registration"] = storedTD["registration"]
+
+		if !serializedEqual(td, storedTD) {
+			t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
+		}
+	})
+
+	t.Run("Patch properties object", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		td["properties"] = map[string]interface{}{
+			"status": map[string]interface{}{
+				"forms": []map[string]interface{}{
+					{"href": "https://mylamp.example.com/status"},
+				},
+			},
+		}
+		createThing(id, td, t)
+
+		// patch with new property
+		jsonTD := `{"properties": {"new_property": {"forms": [{"href": "https://mylamp.example.com/new_property"}]}}}`
+
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Expected response %v, got: %d. Response body: %s", http.StatusOK, res.StatusCode, b)
+		}
+
+		// retrieve the changed TD
+		storedTD := retrieveThing(id, t)
+
+		// manually change attributes of the reference TD
+		td["properties"] = map[string]interface{}{
+			"status": map[string]interface{}{
+				"forms": []map[string]interface{}{
+					{"href": "https://mylamp.example.com/status"},
+				},
+			},
+			"new_property": map[string]interface{}{
+				"forms": []map[string]interface{}{
+					{"href": "https://mylamp.example.com/new_property"},
+				},
+			},
+		}
+		// set system-generated attributes
+		td["registration"] = storedTD["registration"]
+
+		if !serializedEqual(td, storedTD) {
+			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+		}
+	})
+
+	t.Run("Patch array", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		td["properties"] = map[string]interface{}{
+			"status": map[string]interface{}{
+				"forms": []map[string]interface{}{
+					{"href": "https://mylamp.example.com/status"},
+				},
+			},
+		}
+		createThing(id, td, t)
+
+		// patch with different array
+		jsonTD := `{"properties": {"status": {"forms": [
+					{"href": "https://mylamp.example.com/status"},
+					{"href": "coaps://mylamp.example.com/status"}
+				]}}}`
+
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
+		}
+
+		// retrieve the changed TD
+		storedTD := retrieveThing(id, t)
+
+		// manually change attributes of the reference TD
+		td["properties"] = map[string]interface{}{
+			"status": map[string]interface{}{
+				"forms": []map[string]interface{}{
+					{"href": "https://mylamp.example.com/status"},
+					{"href": "coaps://mylamp.example.com/status"},
+				},
+			},
+		}
+		// set system-generated attributes
+		td["registration"] = storedTD["registration"]
+
+		if !serializedEqual(td, storedTD) {
+			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+		}
+	})
+
+	t.Run("Fail removing mandatory title", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, t)
+
+		// set title to null to remove it
+		jsonTD := `{"title": null}`
+
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
+
+		if res.StatusCode != http.StatusBadRequest {
+			t.Fatalf("Expected response %v, got: %d. Response body: %s", http.StatusBadRequest, res.StatusCode, b)
+		}
+	})
+}
+
+func TestDelete(t *testing.T) {
+	// add a new TD
+	id := "urn:uuid:" + uuid.NewV4().String()
+	td := mockedTD(id)
+	createThing(id, td, t)
+
+	t.Run("Remove existing", func(t *testing.T) {
+		// submit DELETE request
+		res, err := httpDelete(serverURL + "/things/" + id)
+		if err != nil {
+			t.Fatalf("Error deleting TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Server should return %v, got instead: %d", http.StatusOK, res.StatusCode)
+		}
+
+		// try to retrieve the delete TD
+		res, err = http.Get(serverURL + "/things/" + id)
+		if err != nil {
+			t.Fatalf("Error getting TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusNotFound {
+			t.Fatalf("Expected response %v, got: %d", http.StatusNotFound, res.StatusCode)
+		}
+	})
+
+	t.Run("Remove non-existing", func(t *testing.T) {
+		// submit DELETE request
+		res, err := httpDelete(serverURL + "/things/does-not-exist")
+		if err != nil {
+			t.Fatalf("Error deleting TD: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusNotFound {
+			t.Fatalf("Expected response %v, got: %d", http.StatusNotFound, res.StatusCode)
+		}
+	})
+
+}
 
 // func TestGetAll(t *testing.T) {
 // 	controller, testServer := setupTestHTTPServer(t)
@@ -670,88 +625,6 @@ func TestRetrieveThing(t *testing.T) {
 // 		}
 // 		if res.StatusCode != http.StatusBadRequest {
 // 			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-// }
-
-// func TestValidation(t *testing.T) {
-// 	_, testServer := setupTestHTTPServer(t)
-
-// 	t.Run("Without Context", func(t *testing.T) {
-// 		td := map[string]any{
-// 			"title":    "example thing",
-// 			"security": []string{"nosec_sc"},
-// 			"securityDefinitions": map[string]any{
-// 				"nosec_sc": map[string]string{
-// 					"scheme": "nosec",
-// 				},
-// 			},
-// 		}
-// 		b, _ := json.Marshal(td)
-
-// 		// retrieve over HTTP
-// 		res, err := httpDoRequest(http.MethodGet, testServer.URL+"/validation", b)
-// 		if err != nil {
-// 			t.Fatalf("Error getting: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err = ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		var result ValidationResult
-// 		err = json.Unmarshal(b, &result)
-// 		if err != nil {
-// 			t.Fatalf("Error decoding body: %s", err)
-// 		}
-
-// 		if result.Valid {
-// 			t.Fatalf("Expected valid set to false, got true.")
-// 		}
-
-// 		if len(result.Errors) != 1 && result.Errors[0] != "(root): @context is required" {
-// 			t.Fatalf("Expected 1 error for required context in root, got: %v", result.Errors)
-// 		}
-// 	})
-
-// 	t.Run("Valid TD", func(t *testing.T) {
-// 		td := mockedTD("")
-// 		b, _ := json.Marshal(td)
-
-// 		// retrieve over HTTP
-// 		res, err := httpDoRequest(http.MethodGet, testServer.URL+"/validation", b)
-// 		if err != nil {
-// 			t.Fatalf("Error getting: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err = ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected response %v, got: %d. Reponse body: %s", http.StatusOK, res.StatusCode, b)
-// 		}
-
-// 		var result ValidationResult
-// 		err = json.Unmarshal(b, &result)
-// 		if err != nil {
-// 			t.Fatalf("Error decoding body: %s", err)
-// 		}
-
-// 		if !result.Valid {
-// 			t.Fatalf("Expected valid set to true, got false.")
-// 		}
-
-// 		if len(result.Errors) != 0 {
-// 			t.Fatalf("Expected no errors, got: %v", result.Errors)
 // 		}
 // 	})
 // }

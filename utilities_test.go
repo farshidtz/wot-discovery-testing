@@ -116,12 +116,22 @@ func httpPut(url, contentType string, b []byte) (*http.Response, error) {
 	return httpRequest(http.MethodPut, url, contentType, b)
 }
 
+func httpPatch(url, contentType string, b []byte) (*http.Response, error) {
+	return httpRequest(http.MethodPatch, url, contentType, b)
+}
+
+func httpDelete(url string) (*http.Response, error) {
+	return httpRequest(http.MethodDelete, url, "", nil)
+}
+
 func httpRequest(method, url, contentType string, b []byte) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", contentType)
+	if contentType != "" {
+		req.Header.Add("Content-Type", contentType)
+	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
