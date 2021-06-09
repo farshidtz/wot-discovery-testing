@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/linksmart/thing-directory/wot"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -551,7 +552,52 @@ func TestListThings(t *testing.T) {
 
 func TestMinimalValidation(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-validation-minimal", "TODO", t)
+		writeTestResult("reg-validation-minimal", "", t)
 	})
-	t.SkipNow()
+
+	t.Run("missing context", func(t *testing.T) {
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+
+		// remove the context field
+		delete(td, "@context")
+
+		b, _ := json.Marshal(td)
+
+		// submit with PUT request
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			t.Fatalf("Error posting: %s", err)
+		}
+		defer res.Body.Close()
+
+		body := httpReadBody(res, t)
+
+		t.Run("status code", func(t *testing.T) {
+			assertStatusCode(res.StatusCode, http.StatusBadRequest, body, t)
+		})
+
+		var pd wot.ProblemDetails
+		err = json.Unmarshal(body, &pd)
+		if err != nil {
+			t.Fatalf("Error decoding body: %s", err)
+		}
+
+		if pd.Status != 400 {
+			t.Fatalf("Expected status set to 400, got: %d", pd.Status)
+		}
+
+		if len(pd.ValidationErrors) != 1 {
+			t.Fatalf("Expected 1 error, got: %d. Body: %s", len(pd.ValidationErrors), body)
+		}
+
+		// if pd.ValidationErrors[0].Field != "(root)" { // not normative?
+		// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Field, body)
+		// }
+
+		// if pd.ValidationErrors[0].Descr != "@context is required" { // not normative?
+		// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Descr, body)
+		// }
+	})
+
 }
