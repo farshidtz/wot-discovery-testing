@@ -1,2 +1,11 @@
-This repository includes code developed at Fraunhofer-Gesellschaft available in
-https://github.com/linksmart/thing-directory under Apache 2.0 license.
+WoT Discovery Testing
+Copyright 2021 Farshid Tavakolizadeh
+
+This software includes the following dependencies developed by
+the corresponding developers and organisations:
+
+* https://github.com/satori/go.uuid by Maxim Bublis (MIT License)
+
+Moreover, it includes portions of source code from the following developers and organizations:
+
+* https://github.com/linksmart/thing-directory by Fraunhofer-Gesellschaft (Apache 2.0 License)
