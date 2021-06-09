@@ -138,3 +138,8 @@ func httpRequest(method, url, contentType string, b []byte) (*http.Response, err
 	}
 	return res, nil
 }
+
+func prettyJSON(i interface{}) string {
+	b, _ := json.MarshalIndent(i, "", "\t")
+	return string(b)
+}

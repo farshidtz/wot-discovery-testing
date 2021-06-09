@@ -74,6 +74,7 @@ func TestCreateThing(t *testing.T) {
 		td := mockedTD(id)
 		b, _ := json.Marshal(td)
 
+		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
@@ -108,6 +109,7 @@ func TestCreateThing(t *testing.T) {
 		td := mockedTD(anotherID)
 		b, _ := json.Marshal(td)
 
+		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
@@ -129,6 +131,7 @@ func TestCreateThing(t *testing.T) {
 		td := mockedTD(id)
 		b, _ := json.Marshal(td)
 
+		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
@@ -157,6 +160,7 @@ func TestRetrieveThing(t *testing.T) {
 	td := mockedTD(id)
 	storedTD := createThing(id, td, t)
 
+	// submit GET request
 	res, err := http.Get(serverURL + "/td/" + id)
 	if err != nil {
 		t.Fatalf("Error getting TD: %s", err)
@@ -201,8 +205,11 @@ func TestUpdateThing(t *testing.T) {
 	td := mockedTD(id)
 	createThing(id, td, t)
 
+	// update an attribute
 	td["title"] = "updated title"
 	b, _ := json.Marshal(td)
+
+	// submit PUT request
 	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 	if err != nil {
 		t.Fatalf("Error putting TD: %s", err)
@@ -451,6 +458,10 @@ func TestPatch(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("delete-thing", "", t)
+	})
+
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -495,136 +506,54 @@ func TestDelete(t *testing.T) {
 
 }
 
-// func TestGetAll(t *testing.T) {
-// 	controller, testServer := setupTestHTTPServer(t)
+func TestListThings(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("list-things", "", t)
+	})
 
-// 	for i := 0; i < 3; i++ {
-// 		// add through controller
-// 		td := mockedTD("urn:example:test/thing_" + strconv.Itoa(i))
-// 		_, err := controller.add(td)
-// 		if err != nil {
-// 			t.Fatalf("Error adding through controller: %s", err)
-// 		}
-// 	}
+	t.Run("header", func(t *testing.T) {
+		res, err := http.Get(serverURL + "/things")
+		if err != nil {
+			t.Fatalf("Error getting list of TDs: %s", err)
+		}
+		defer res.Body.Close()
 
-// 	t.Run("Response total", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
+		if res.StatusCode != http.StatusOK {
+			t.Fatalf("Expected status %v, got: %d", http.StatusOK, res.StatusCode)
+		}
 
-// 		var collectionPage ThingDescriptionPage
-// 		err = json.NewDecoder(res.Body).Decode(&collectionPage)
-// 		if err != nil {
-// 			t.Fatalf("Error decoding page: %s", err)
-// 		}
+		mediaType, _, err := mime.ParseMediaType(res.Header.Get("Content-Type"))
+		if err != nil {
+			t.Fatalf("Error parsing media type: %s", err)
+		}
+		if mediaType != MediaTypeJSONLD {
+			t.Fatalf("Expected Content-Type: %s, got %s", MediaTypeJSONLD, res.Header.Get("Content-Type"))
+		}
+	})
 
-// 		items, ok := collectionPage.Items.([]interface{})
-// 		if !ok {
-// 			t.Fatalf("Items in catalog are not TDs. Got: %v", collectionPage.Items)
-// 		}
-// 		if len(items) != 3 {
-// 			t.Fatalf("Expected 3 items in page, got %d", len(items))
-// 		}
-// 		if collectionPage.Total != 3 {
-// 			t.Fatalf("Expected total value of 3, got %d", collectionPage.Total)
-// 		}
-// 	})
+	t.Run("payload", func(t *testing.T) {
+		res, err := http.Get(serverURL + "/things")
+		if err != nil {
+			t.Fatalf("Error getting list of TDs: %s", err)
+		}
+		defer res.Body.Close()
 
-// 	t.Run("Response headers", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("Error reading response body: %s", err)
+		}
 
-// 		if res.StatusCode != http.StatusOK {
-// 			t.Fatalf("Expected status %v, got: %d", http.StatusOK, res.StatusCode)
-// 		}
+		var collection []mapAny
+		err = json.Unmarshal(b, &collection)
+		if err != nil {
+			t.Fatalf("Error decoding page: %s", err)
+		}
 
-// 		mediaType, _, err := mime.ParseMediaType(res.Header.Get("Content-Type"))
-// 		if err != nil {
-// 			t.Fatalf("Error parsing media type: %s", err)
-// 		}
-// 		if mediaType != wot.MediaTypeJSONLD {
-// 			t.Fatalf("Expected Content-Type: %s, got %s", wot.MediaTypeJSONLD, res.Header.Get("Content-Type"))
-// 		}
-// 	})
+		for _, td := range collection {
+			if td["title"] == nil || td["title"].(string) == "" {
+				t.Fatalf("Item in list may not be a TD: no mandatory title. Got:\n%s", prettyJSON(td))
+			}
+		}
+	})
 
-// 	t.Run("Response items", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		var collectionPage ThingDescriptionPage
-// 		err = json.NewDecoder(res.Body).Decode(&collectionPage)
-// 		if err != nil {
-// 			t.Fatalf("Error decoding page: %s", err)
-// 		}
-
-// 		// get all through controller
-// 		storedTDs, _, err := controller.list(1, 10)
-// 		if err != nil {
-// 			t.Fatal("Error getting list of TDs:", err.Error())
-// 		}
-
-// 		// compare response and stored
-// 		for i, sd := range collectionPage.Items.([]interface{}) {
-// 			if !reflect.DeepEqual(storedTDs[i], sd) {
-// 				t.Fatalf("TD responded over HTTP is different with the one stored:\n Stored:\n%v\n Listed\n%v\n",
-// 					storedTDs[i], sd)
-// 			}
-// 		}
-// 	})
-
-// 	t.Run("Filter bad JSONPath", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td?jsonpath=*/id")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-// 		if res.StatusCode != http.StatusBadRequest {
-// 			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-
-// 	t.Run("Filter bad XPath", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td?xpath=$[:].id")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-// 		if res.StatusCode != http.StatusBadRequest {
-// 			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-
-// 	t.Run("Filter multiple paths", func(t *testing.T) {
-// 		res, err := http.Get(testServer.URL + "/td?jsonpath=$[:].id&xpath=*/id")
-// 		if err != nil {
-// 			t.Fatalf("Error getting TDs: %s", err)
-// 		}
-// 		defer res.Body.Close()
-
-// 		b, err := ioutil.ReadAll(res.Body)
-// 		if err != nil {
-// 			t.Fatalf("Error reading response body: %s", err)
-// 		}
-// 		if res.StatusCode != http.StatusBadRequest {
-// 			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusBadRequest, res.StatusCode, b)
-// 		}
-// 	})
-// }
+}

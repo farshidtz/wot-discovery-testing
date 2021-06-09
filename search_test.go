@@ -41,8 +41,8 @@ func TestJSONPath(t *testing.T) {
 			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusOK, res.StatusCode, b)
 		}
 
-		var collectionPage []mapAny
-		err = json.Unmarshal(b, &collectionPage)
+		var collection []mapAny
+		err = json.Unmarshal(b, &collection)
 		if err != nil {
 			t.Fatalf("Error decoding page: %s", err)
 		}
