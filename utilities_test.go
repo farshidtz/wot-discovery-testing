@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-
-	"github.com/linksmart/thing-directory/wot"
 )
 
 type any = interface{}
@@ -61,7 +59,7 @@ func createThing(id string, td mapAny, t *testing.T) mapAny {
 	t.Helper()
 	b, _ := json.Marshal(td)
 
-	res, err := httpPut(serverURL+"/things/"+id, wot.MediaTypeThingDescription, b)
+	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 	if err != nil {
 		t.Fatalf("Error posting: %s", err)
 	}
