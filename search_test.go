@@ -33,16 +33,13 @@ func TestJSONPath(t *testing.T) {
 		}
 		defer res.Body.Close()
 
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			t.Fatalf("Error reading response body: %s", err)
-		}
+		body := httpReadBody(res, t)
 		if res.StatusCode != http.StatusOK {
-			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusOK, res.StatusCode, b)
+			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusOK, res.StatusCode, body)
 		}
 
 		var collection []mapAny
-		err = json.Unmarshal(b, &collection)
+		err = json.Unmarshal(body, &collection)
 		if err != nil {
 			t.Fatalf("Error decoding page: %s", err)
 		}

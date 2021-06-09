@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"reflect"
 	"testing"
@@ -32,6 +33,7 @@ func mockedTD(id string) map[string]any {
 }
 
 func retrieveThing(id string, t *testing.T) mapAny {
+	t.Helper()
 	res, err := http.Get(serverURL + "/things/" + id)
 	if err != nil {
 		t.Fatalf("Error getting TD: %s", err)
@@ -50,12 +52,13 @@ func retrieveThing(id string, t *testing.T) mapAny {
 	var retrievedTD mapAny
 	err = json.Unmarshal(b, &retrievedTD)
 	if err != nil {
-		t.Fatalf("Error decoding body: %s", err)
+		t.Fatalf("Error decoding body: %s. Body:\n%s", err, b)
 	}
 	return retrievedTD
 }
 
 func createThing(id string, td mapAny, t *testing.T) mapAny {
+	t.Helper()
 	b, _ := json.Marshal(td)
 
 	res, err := httpPut(serverURL+"/things/"+id, wot.MediaTypeThingDescription, b)
@@ -81,6 +84,7 @@ func createThing(id string, td mapAny, t *testing.T) mapAny {
 }
 
 func retrieveAllThings(t *testing.T) []mapAny {
+	t.Helper()
 	res, err := http.Get(serverURL + "/things")
 	if err != nil {
 		t.Fatalf("Error getting TD: %s", err)
@@ -139,7 +143,39 @@ func httpRequest(method, url, contentType string, b []byte) (*http.Response, err
 	return res, nil
 }
 
-func prettyJSON(i interface{}) string {
+func httpReadBody(res *http.Response, t *testing.T) []byte {
+	t.Helper()
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+	return b
+}
+
+func marshalPrettyJSON(i interface{}) string {
 	b, _ := json.MarshalIndent(i, "", "\t")
 	return string(b)
+}
+
+func prettifyJSON(in []byte) []byte {
+	var out bytes.Buffer
+	json.Indent(&out, in, "", "\t")
+	return out.Bytes()
+}
+
+func assertStatusCode(got, expected int, body []byte, t *testing.T) {
+	t.Helper()
+	if got != expected {
+		t.Fatalf("Expected response %d, got: %d. Body:\n%s", expected, got, prettifyJSON(body))
+	}
+}
+
+func assertContentMediaType(got, expected string, t *testing.T) {
+	mediaType, _, err := mime.ParseMediaType(got)
+	if err != nil {
+		t.Fatalf("Error parsing content media type: %s", err)
+	}
+	if mediaType != expected {
+		t.Fatalf("Expected Content-Type: %s, got %s", expected, got)
+	}
 }
