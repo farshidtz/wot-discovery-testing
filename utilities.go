@@ -13,24 +13,8 @@ import (
 type any = interface{}
 type mapAny = map[string]any
 
-func mockedTD(id string) map[string]any {
-	var td = map[string]any{
-		"@context": "https://www.w3.org/2019/wot/td/v1",
-		"title":    "example thing",
-		"security": []string{"nosec_sc"},
-		"securityDefinitions": map[string]any{
-			"nosec_sc": map[string]string{
-				"scheme": "nosec",
-			},
-		},
-	}
-	if id != "" {
-		td["id"] = id
-	}
-	return td
-}
-
-func retrieveThing(id string, t *testing.T) mapAny {
+// retrieveThing is a helper function to support tests unrelated to retrieval of a TD
+func retrieveThing(id, serverURL string, t *testing.T) mapAny {
 	t.Helper()
 	res, err := http.Get(serverURL + "/things/" + id)
 	if err != nil {
@@ -55,7 +39,8 @@ func retrieveThing(id string, t *testing.T) mapAny {
 	return retrievedTD
 }
 
-func createThing(id string, td mapAny, t *testing.T) mapAny {
+// createThing is a helper function to support tests unrelated to creation of a TD
+func createThing(id string, td mapAny, serverURL string, t *testing.T) mapAny {
 	t.Helper()
 	b, _ := json.Marshal(td)
 
@@ -74,14 +59,15 @@ func createThing(id string, td mapAny, t *testing.T) mapAny {
 		t.Fatalf("Error creating test data: %d: %s", res.StatusCode, b)
 	}
 
-	storedTD := retrieveThing(id, t)
+	storedTD := retrieveThing(id, serverURL, t)
 
 	// add the system-generated attributes
 	td["registration"] = storedTD["registration"]
 	return td
 }
 
-func retrieveAllThings(t *testing.T) []mapAny {
+// retrieveAllThings is a helper function to support tests unrelated to retrieval of all TDs
+func retrieveAllThings(serverURL string, t *testing.T) []mapAny {
 	t.Helper()
 	res, err := http.Get(serverURL + "/things")
 	if err != nil {

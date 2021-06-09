@@ -11,13 +11,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-const (
-	MediaTypeJSON             = "application/json"
-	MediaTypeJSONLD           = "application/ld+json"
-	MediaTypeThingDescription = "application/td+json"
-	MediaTypeMergePatch       = "application/merge-patch+json"
-)
-
 func TestCreateAnonymousThing(t *testing.T) {
 	t.Cleanup(func() {
 		writeTestResult("reg-create-anonymous-thing", "", t)
@@ -59,7 +52,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 			t.Skip()
 		}
 		// retrieve the stored TD
-		storedTD := retrieveThing(systemGeneratedID, t)
+		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
 
 		// manually change attributes of the reference TD
 		// set the system-generated attributes
@@ -97,7 +90,7 @@ func TestCreateThing(t *testing.T) {
 
 		t.Run("result", func(t *testing.T) {
 			// retrieve the stored TD
-			storedTD := retrieveThing(id, t)
+			storedTD := retrieveThing(id, serverURL, t)
 
 			// manually change attributes of the reference TD
 			// set the system-generated attributes
@@ -160,7 +153,7 @@ func TestRetrieveThing(t *testing.T) {
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
-	storedTD := createThing(id, td, t)
+	storedTD := createThing(id, td, serverURL, t)
 
 	// submit GET request
 	res, err := http.Get(serverURL + "/td/" + id)
@@ -200,7 +193,7 @@ func TestUpdateThing(t *testing.T) {
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
-	createThing(id, td, t)
+	createThing(id, td, serverURL, t)
 
 	// update an attribute
 	td["title"] = "updated title"
@@ -221,7 +214,7 @@ func TestUpdateThing(t *testing.T) {
 
 	t.Run("result", func(t *testing.T) {
 		// retrieve the stored TD
-		storedTD := retrieveThing(id, t)
+		storedTD := retrieveThing(id, serverURL, t)
 
 		// manually change attributes of the reference TD
 		// set system-generated attributes
@@ -242,7 +235,7 @@ func TestPatch(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 
 		// update the title
 		jsonTD := `{"title": "new title"}`
@@ -262,7 +255,7 @@ func TestPatch(t *testing.T) {
 
 		t.Run("result", func(t *testing.T) {
 			// retrieve the changed TD
-			storedTD := retrieveThing(id, t)
+			storedTD := retrieveThing(id, serverURL, t)
 
 			// manually change attributes of the reference TD
 			td["title"] = "new title"
@@ -280,7 +273,7 @@ func TestPatch(t *testing.T) {
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
 		td["description"] = "this is a test descr"
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 
 		// set description to null to remove it
 		jsonTD := `{"description": null}`
@@ -300,7 +293,7 @@ func TestPatch(t *testing.T) {
 
 		t.Run("result", func(t *testing.T) {
 			// retrieve the changed TD
-			storedTD := retrieveThing(id, t)
+			storedTD := retrieveThing(id, serverURL, t)
 
 			// manually change attributes of the reference TD
 			delete(td, "description")
@@ -324,7 +317,7 @@ func TestPatch(t *testing.T) {
 				},
 			},
 		}
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 
 		// patch with new property
 		jsonTD := `{"properties": {"new_property": {"forms": [{"href": "https://mylamp.example.com/new_property"}]}}}`
@@ -344,7 +337,7 @@ func TestPatch(t *testing.T) {
 
 		t.Run("result", func(t *testing.T) {
 			// retrieve the changed TD
-			storedTD := retrieveThing(id, t)
+			storedTD := retrieveThing(id, serverURL, t)
 
 			// manually change attributes of the reference TD
 			td["properties"] = map[string]interface{}{
@@ -379,7 +372,7 @@ func TestPatch(t *testing.T) {
 				},
 			},
 		}
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 
 		// patch with different array
 		jsonTD := `{"properties": {"status": {"forms": [
@@ -402,7 +395,7 @@ func TestPatch(t *testing.T) {
 
 		t.Run("result", func(t *testing.T) {
 			// retrieve the changed TD
-			storedTD := retrieveThing(id, t)
+			storedTD := retrieveThing(id, serverURL, t)
 
 			// manually change attributes of the reference TD
 			td["properties"] = map[string]interface{}{
@@ -426,7 +419,7 @@ func TestPatch(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 
 		// set title to null to remove it
 		jsonTD := `{"title": null}`
@@ -454,7 +447,7 @@ func TestDelete(t *testing.T) {
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
-	createThing(id, td, t)
+	createThing(id, td, serverURL, t)
 
 	t.Run("Remove existing", func(t *testing.T) {
 		// submit DELETE request

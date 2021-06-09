@@ -23,7 +23,7 @@ func TestJSONPath(t *testing.T) {
 		td := mockedTD(id)
 		// tag the TDs to find later
 		td["tag"] = tag
-		createThing(id, td, t)
+		createThing(id, td, serverURL, t)
 	}
 
 	t.Run("Filter", func(t *testing.T) {
@@ -44,7 +44,7 @@ func TestJSONPath(t *testing.T) {
 			t.Fatalf("Error decoding page: %s", err)
 		}
 
-		storedTDs := retrieveAllThings(t)
+		storedTDs := retrieveAllThings(serverURL, t)
 
 		// compare response and stored
 		for i, sd := range storedTDs {
