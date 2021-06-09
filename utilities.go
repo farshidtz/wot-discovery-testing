@@ -150,7 +150,12 @@ func prettifyJSON(in []byte) []byte {
 func assertStatusCode(got, expected int, body []byte, t *testing.T) {
 	t.Helper()
 	if got != expected {
-		t.Fatalf("Expected response %d, got: %d. Body:\n%s", expected, got, prettifyJSON(body))
+		body = prettifyJSON(body)
+		if len(body) == 0 {
+			t.Fatalf("Expected response %d, got: %d.", expected, got)
+		} else {
+			t.Fatalf("Expected response %d, got: %d. Body:\n%s", expected, got, body)
+		}
 	}
 }
 

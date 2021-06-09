@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/linksmart/thing-directory/wot"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -543,6 +542,7 @@ func TestListThings(t *testing.T) {
 
 }
 
+// TODO: validate as part of POST/PUT/PATCH
 func TestMinimalValidation(t *testing.T) {
 	t.Cleanup(func() {
 		writeTestResult("reg-validation-minimal", "", t)
@@ -570,18 +570,26 @@ func TestMinimalValidation(t *testing.T) {
 			assertStatusCode(res.StatusCode, http.StatusBadRequest, body, t)
 		})
 
-		var pd wot.ProblemDetails
-		err = json.Unmarshal(body, &pd)
+		var problemDetails map[string]any
+		err = json.Unmarshal(body, &problemDetails)
 		if err != nil {
 			t.Fatalf("Error decoding body: %s", err)
 		}
 
-		if pd.Status != 400 {
-			t.Fatalf("Expected status set to 400, got: %d", pd.Status)
+		problemDetailsStatus, ok := problemDetails["status"].(float64) // JSON number is float64
+		if !ok {
+			t.Fatalf("Problem Details: missing status field. Body: %s", body)
+		}
+		if problemDetailsStatus != 400 {
+			t.Fatalf("Problem Details: expected status 400 in body, got: %f", problemDetailsStatus)
 		}
 
-		if len(pd.ValidationErrors) != 1 {
-			t.Fatalf("Expected 1 error, got: %d. Body: %s", len(pd.ValidationErrors), body)
+		validationErrors, ok := problemDetails["validationErrors"].([]any)
+		if !ok {
+			t.Fatalf("Problem Details: missing validationErrors field. Body: %s", body)
+		}
+		if len(validationErrors) != 1 {
+			t.Fatalf("Problem Details: expected 1 validation error, got: %d. Body: %s", len(validationErrors), body)
 		}
 
 		// if pd.ValidationErrors[0].Field != "(root)" { // not normative?

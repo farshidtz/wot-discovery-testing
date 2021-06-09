@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"testing"
@@ -26,7 +25,7 @@ func TestJSONPath(t *testing.T) {
 		createThing(id, td, serverURL, t)
 	}
 
-	t.Run("Filter", func(t *testing.T) {
+	t.Run("filter", func(t *testing.T) {
 		res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
 		if err != nil {
 			t.Fatalf("Error getting TDs: %s", err)
@@ -34,43 +33,42 @@ func TestJSONPath(t *testing.T) {
 		defer res.Body.Close()
 
 		body := httpReadBody(res, t)
-		if res.StatusCode != http.StatusOK {
-			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusOK, res.StatusCode, body)
-		}
 
-		var collection []mapAny
-		err = json.Unmarshal(body, &collection)
-		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
-		}
+		t.Run("status code", func(t *testing.T) {
+			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+		})
 
-		storedTDs := retrieveAllThings(serverURL, t)
+		t.Run("payload", func(t *testing.T) {
+			var collection []mapAny
+			err = json.Unmarshal(body, &collection)
+			if err != nil {
+				t.Fatalf("Error decoding page: %s", err)
+			}
 
-		// compare response and stored
-		for i, sd := range storedTDs {
-			if sd["tag"] == tag {
-				if !reflect.DeepEqual(storedTDs[i], sd) {
-					t.Fatalf("TD responded over HTTP is different with the one stored:\n Stored:\n%v\n Listed\n%v\n",
-						storedTDs[i], sd)
+			storedTDs := retrieveAllThings(serverURL, t)
+
+			// compare response and stored
+			for i, sd := range storedTDs {
+				if sd["tag"] == tag {
+					if !reflect.DeepEqual(storedTDs[i], sd) {
+						t.Fatalf("TD responded over HTTP is different with the one stored:\n Stored:\n%v\n Listed\n%v\n",
+							storedTDs[i], sd)
+					}
 				}
 			}
-		}
+		})
 	})
 
-	t.Run("Filter fail", func(t *testing.T) {
+	t.Run("fail bad query", func(t *testing.T) {
 		res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
 		if err != nil {
 			t.Fatalf("Error getting TDs: %s", err)
 		}
 		defer res.Body.Close()
 
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			t.Fatalf("Error reading response body: %s", err)
-		}
-		if res.StatusCode != http.StatusBadRequest {
-			t.Fatalf("Expected status %v, got: %d. Response body:\n%s", http.StatusBadRequest, res.StatusCode, b)
-		}
+		t.Run("status code", func(t *testing.T) {
+			assertStatusCode(res.StatusCode, http.StatusBadRequest, nil, t)
+		})
 	})
 
 }
