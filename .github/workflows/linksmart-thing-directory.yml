@@ -1,0 +1,25 @@
+name: Test LinkSmart Thing Directory
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Test
+      env:
+        URL: http://localhost:8081
+      run: |
+        docker run --name=tdd -p 8081:8081 -d linksmart/td 
+        go test -v
+        docker stop tdd
+        docker logs tdd
+
