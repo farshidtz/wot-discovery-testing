@@ -14,12 +14,14 @@ jobs:
       with:
         go-version: 1.15
 
+    - name: Run server
+      run: docker run --name=tdd -p 8081:8081 -d linksmart/td
+    
     - name: Test
       env:
         URL: http://localhost:8081
-      run: |
-        docker run --name=tdd -p 8081:8081 -d linksmart/td 
-        go test -v
-        docker stop tdd
-        docker logs tdd
-
+      run: go test -v
+    
+    - name: Print server logs
+      if: ${{ always() }}
+      run: docker logs tdd
