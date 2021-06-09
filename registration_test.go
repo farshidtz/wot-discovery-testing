@@ -19,7 +19,7 @@ const (
 
 func TestCreateAnonymousThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("create-anonymous-thing", "", t)
+		writeTestResult("reg-create-anonymous-thing", "", t)
 	})
 
 	td := mockedTD("") // without ID
@@ -73,7 +73,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 func TestCreateThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("create-thing", "", t)
+		writeTestResult("reg-create-thing", "", t)
 	})
 
 	t.Run("PUT", func(t *testing.T) {
@@ -153,7 +153,7 @@ func TestCreateThing(t *testing.T) {
 
 func TestRetrieveThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("retrieve-thing", "", t)
+		writeTestResult("reg-retrieve-thing", "", t)
 	})
 
 	// add a new TD
@@ -193,7 +193,7 @@ func TestRetrieveThing(t *testing.T) {
 
 func TestUpdateThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("update-thing", "", t)
+		writeTestResult("reg-update-thing", "", t)
 	})
 
 	// add a new TD
@@ -234,7 +234,7 @@ func TestUpdateThing(t *testing.T) {
 
 func TestPatch(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("partially-update-thing", "", t)
+		writeTestResult("reg-partially-update-thing", "", t)
 	})
 
 	t.Run("Update title", func(t *testing.T) {
@@ -447,7 +447,7 @@ func TestPatch(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("delete-thing", "", t)
+		writeTestResult("reg-delete-thing", "", t)
 	})
 
 	// add a new TD
@@ -502,7 +502,7 @@ func TestDelete(t *testing.T) {
 
 func TestListThings(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("list-things", "", t)
+		writeTestResult("reg-list-things", "", t)
 	})
 
 	t.Run("status code", func(t *testing.T) {
@@ -547,4 +547,11 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
+}
+
+func TestMinimalValidation(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("reg-validation-minimal", "TODO", t)
+	})
+	t.SkipNow()
 }

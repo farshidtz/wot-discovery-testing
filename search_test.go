@@ -74,3 +74,10 @@ func TestJSONPath(t *testing.T) {
 	})
 
 }
+
+func TestXPath(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult("search-xpath", "TODO", t)
+	})
+	t.SkipNow()
+}
