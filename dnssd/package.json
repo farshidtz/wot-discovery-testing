@@ -1,0 +1,18 @@
+{
+  "name": "wot-testing-dns-sd",
+  "version": "1.1.0",
+  "description": "Testing accordingly https://www.w3.org/TR/wot-discovery/#introduction-dns-sd",
+  "bin": "command.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node command.js"
+  },
+  "author": "Cristiano Aguzzi",
+  "license": "ISC",
+  "dependencies": {
+    "csv-writer": "^1.6.0",
+    "multicast-dns": "^7.2.3",
+    "node-fetch": "^2.6.1",
+    "yargs": "^17.0.1"
+  }
+}
