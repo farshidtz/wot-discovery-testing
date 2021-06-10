@@ -1,4 +1,4 @@
-module github.com/wot-discovery-testing
+module github.com/wot-discovery-testing/directory
 
 go 1.16
 
