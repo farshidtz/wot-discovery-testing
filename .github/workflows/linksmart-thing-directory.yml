@@ -1,6 +1,13 @@
 name: Test LinkSmart Thing Directory
 
-on: [push, pull_request, workflow_dispatch]
+on: 
+  push:
+    paths:
+    - 'directory/**'
+  pull_request:
+    paths:
+    - 'directory/**'
+  workflow_dispatch:
 
 jobs:
   test:
