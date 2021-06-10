@@ -3,7 +3,6 @@ name: Test LinkSmart Thing Directory
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +25,7 @@ jobs:
       if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
-        name: test-report
+        name: report-linksmart-thing-directory
         path: report.csv
     
     - name: Print server logs
