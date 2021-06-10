@@ -3,24 +3,36 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"testing"
 )
 
+const outputFile = "report.csv"
+
 var report [][]string
 
-func initReportWriter() func() {
+func initReportWriter() (commit func()) {
+	// csv header
 	header := []string{"ID", "Status", "Related Assertions from Spec", "Comments"}
 
-	writer := csv.NewWriter(os.Stdout)
+	file, err := os.Create(outputFile)
+	if err != nil {
+		fmt.Printf("Error creating report file: %s", err)
+		os.Exit(1)
+	}
 
-	err := writer.Write(header)
+	// write to both stdout and file
+	writer := csv.NewWriter(io.MultiWriter(os.Stdout, file))
+
+	err = writer.Write(header)
 	if err != nil {
 		fmt.Printf("Error writing header to report file: %s", err)
 		os.Exit(1)
 	}
 
+	// return commit function and run after all tests
 	return func() {
 		fmt.Println("==================== REPORT ====================")
 		for _, record := range report {
@@ -38,6 +50,8 @@ func initReportWriter() func() {
 			fmt.Printf("Error flushing the report file: %s", err)
 			os.Exit(1)
 		}
+
+		file.Close()
 	}
 
 }

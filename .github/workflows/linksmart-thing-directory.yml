@@ -21,6 +21,13 @@ jobs:
       env:
         URL: http://localhost:8081
       run: go test -v
+
+    - name: Export report as artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-report
+        path: report.csv
     
     - name: Print server logs
       if: ${{ always() }}

@@ -1,0 +1,61 @@
+ID,Status,Related Assertions from Spec,Comments
+TestCreateEvent,skipped,,TODO
+TestUpdateEvent,skipped,,TODO
+TestDeleteEvent,skipped,,TODO
+TestCreateAnonymousThing/submit_request,passed,tdd-reg-create-anonymous-td tdd-reg-create-body,
+TestCreateAnonymousThing/status_code,failed,tdd-reg-create-anonymous-td-resp,
+TestCreateAnonymousThing/location_header,failed,tdd-reg-create-anonymous-td-resp,
+TestCreateAnonymousThing/result,skipped,tdd-reg-create-anonymous-td,
+TestCreateAnonymousThing,failed,,
+TestCreateThing/submit_request,passed,tdd-reg-create-known-td tdd-reg-create-body,
+TestCreateThing/status_code,passed,tdd-reg-create-known-td-resp,
+TestCreateThing/result,passed,tdd-reg-create-known-td tdd-reg-create-body,
+TestCreateThing/reject_id_mismatch,skipped,,no relevant assertions
+TestCreateThing/reject_POST,skipped,,no relevant assertions
+TestCreateThing,passed,,
+TestRetrieveThing/submit_request,passed,tdd-reg-retrieve,
+TestRetrieveThing/status_code,passed,tdd-reg-retrieve-resp,
+TestRetrieveThing/content_type,passed,tdd-reg-retrieve-resp,
+TestRetrieveThing/result,passed,tdd-reg-retrieve,
+TestRetrieveThing/enriched_result,skipped,,TODO
+TestRetrieveThing,passed,,
+TestUpdateThing/submit_request,passed,tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype,
+TestUpdateThing/status_code,failed,tdd-reg-update-resp,
+TestUpdateThing/result,passed,tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype,
+TestUpdateThing,failed,,
+TestPatch/replace_title/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/replace_title/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/replace_title/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/remove_description/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/remove_description/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/remove_description/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/update_properties/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/update_properties/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/update_properties/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/replace_array/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/replace_array/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/replace_array/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/fail_to_remove_mandatory_title/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/fail_to_remove_mandatory_title/status_code,passed,tdd-reg-update-partial-resp td-validation-syntactic,
+TestPatch,passed,,
+TestDelete/existing/submit_request,passed,tdd-reg-delete,
+TestDelete/existing/status_code,failed,tdd-reg-delete-resp,
+TestDelete/existing/result,passed,tdd-reg-delete,
+TestDelete/non-existing/submit_request,passed,tdd-reg-delete,
+TestDelete/non-existing/status_code,passed,tdd-reg-delete-resp,
+TestDelete,failed,,
+TestListThings/status_code,passed,tdd-reg-list-method,
+TestListThings/content_type,passed,tdd-reg-list-resp,
+TestListThings/payload,passed,tdd-reg-list-resp,
+TestListThings/http11_chunking,skipped,tdd-reg-list-http11,TODO
+TestListThings/http2_streaming,skipped,tdd-reg-list-http2,TODO
+TestListThings/pagination,skipped,tdd-reg-list-pagination tdd-reg-list-pagination-limit tdd-reg-list-pagination-header-nextlink tdd-reg-list-pagination-header-nextlink-attr tdd-reg-list-pagination-header-canonicallink tdd-reg-list-pagination-order-default tdd-reg-list-pagination-order tdd-reg-list-pagination-order-unsupported tdd-reg-list-pagination-order-nextlink,TODO
+TestListThings,passed,,
+TestMinimalValidation,skipped,,TODO: validate as part of POST/PUT/PATCH
+TestJSONPath/filter/submit_request,passed,tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter,
+TestJSONPath/filter/status_code,passed,tdd-search-jsonpath-response,
+TestJSONPath/filter/payload,passed,tdd-search-jsonpath-response,
+TestJSONPath/reject_bad_query/submit_request,passed,tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter,
+TestJSONPath/reject_bad_query/status_code,passed,tdd-search-jsonpath-response,
+TestJSONPath,passed,,
+TestXPath,skipped,,TODO
