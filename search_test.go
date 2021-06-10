@@ -12,7 +12,7 @@ import (
 
 func TestJSONPath(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("search-jsonpath", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
 	tag := uuid.NewV4().String()
@@ -24,23 +24,37 @@ func TestJSONPath(t *testing.T) {
 		td["tag"] = tag
 		createThing(id, td, serverURL, t)
 	}
-
 	t.Run("filter", func(t *testing.T) {
-		res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), "tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
+			})
+			// submit the request
+			res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
+			if err != nil {
+				t.Fatalf("Error getting TDs: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 		})
 
 		t.Run("payload", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+			})
 			var collection []mapAny
-			err = json.Unmarshal(body, &collection)
+			err := json.Unmarshal(body, &collection)
 			if err != nil {
 				t.Fatalf("Error decoding page: %s", err)
 			}
@@ -59,15 +73,26 @@ func TestJSONPath(t *testing.T) {
 		})
 	})
 
-	t.Run("fail bad query", func(t *testing.T) {
-		res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer res.Body.Close()
+	t.Run("reject bad query", func(t *testing.T) {
+		var response *http.Response
+
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), "tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
+			})
+			res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
+			if err != nil {
+				t.Fatalf("Error getting TDs: %s", err)
+			}
+			defer res.Body.Close()
+			response = res
+		})
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusBadRequest, nil, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusBadRequest, nil, t)
 		})
 	})
 
@@ -75,7 +100,7 @@ func TestJSONPath(t *testing.T) {
 
 func TestXPath(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("search-xpath", "TODO", t)
+		writeTestResult(t.Name(), "", "TODO", t)
 	})
 	t.SkipNow()
 }

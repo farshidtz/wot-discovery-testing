@@ -12,28 +12,43 @@ import (
 
 func TestCreateAnonymousThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-create-anonymous-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
 
-	// submit POST request
-	res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
-	if err != nil {
-		t.Fatalf("Error posting: %s", err)
-	}
-	defer res.Body.Close()
+	var response *http.Response
 
-	body := httpReadBody(res, t)
+	t.Run("submit request", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-anonymous-td tdd-reg-create-body", "", t)
+		})
+		// submit POST request
+		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
+		if err != nil {
+			t.Fatalf("Error posting: %s", err)
+		}
+		response = res
+		// defer res.Body.Close()
+	})
+
+	body := httpReadBody(response, t)
+
 	t.Run("status code", func(t *testing.T) {
-		assertStatusCode(res.StatusCode, http.StatusCreated, body, t)
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-anonymous-td-resp", "", t)
+		})
+		assertStatusCode(response.StatusCode, http.StatusCreated, body, t)
 	})
 
 	var systemGeneratedID string
 	t.Run("location header", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-anonymous-td-resp", "", t)
+		})
 		// Check if system-generated id is in response
-		location, err := res.Location()
+		location, err := response.Location()
 		if err != nil {
 			t.Fatal(err.Error())
 		}
@@ -47,6 +62,9 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 
 	t.Run("result", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-anonymous-td", "", t)
+		})
 		if systemGeneratedID == "" {
 			t.Skip()
 		}
@@ -66,42 +84,57 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 func TestCreateThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-create-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
-	t.Run("PUT", func(t *testing.T) {
-		id := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(id)
-		b, _ := json.Marshal(td)
+	id := "urn:uuid:" + uuid.NewV4().String()
+	td := mockedTD(id)
+	b, _ := json.Marshal(td)
 
+	var response *http.Response
+
+	t.Run("submit request", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-known-td tdd-reg-create-body", "", t)
+		})
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
 			t.Fatalf("Error posting: %s", err)
 		}
-		defer res.Body.Close()
-
-		body := httpReadBody(res, t)
-
-		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusCreated, body, t)
-		})
-
-		t.Run("result", func(t *testing.T) {
-			// retrieve the stored TD
-			storedTD := retrieveThing(id, serverURL, t)
-
-			// manually change attributes of the reference TD
-			// set the system-generated attributes
-			td["registration"] = storedTD["registration"]
-
-			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
-			}
-		})
+		response = res
+		// defer res.Body.Close()
 	})
 
-	t.Run("PUT fail id mismatch", func(t *testing.T) {
+	body := httpReadBody(response, t)
+
+	t.Run("status code", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-known-td-resp", "", t)
+		})
+		assertStatusCode(response.StatusCode, http.StatusCreated, body, t)
+	})
+
+	t.Run("result", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-create-known-td tdd-reg-create-body", "", t)
+		})
+		// retrieve the stored TD
+		storedTD := retrieveThing(id, serverURL, t)
+
+		// manually change attributes of the reference TD
+		// set the system-generated attributes
+		td["registration"] = storedTD["registration"]
+
+		if !serializedEqual(td, storedTD) {
+			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+		}
+	})
+
+	t.Run("reject id mismatch", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "", "no relevant assertions", t)
+		})
 		t.SkipNow() // this is sadly not an expected normative behavior
 
 		id := "urn:uuid:" + uuid.NewV4().String()
@@ -123,7 +156,12 @@ func TestCreateThing(t *testing.T) {
 		})
 	})
 
-	t.Run("POST fail", func(t *testing.T) {
+	t.Run("reject POST", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "", "no relevant assertions", t)
+		})
+		t.SkipNow()
+
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
 		b, _ := json.Marshal(td)
@@ -146,7 +184,7 @@ func TestCreateThing(t *testing.T) {
 
 func TestRetrieveThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-retrieve-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
 	// add a new TD
@@ -154,26 +192,43 @@ func TestRetrieveThing(t *testing.T) {
 	td := mockedTD(id)
 	storedTD := createThing(id, td, serverURL, t)
 
-	// submit GET request
-	res, err := http.Get(serverURL + "/td/" + id)
-	if err != nil {
-		t.Fatalf("Error getting TD: %s", err)
-	}
-	defer res.Body.Close()
+	var response *http.Response
 
-	body := httpReadBody(res, t)
+	t.Run("submit request", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-retrieve", "", t)
+		})
+		// submit GET request
+		res, err := http.Get(serverURL + "/td/" + id)
+		if err != nil {
+			t.Fatalf("Error getting TD: %s", err)
+		}
+		response = res
+		// defer res.Body.Close()
+	})
+
+	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-retrieve-resp", "", t)
+		})
+		assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		assertContentMediaType(res.Header.Get("Content-Type"), MediaTypeThingDescription, t)
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-retrieve-resp", "", t)
+		})
+		assertContentMediaType(response.Header.Get("Content-Type"), MediaTypeThingDescription, t)
 	})
 
 	t.Run("result", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-retrieve", "", t)
+		})
 		var retrievedTD mapAny
-		err = json.Unmarshal(body, &retrievedTD)
+		err := json.Unmarshal(body, &retrievedTD)
 		if err != nil {
 			t.Fatalf("Error decoding body: %s", err)
 		}
@@ -182,11 +237,18 @@ func TestRetrieveThing(t *testing.T) {
 			t.Fatalf("The retrieved TD is not the same as the added one:\n Added:\n %v \n Retrieved: \n %v", td, retrievedTD)
 		}
 	})
+
+	t.Run("enriched result", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "", "TODO", t)
+		})
+		t.SkipNow()
+	})
 }
 
 func TestUpdateThing(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-update-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
 	// add a new TD
@@ -198,20 +260,34 @@ func TestUpdateThing(t *testing.T) {
 	td["title"] = "updated title"
 	b, _ := json.Marshal(td)
 
-	// submit PUT request
-	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-	if err != nil {
-		t.Fatalf("Error putting TD: %s", err)
-	}
-	defer res.Body.Close()
+	var response *http.Response
 
-	body := httpReadBody(res, t)
+	t.Run("submit request", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype", "", t)
+		})
+		// submit PUT request
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			t.Fatalf("Error putting TD: %s", err)
+		}
+		response = res
+		// defer res.Body.Close()
+	})
+
+	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+		// t.Cleanup(func() {
+		defer writeTestResult(t.Name(), "tdd-reg-update-resp", "", t)
+		// })
+		assertStatusCode(response.StatusCode, http.StatusNoContent, body, t)
 	})
 
 	t.Run("result", func(t *testing.T) {
+		// t.Cleanup(func() {
+		defer writeTestResult(t.Name(), "tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype", "", t)
+		// })
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
@@ -227,10 +303,16 @@ func TestUpdateThing(t *testing.T) {
 
 func TestPatch(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-partially-update-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
-	t.Run("Update title", func(t *testing.T) {
+	const (
+		requestAssertions = "tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype"
+		statusAssertions  = "tdd-reg-update-partial-resp"
+		resultAssertions  = "tdd-reg-update-partial tdd-reg-update-partial-mergepatch"
+	)
+
+	t.Run("replace title", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -239,20 +321,34 @@ func TestPatch(t *testing.T) {
 		// update the title
 		jsonTD := `{"title": "new title"}`
 
-		// submit PATCH request
-		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-		if err != nil {
-			t.Fatalf("Error patching TD: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit PATCH request
+			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+			if err != nil {
+				t.Fatalf("Error patching TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 		})
 
 		t.Run("result", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), resultAssertions, "", t)
+			})
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -267,7 +363,7 @@ func TestPatch(t *testing.T) {
 		})
 	})
 
-	t.Run("Remove description", func(t *testing.T) {
+	t.Run("remove description", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -277,20 +373,34 @@ func TestPatch(t *testing.T) {
 		// set description to null to remove it
 		jsonTD := `{"description": null}`
 
-		// submit PATCH request
-		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-		if err != nil {
-			t.Fatalf("Error patching TD: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit PATCH request
+			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+			if err != nil {
+				t.Fatalf("Error patching TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 		})
 
 		t.Run("result", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), resultAssertions, "", t)
+			})
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -305,7 +415,7 @@ func TestPatch(t *testing.T) {
 		})
 	})
 
-	t.Run("Patch properties object", func(t *testing.T) {
+	t.Run("update properties", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -321,20 +431,34 @@ func TestPatch(t *testing.T) {
 		// patch with new property
 		jsonTD := `{"properties": {"new_property": {"forms": [{"href": "https://mylamp.example.com/new_property"}]}}}`
 
-		// submit PATCH request
-		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-		if err != nil {
-			t.Fatalf("Error patching TD: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit PATCH request
+			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+			if err != nil {
+				t.Fatalf("Error patching TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 		})
 
 		t.Run("result", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), resultAssertions, "", t)
+			})
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -360,7 +484,7 @@ func TestPatch(t *testing.T) {
 		})
 	})
 
-	t.Run("Patch array", func(t *testing.T) {
+	t.Run("replace array", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -379,20 +503,34 @@ func TestPatch(t *testing.T) {
 					{"href": "coaps://mylamp.example.com/status"}
 				]}}}`
 
-		// submit PATCH request
-		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-		if err != nil {
-			t.Fatalf("Error patching TD: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit PATCH request
+			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+			if err != nil {
+				t.Fatalf("Error patching TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
 		})
 
 		t.Run("result", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), resultAssertions, "", t)
+			})
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -414,7 +552,7 @@ func TestPatch(t *testing.T) {
 		})
 	})
 
-	t.Run("Fail removing mandatory title", func(t *testing.T) {
+	t.Run("fail to remove mandatory title", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -423,71 +561,115 @@ func TestPatch(t *testing.T) {
 		// set title to null to remove it
 		jsonTD := `{"title": null}`
 
-		// submit PATCH request
-		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-		if err != nil {
-			t.Fatalf("Error patching TD: %s", err)
-		}
-		defer res.Body.Close()
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit PATCH request
+			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+			if err != nil {
+				t.Fatalf("Error patching TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusBadRequest, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions+" td-validation-syntactic", "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusBadRequest, body, t)
 		})
 	})
 }
 
 func TestDelete(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-delete-thing", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
+
+	const (
+		requestAssertions = "tdd-reg-delete"
+		statusAssertions  = "tdd-reg-delete-resp"
+		resultAssertions  = "tdd-reg-delete"
+	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
 	createThing(id, td, serverURL, t)
 
-	t.Run("Remove existing", func(t *testing.T) {
-		// submit DELETE request
-		res, err := httpDelete(serverURL + "/things/" + id)
-		if err != nil {
-			t.Fatalf("Error deleting TD: %s", err)
-		}
-		defer res.Body.Close()
+	t.Run("existing", func(t *testing.T) {
+		var response *http.Response
 
-		body := httpReadBody(res, t)
-
-		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusOK, body, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit DELETE request
+			res, err := httpDelete(serverURL + "/things/" + id)
+			if err != nil {
+				t.Fatalf("Error deleting TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
 		})
 
-		// try to retrieve the deleted TD
-		res, err = http.Get(serverURL + "/things/" + id)
-		if err != nil {
-			t.Fatalf("Error getting TD: %s", err)
-		}
-		defer res.Body.Close()
-
-		body = httpReadBody(res, t)
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusNotFound, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusNoContent, body, t)
+		})
+
+		t.Run("result", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), resultAssertions, "", t)
+			})
+			// try to retrieve the deleted TD
+			res, err := http.Get(serverURL + "/things/" + id)
+			if err != nil {
+				t.Fatalf("Error getting TD: %s", err)
+			}
+			defer res.Body.Close()
+
+			body = httpReadBody(res, t)
+
+			t.Run("status code", func(t *testing.T) {
+				assertStatusCode(res.StatusCode, http.StatusNotFound, body, t)
+			})
 		})
 	})
 
-	t.Run("Remove non-existing", func(t *testing.T) {
-		// submit DELETE request
-		res, err := httpDelete(serverURL + "/things/does-not-exist")
-		if err != nil {
-			t.Fatalf("Error deleting TD: %s", err)
-		}
-		defer res.Body.Close()
+	t.Run("non-existing", func(t *testing.T) {
+		var response *http.Response
 
-		body := httpReadBody(res, t)
+		t.Run("submit request", func(t *testing.T) {
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), requestAssertions, "", t)
+			})
+			// submit DELETE request
+			res, err := httpDelete(serverURL + "/things/non-exiting-td")
+			if err != nil {
+				t.Fatalf("Error deleting TD: %s", err)
+			}
+			// defer res.Body.Close()
+			response = res
+		})
+
+		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res.StatusCode, http.StatusNotFound, body, t)
+			t.Cleanup(func() {
+				writeTestResult(t.Name(), statusAssertions, "", t)
+			})
+			assertStatusCode(response.StatusCode, http.StatusNotFound, body, t)
 		})
 	})
 
@@ -495,10 +677,13 @@ func TestDelete(t *testing.T) {
 
 func TestListThings(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult("reg-list-things", "", t)
+		writeTestResult(t.Name(), "", "", t)
 	})
 
 	t.Run("status code", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-method", "", t)
+		})
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
 			t.Fatalf("Error getting list of TDs: %s", err)
@@ -509,6 +694,9 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("content type", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-resp", "", t)
+		})
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
 			t.Fatalf("Error getting list of TDs: %s", err)
@@ -519,6 +707,9 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("payload", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-resp", "", t)
+		})
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
 			t.Fatalf("Error getting list of TDs: %s", err)
@@ -540,15 +731,36 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
-}
-
-// TODO: validate as part of POST/PUT/PATCH
-func TestMinimalValidation(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("reg-validation-minimal", "", t)
+	t.Run("http11 chunking", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-http11", "TODO", t)
+		})
+		t.SkipNow()
 	})
 
-	t.Run("missing context", func(t *testing.T) {
+	t.Run("http2 streaming", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-http2", "TODO", t)
+		})
+		t.SkipNow()
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		t.Cleanup(func() {
+			writeTestResult(t.Name(), "tdd-reg-list-pagination tdd-reg-list-pagination-limit tdd-reg-list-pagination-header-nextlink tdd-reg-list-pagination-header-nextlink-attr tdd-reg-list-pagination-header-canonicallink tdd-reg-list-pagination-order-default tdd-reg-list-pagination-order tdd-reg-list-pagination-order-unsupported tdd-reg-list-pagination-order-nextlink", "TODO", t)
+		})
+		t.SkipNow()
+	})
+
+}
+
+func TestMinimalValidation(t *testing.T) {
+	t.Cleanup(func() {
+		writeTestResult(t.Name(), "", "TODO: validate as part of POST/PUT/PATCH", t)
+	})
+	t.SkipNow()
+
+	t.Run("reject missing context", func(t *testing.T) {
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
 
