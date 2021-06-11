@@ -138,7 +138,7 @@ func TestCreateThing(t *testing.T) {
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			fatal(t, r, "Unexpected results; see logs.")
+			fatal(t, r, "Unexpected result body; see logs.")
 		}
 	})
 
@@ -340,7 +340,7 @@ func TestUpdateThing(t *testing.T) {
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\n Retrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			fatal(t, r, "Unexpected results; see logs.")
+			fatal(t, r, "Unexpected result body; see logs.")
 		}
 	})
 }
@@ -407,7 +407,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected results; see logs.")
+				fatal(t, r, "Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -466,7 +466,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected results; see logs.")
+				fatal(t, r, "Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -542,7 +542,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected results; see logs.")
+				fatal(t, r, "Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -617,7 +617,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected results; see logs.")
+				fatal(t, r, "Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -848,7 +848,6 @@ func TestListThings(t *testing.T) {
 
 		skip(t, r, "TODO")
 	})
-
 }
 
 func TestMinimalValidation(t *testing.T) {
