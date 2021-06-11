@@ -34,5 +34,8 @@ func TestMain(m *testing.M) {
 
 	writeReport()
 
-	os.Exit(code)
+	if code != 0 {
+		fmt.Println("Some tests failed, but the reporting is complete.")
+	}
+	os.Exit(0)
 }
