@@ -6,21 +6,21 @@ import (
 
 func TestCreateEvent(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult(t.Name(), "", "TODO", t)
+		writeTestResult("", "TODO", t)
 	})
 	t.SkipNow()
 }
 
 func TestUpdateEvent(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult(t.Name(), "", "TODO", t)
+		writeTestResult("", "TODO", t)
 	})
 	t.SkipNow()
 }
 
 func TestDeleteEvent(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult(t.Name(), "", "TODO", t)
+		writeTestResult("", "TODO", t)
 	})
 	t.SkipNow()
 }

@@ -129,6 +129,10 @@ func httpRequest(method, url, contentType string, b []byte) (*http.Response, err
 
 func httpReadBody(res *http.Response, t *testing.T) []byte {
 	t.Helper()
+	if res == nil {
+		t.FailNow()
+	}
+
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		t.Fatalf("Error reading response body: %s", err)
@@ -147,8 +151,12 @@ func prettifyJSON(in []byte) []byte {
 	return out.Bytes()
 }
 
-func assertStatusCode(got, expected int, body []byte, t *testing.T) {
+func assertStatusCode(res *http.Response, expected int, body []byte, t *testing.T) {
 	t.Helper()
+	if res == nil {
+		t.FailNow()
+	}
+	got := res.StatusCode
 	if got != expected {
 		body = prettifyJSON(body)
 		if len(body) == 0 {
@@ -159,7 +167,12 @@ func assertStatusCode(got, expected int, body []byte, t *testing.T) {
 	}
 }
 
-func assertContentMediaType(got, expected string, t *testing.T) {
+func assertContentMediaType(res *http.Response, expected string, t *testing.T) {
+	t.Helper()
+	if res == nil {
+		t.FailNow()
+	}
+	got := res.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(got)
 	if err != nil {
 		t.Fatalf("Error parsing content media type: %s", err)

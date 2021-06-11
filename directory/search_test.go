@@ -12,7 +12,7 @@ import (
 
 func TestJSONPath(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult(t.Name(), "", "", t)
+		writeTestResult("", "", t)
 	})
 
 	tag := uuid.NewV4().String()
@@ -29,7 +29,7 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			t.Cleanup(func() {
-				writeTestResult(t.Name(), "tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
+				writeTestResult("tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
 			})
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
@@ -44,14 +44,14 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("status code", func(t *testing.T) {
 			t.Cleanup(func() {
-				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+				writeTestResult("tdd-search-jsonpath-response", "", t)
 			})
-			assertStatusCode(response.StatusCode, http.StatusOK, body, t)
+			assertStatusCode(response, http.StatusOK, body, t)
 		})
 
 		t.Run("payload", func(t *testing.T) {
 			t.Cleanup(func() {
-				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+				writeTestResult("tdd-search-jsonpath-response", "", t)
 			})
 			var collection []mapAny
 			err := json.Unmarshal(body, &collection)
@@ -78,7 +78,7 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			t.Cleanup(func() {
-				writeTestResult(t.Name(), "tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
+				writeTestResult("tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
 			})
 			res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
 			if err != nil {
@@ -90,9 +90,9 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("status code", func(t *testing.T) {
 			t.Cleanup(func() {
-				writeTestResult(t.Name(), "tdd-search-jsonpath-response", "", t)
+				writeTestResult("tdd-search-jsonpath-response", "", t)
 			})
-			assertStatusCode(response.StatusCode, http.StatusBadRequest, nil, t)
+			assertStatusCode(response, http.StatusBadRequest, nil, t)
 		})
 	})
 
@@ -100,7 +100,7 @@ func TestJSONPath(t *testing.T) {
 
 func TestXPath(t *testing.T) {
 	t.Cleanup(func() {
-		writeTestResult(t.Name(), "", "TODO", t)
+		writeTestResult("", "TODO", t)
 	})
 	t.SkipNow()
 }
