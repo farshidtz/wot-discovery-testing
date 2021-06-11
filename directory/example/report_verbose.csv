@@ -1,0 +1,89 @@
+ID,Status,Related Assertions from Spec,Comments
+TestCreateEvent,skipped,,TODO
+TestUpdateEvent,skipped,,TODO
+TestDeleteEvent,skipped,,TODO
+TestCreateAnonymousThing/submit_request,passed,tdd-reg-create-anonymous-td tdd-reg-create-body,
+TestCreateAnonymousThing/status_code,passed,tdd-reg-create-anonymous-td-resp,
+TestCreateAnonymousThing/location_header,failed,tdd-reg-create-anonymous-td-resp,System-generated ID is not a Blank Node Identifier. Get response location: urn:uuid:8c7f36b3-c990-444b-a040-4f8c1f9cb4c0
+TestCreateAnonymousThing/result,failed,tdd-reg-create-anonymous-td,"Expected:
+{
+	'@context': 'https://www.w3.org/2019/wot/td/v1',
+	'security': [
+		'nosec_sc'
+	],
+	'securityDefinitions': {
+		'nosec_sc': {
+			'scheme': 'nosec'
+		}
+	},
+	'title': 'example thing'
+}
+Retrieved:
+{
+	'@context': 'https://www.w3.org/2019/wot/td/v1',
+	'id': 'urn:uuid:8c7f36b3-c990-444b-a040-4f8c1f9cb4c0',
+	'security': [
+		'nosec_sc'
+	],
+	'securityDefinitions': {
+		'nosec_sc': {
+			'scheme': 'nosec'
+		}
+	},
+	'title': 'example thing'
+}
+"
+TestCreateAnonymousThing,failed,,
+TestCreateThing/submit_request,passed,tdd-reg-create-known-td tdd-reg-create-body,
+TestCreateThing/status_code,passed,tdd-reg-create-known-td-resp,
+TestCreateThing/result,passed,tdd-reg-create-known-td tdd-reg-create-body,
+TestCreateThing/reject_id_mismatch,skipped,,no relevant assertions
+TestCreateThing/reject_POST,skipped,,no relevant assertions
+TestCreateThing,passed,,
+TestRetrieveThing/submit_request,passed,tdd-reg-retrieve,
+TestRetrieveThing/status_code,passed,tdd-reg-retrieve-resp,
+TestRetrieveThing/content_type,passed,tdd-reg-retrieve-resp,
+TestRetrieveThing/result,passed,tdd-reg-retrieve,
+TestRetrieveThing/enriched_result,skipped,,TODO
+TestRetrieveThing,passed,,
+TestUpdateThing/submit_request,passed,tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype,
+TestUpdateThing/status_code,passed,tdd-reg-update-resp,
+TestUpdateThing/result,passed,tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype,
+TestUpdateThing,passed,,
+TestPatch/replace_title/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/replace_title/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/replace_title/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/remove_description/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/remove_description/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/remove_description/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/update_properties/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/update_properties/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/update_properties/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/replace_array/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/replace_array/status_code,passed,tdd-reg-update-partial-resp,
+TestPatch/replace_array/result,passed,tdd-reg-update-partial tdd-reg-update-partial-mergepatch,
+TestPatch/fail_to_remove_mandatory_title/submit_request,passed,tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype,
+TestPatch/fail_to_remove_mandatory_title/status_code,passed,tdd-reg-update-partial-resp td-validation-syntactic,
+TestPatch,passed,,
+TestDelete/existing/submit_request,passed,tdd-reg-delete,
+TestDelete/existing/status_code,passed,tdd-reg-delete-resp,
+TestDelete/existing/result,passed,tdd-reg-delete,
+TestDelete/non-existing/submit_request,passed,tdd-reg-delete,
+TestDelete/non-existing/status_code,passed,tdd-reg-delete-resp,
+TestDelete,passed,,
+TestListThings/submit_request,passed,tdd-reg-list-method,
+TestListThings/status_code,passed,tdd-reg-list-method,
+TestListThings/content_type,passed,tdd-reg-list-resp,
+TestListThings/payload,passed,tdd-reg-list-resp,
+TestListThings/http11_chunking,skipped,tdd-reg-list-http11,TODO
+TestListThings/http2_streaming,skipped,tdd-reg-list-http2,TODO
+TestListThings/pagination,skipped,,TODO
+TestListThings,passed,,
+TestMinimalValidation,skipped,,TODO
+TestJSONPath/filter/submit_request,passed,tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter,
+TestJSONPath/filter/status_code,passed,tdd-search-jsonpath-response,
+TestJSONPath/filter/payload,passed,tdd-search-jsonpath-response,
+TestJSONPath/reject_bad_query/submit_request,passed,tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter,
+TestJSONPath/reject_bad_query/status_code,passed,tdd-search-jsonpath-response,
+TestJSONPath,passed,,
+TestXPath,skipped,,TODO
