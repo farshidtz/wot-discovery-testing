@@ -8,7 +8,7 @@ The final report is printed to the standard output as well as to `./report.csv` 
 ### Go
 Linux/macOS: 
 ```bash
-URL=http://localhost:8081 go test -v
+URL=http://localhost:8081 go test
 ```
 
 ### Docker

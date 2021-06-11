@@ -26,7 +26,7 @@ jobs:
     - name: Test
       env:
         URL: http://localhost:8081
-      run: go test -v
+      run: go test
       working-directory: directory
 
     - name: Export report as artifact

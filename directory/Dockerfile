@@ -6,4 +6,4 @@ WORKDIR /home
 
 ENV CGO_ENABLED=0
 
-ENTRYPOINT ["go", "test", "-v"]
+ENTRYPOINT ["go", "test"]
