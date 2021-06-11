@@ -40,7 +40,7 @@ func retrieveThing(id, serverURL string, t *testing.T) mapAny {
 }
 
 // createThing is a helper function to support tests unrelated to creation of a TD
-func createThing(id string, td mapAny, serverURL string, t *testing.T) mapAny {
+func createThing(id string, td mapAny, serverURL string, t *testing.T) {
 	t.Helper()
 	b, _ := json.Marshal(td)
 
@@ -59,11 +59,11 @@ func createThing(id string, td mapAny, serverURL string, t *testing.T) mapAny {
 		t.Fatalf("Error creating test data: %d: %s", res.StatusCode, b)
 	}
 
-	storedTD := retrieveThing(id, serverURL, t)
+	// storedTD := retrieveThing(id, serverURL, t)
 
 	// add the system-generated attributes
-	td["registration"] = storedTD["registration"]
-	return td
+	// td["registration"] = storedTD["registration"]
+	// return td
 }
 
 // retrieveAllThings is a helper function to support tests unrelated to retrieval of all TDs

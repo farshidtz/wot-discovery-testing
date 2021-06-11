@@ -11,9 +11,7 @@ import (
 )
 
 func TestJSONPath(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	tag := uuid.NewV4().String()
 	for i := 0; i < 3; i++ {
@@ -28,13 +26,15 @@ func TestJSONPath(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult("tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
-			})
+			r := &record{
+				assertions: []string{"tdd-search-apis-jsonPath", "tdd-search-jsonpath-method", "tdd-search-jsonpath-parameter"},
+			}
+			defer report(t, r)
+
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
 			if err != nil {
-				t.Fatalf("Error getting TDs: %s", err)
+				fatal(t, r, "Error getting TDs: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -43,20 +43,24 @@ func TestJSONPath(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult("tdd-search-jsonpath-response", "", t)
-			})
-			assertStatusCode(response, http.StatusOK, body, t)
+			r := &record{
+				assertions: []string{"tdd-search-jsonpath-response"},
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("payload", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult("tdd-search-jsonpath-response", "", t)
-			})
+			r := &record{
+				assertions: []string{"tdd-search-jsonpath-response"},
+			}
+			defer report(t, r)
+
 			var collection []mapAny
 			err := json.Unmarshal(body, &collection)
 			if err != nil {
-				t.Fatalf("Error decoding page: %s", err)
+				fatal(t, r, "Error decoding page: %s", err)
 			}
 
 			storedTDs := retrieveAllThings(serverURL, t)
@@ -77,30 +81,31 @@ func TestJSONPath(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult("tdd-search-apis-jsonPath tdd-search-jsonpath-method tdd-search-jsonpath-parameter", "", t)
-			})
+			r := &record{
+				assertions: []string{"tdd-search-apis-jsonPath", "tdd-search-jsonpath-method", "tdd-search-jsonpath-parameter"},
+			}
+			defer report(t, r)
+
 			res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
 			if err != nil {
-				t.Fatalf("Error getting TDs: %s", err)
+				fatal(t, r, "Error getting TDs: %s", err)
 			}
 			defer res.Body.Close()
 			response = res
 		})
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult("tdd-search-jsonpath-response", "", t)
-			})
-			assertStatusCode(response, http.StatusBadRequest, nil, t)
+			r := &record{
+				assertions: []string{"tdd-search-jsonpath-response"},
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusBadRequest, nil)
 		})
 	})
-
 }
 
 func TestXPath(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "TODO", t)
-	})
+	defer report(t, &record{comments: "TODO"})
 	t.SkipNow()
 }

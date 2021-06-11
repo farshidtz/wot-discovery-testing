@@ -5,22 +5,16 @@ import (
 )
 
 func TestCreateEvent(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "TODO", t)
-	})
+	defer report(t, &record{comments: "TODO"})
 	t.SkipNow()
 }
 
 func TestUpdateEvent(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "TODO", t)
-	})
+	defer report(t, &record{comments: "TODO"})
 	t.SkipNow()
 }
 
 func TestDeleteEvent(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "TODO", t)
-	})
+	defer report(t, &record{comments: "TODO"})
 	t.SkipNow()
 }

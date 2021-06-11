@@ -117,6 +117,8 @@ func report(t *testing.T, r *record) {
 		r.status = "passed"
 	}
 
+	r.comments = strings.ReplaceAll(r.comments, "\"", "'")
+
 	appendRecord(r.id, r.status, strings.Join(r.assertions, " "), r.comments)
 }
 

@@ -77,13 +77,13 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
 
-		// manually change attributes of the reference TD
-		// set the system-generated attributes
-		td["id"] = storedTD["id"]
-		td["registration"] = storedTD["registration"]
+		// remove system-generated attributes
+		delete(td, "registration")
+		delete(storedTD, "registration")
 
 		if !serializedEqual(td, storedTD) {
-			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+			fatal(t, r, "Stored TD was does not match the expectations; see logs.")
 		}
 	})
 }
@@ -132,12 +132,13 @@ func TestCreateThing(t *testing.T) {
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
-		// manually change attributes of the reference TD
-		// set the system-generated attributes
-		td["registration"] = storedTD["registration"]
+		// remove system-generated attributes
+		delete(td, "registration")
+		delete(storedTD, "registration")
 
 		if !serializedEqual(td, storedTD) {
-			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+			fatal(t, r, "Unexpected results; see logs.")
 		}
 	})
 
@@ -214,7 +215,7 @@ func TestRetrieveThing(t *testing.T) {
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
-	storedTD := createThing(id, td, serverURL, t)
+	createThing(id, td, serverURL, t)
 
 	var response *http.Response
 
@@ -265,8 +266,12 @@ func TestRetrieveThing(t *testing.T) {
 			fatal(t, r, "Error decoding body: %s", err)
 		}
 
-		if !serializedEqual(td, storedTD) {
-			fatal(t, r, "The retrieved TD is not the same as the added one:\n Added:\n %v \n Retrieved: \n %v", td, retrievedTD)
+		// remove system-generated attributes
+		delete(retrievedTD, "registration")
+
+		if !serializedEqual(td, retrievedTD) {
+			t.Logf("Expected:\n%v\nRetrieved:\n%v", marshalPrettyJSON(td), marshalPrettyJSON(retrievedTD))
+			fatal(t, r, "The retrieved TD is not the same as the added one; see logs.")
 		}
 	})
 
@@ -329,12 +334,13 @@ func TestUpdateThing(t *testing.T) {
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
-		// manually change attributes of the reference TD
-		// set system-generated attributes
-		td["registration"] = storedTD["registration"]
+		// remove system-generated attributes
+		delete(td, "registration")
+		delete(storedTD, "registration")
 
 		if !serializedEqual(td, storedTD) {
-			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			t.Logf("Expected:\n%v\n Retrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+			fatal(t, r, "Unexpected results; see logs.")
 		}
 	})
 }
@@ -396,11 +402,12 @@ func TestPatch(t *testing.T) {
 
 			// manually change attributes of the reference TD
 			td["title"] = "new title"
-			// set system-generated attributes
-			td["registration"] = storedTD["registration"]
+			// remove system-generated attributes
+			delete(td, "registration")
 
 			if !serializedEqual(td, storedTD) {
-				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+				fatal(t, r, "Unexpected results; see logs.")
 			}
 		})
 	})
@@ -454,11 +461,12 @@ func TestPatch(t *testing.T) {
 
 			// manually change attributes of the reference TD
 			delete(td, "description")
-			// set system-generated attributes
-			td["registration"] = storedTD["registration"]
+			// remove system-generated attributes
+			delete(td, "registration")
 
 			if !serializedEqual(td, storedTD) {
-				fatal(t, r, "Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+				fatal(t, r, "Unexpected results; see logs.")
 			}
 		})
 	})
@@ -529,11 +537,12 @@ func TestPatch(t *testing.T) {
 					},
 				},
 			}
-			// set system-generated attributes
-			td["registration"] = storedTD["registration"]
+			// remove system-generated attributes
+			delete(td, "registration")
 
 			if !serializedEqual(td, storedTD) {
-				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+				fatal(t, r, "Unexpected results; see logs.")
 			}
 		})
 	})
@@ -603,11 +612,12 @@ func TestPatch(t *testing.T) {
 					},
 				},
 			}
-			// set system-generated attributes
-			td["registration"] = storedTD["registration"]
+			// remove system-generated attributes
+			delete(td, "registration")
 
 			if !serializedEqual(td, storedTD) {
-				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
+				fatal(t, r, "Unexpected results; see logs.")
 			}
 		})
 	})
@@ -800,7 +810,8 @@ func TestListThings(t *testing.T) {
 
 		for _, td := range collection {
 			if td["title"] == nil || td["title"].(string) == "" {
-				fatal(t, r, "Item in list may not be a TD: no mandatory title. Got:\n%s", marshalPrettyJSON(td))
+				t.Logf("Body:\n%s", marshalPrettyJSON(td))
+				fatal(t, r, "Object in array may not be a TD: no mandatory title. See logs.")
 			}
 		}
 	})
@@ -841,60 +852,60 @@ func TestListThings(t *testing.T) {
 }
 
 func TestMinimalValidation(t *testing.T) {
-	defer report(t, nil)
+	defer report(t, &record{comments: "TODO"})
 	t.SkipNow()
 
-	t.Run("reject missing context", func(t *testing.T) {
-		id := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(id)
+	// t.Run("reject missing context", func(t *testing.T) {
+	// 	id := "urn:uuid:" + uuid.NewV4().String()
+	// 	td := mockedTD(id)
 
-		// remove the context field
-		delete(td, "@context")
+	// 	// remove the context field
+	// 	delete(td, "@context")
 
-		b, _ := json.Marshal(td)
+	// 	b, _ := json.Marshal(td)
 
-		// submit with PUT request
-		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-		if err != nil {
-			t.Fatalf("Error posting: %s", err)
-		}
-		defer res.Body.Close()
+	// 	// submit with PUT request
+	// 	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+	// 	if err != nil {
+	// 		t.Fatalf("Error posting: %s", err)
+	// 	}
+	// 	defer res.Body.Close()
 
-		body := httpReadBody(res, t)
+	// 	body := httpReadBody(res, t)
 
-		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res, http.StatusBadRequest, body, t)
-		})
+	// 	t.Run("status code", func(t *testing.T) {
+	// 		assertStatusCode(res, http.StatusBadRequest, body, t)
+	// 	})
 
-		var problemDetails map[string]any
-		err = json.Unmarshal(body, &problemDetails)
-		if err != nil {
-			t.Fatalf("Error decoding body: %s", err)
-		}
+	// 	var problemDetails map[string]any
+	// 	err = json.Unmarshal(body, &problemDetails)
+	// 	if err != nil {
+	// 		t.Fatalf("Error decoding body: %s", err)
+	// 	}
 
-		problemDetailsStatus, ok := problemDetails["status"].(float64) // JSON number is float64
-		if !ok {
-			t.Fatalf("Problem Details: missing status field. Body: %s", body)
-		}
-		if problemDetailsStatus != 400 {
-			t.Fatalf("Problem Details: expected status 400 in body, got: %f", problemDetailsStatus)
-		}
+	// 	problemDetailsStatus, ok := problemDetails["status"].(float64) // JSON number is float64
+	// 	if !ok {
+	// 		t.Fatalf("Problem Details: missing status field. Body: %s", body)
+	// 	}
+	// 	if problemDetailsStatus != 400 {
+	// 		t.Fatalf("Problem Details: expected status 400 in body, got: %f", problemDetailsStatus)
+	// 	}
 
-		validationErrors, ok := problemDetails["validationErrors"].([]any)
-		if !ok {
-			t.Fatalf("Problem Details: missing validationErrors field. Body: %s", body)
-		}
-		if len(validationErrors) != 1 {
-			t.Fatalf("Problem Details: expected 1 validation error, got: %d. Body: %s", len(validationErrors), body)
-		}
+	// 	validationErrors, ok := problemDetails["validationErrors"].([]any)
+	// 	if !ok {
+	// 		t.Fatalf("Problem Details: missing validationErrors field. Body: %s", body)
+	// 	}
+	// 	if len(validationErrors) != 1 {
+	// 		t.Fatalf("Problem Details: expected 1 validation error, got: %d. Body: %s", len(validationErrors), body)
+	// 	}
 
-		// if pd.ValidationErrors[0].Field != "(root)" { // not normative?
-		// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Field, body)
-		// }
+	// if pd.ValidationErrors[0].Field != "(root)" { // not normative?
+	// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Field, body)
+	// }
 
-		// if pd.ValidationErrors[0].Descr != "@context is required" { // not normative?
-		// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Descr, body)
-		// }
-	})
+	// if pd.ValidationErrors[0].Descr != "@context is required" { // not normative?
+	// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Descr, body)
+	// }
+	// })
 
 }
