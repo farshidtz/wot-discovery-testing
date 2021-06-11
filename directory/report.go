@@ -5,17 +5,32 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 )
 
 const outputFile = "report.csv"
 
-var records [][]string
+var results map[string]result
+
+type record struct {
+	name       string
+	status     string
+	assertions []string
+	comments   string
+}
+
+type result struct {
+	passed  []string
+	failed  []string
+	skipped []string
+}
 
 func initReportWriter() (commit func()) {
+	results = make(map[string]result)
 	// csv header
-	header := []string{"ID", "Status", "Related Assertions from Spec", "Comments"}
+	header := []string{"AssertionID", "Status", "Coverage", "Details"}
 
 	file, err := os.Create(outputFile)
 	if err != nil {
@@ -33,18 +48,27 @@ func initReportWriter() (commit func()) {
 	}
 
 	// return commit function and run after all tests
-	return func() {
+	var sortedResults [][]string
+	commit = func() {
+		// sort by id
+		for id, result := range results {
+			sortedResults = append(sortedResults, resultToCSV(id, result))
+		}
+		sort.Slice(sortedResults, func(i, j int) bool {
+			return sortedResults[i][0] < sortedResults[j][0]
+		})
+
 		fmt.Println("==================== REPORT ====================")
-		for _, record := range records {
-			err := writer.Write(record)
+		for _, result := range sortedResults {
+			err := writer.Write(result)
 			if err != nil {
 				fmt.Printf("Error writing the report: %s", err)
 				os.Exit(1)
 			}
 		}
-
 		writer.Flush()
 		fmt.Println("================================================")
+
 		err = writer.Error()
 		if err != nil {
 			fmt.Printf("Error flushing the report file: %s", err)
@@ -54,48 +78,69 @@ func initReportWriter() (commit func()) {
 		file.Close()
 	}
 
+	return commit
 }
 
-func appendRecord(id, status, assertions, comments string) {
-	records = append(records, []string{id, status, assertions, comments})
+func ingestRecord(t *testing.T, r record) {
+	for _, a := range r.assertions {
+		result := results[a]
+		if t.Failed() {
+			result.failed = append(result.failed, r.name)
+		} else if t.Skipped() {
+			result.skipped = append(result.skipped, r.name)
+		} else {
+			result.passed = append(result.passed, r.name)
+		}
+		results[a] = result
+	}
+
 }
 
-func writeTestResult(assertions, comments string, t *testing.T) {
-	id := t.Name()
-	if strings.Contains(id, ",") {
-		t.Fatalf("ID cell should not contain commas.")
-	}
-	if strings.Contains(assertions, ",") {
-		t.Fatalf("Assertions cell should not contain commas. Use space as separator.")
-	}
-	if t.Failed() {
-		appendRecord(id, "failed", assertions, comments)
-	} else if t.Skipped() {
-		appendRecord(id, "skipped", assertions, comments)
+func resultToCSV(assertionID string, r result) []string {
+	var status string
+	if len(r.failed) > 0 {
+		status = "failed"
+	} else if len(r.passed) > 0 {
+		status = "passed"
 	} else {
-		appendRecord(id, "passed", assertions, comments)
+		status = "skipped"
+	}
+
+	// calculate ratio of passed tests
+	var coverage float64
+	if len(r.passed)+len(r.failed)+len(r.skipped) == 0 {
+		coverage = 0
+	} else {
+		coverage = float64(len(r.passed)) / float64(len(r.passed)+len(r.failed)+len(r.skipped))
+	}
+
+	var details []string
+	if len(r.passed) > 0 {
+		// details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " ")))
+		details = append(details, fmt.Sprint("passed:", len(r.passed)))
+	}
+	if len(r.failed) > 0 {
+		details = append(details, fmt.Sprint("failed:", strings.Join(r.failed, " ")))
+	}
+	if len(r.skipped) > 0 {
+		details = append(details, fmt.Sprint("skipped:", strings.Join(r.skipped, " ")))
+	}
+
+	return []string{
+		assertionID,
+		status,
+		fmt.Sprintf("%.0f%%", coverage*100),
+		strings.Join(details, " "),
 	}
 }
 
-type record struct {
-	id         string
-	status     string
-	assertions []string
-	comments   string
-}
-
+// report at the end of tests. Execute with defer statement.
 func report(t *testing.T, r *record) {
 	if r == nil {
 		r = &record{}
 	}
-	if r.id != "" {
-		panic("id should not be set explicitly: " + r.id)
-	}
-	// take id from test name
-	r.id = t.Name()
-	if strings.Contains(r.id, ",") {
-		panic("ID cell should not contain commas: " + r.id)
-	}
+
+	r.name = t.Name()
 
 	for _, a := range r.assertions {
 		if strings.Contains(a, ",") {
@@ -109,17 +154,8 @@ func report(t *testing.T, r *record) {
 	if r.status != "" {
 		panic("status should not be set explicitly: " + r.status)
 	}
-	if t.Failed() {
-		r.status = "failed"
-	} else if t.Skipped() {
-		r.status = "skipped"
-	} else {
-		r.status = "passed"
-	}
 
-	r.comments = strings.ReplaceAll(r.comments, "\"", "'")
-
-	appendRecord(r.id, r.status, strings.Join(r.assertions, " "), r.comments)
+	ingestRecord(t, *r)
 }
 
 func fatal(t *testing.T, r *record, format string, messages ...interface{}) {
