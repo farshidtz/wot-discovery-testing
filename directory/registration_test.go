@@ -11,9 +11,7 @@ import (
 )
 
 func TestCreateAnonymousThing(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
@@ -24,19 +22,12 @@ func TestCreateAnonymousThing(t *testing.T) {
 		r := &record{
 			assertions: []string{"tdd-reg-create-anonymous-td", "tdd-reg-create-body"},
 		}
-		defer report(r, t)
-		// t.Cleanup(func() {
-		// 	// writeTestResult("tdd-reg-create-anonymous-td tdd-reg-create-body", "", t)
-		// 	report(r, t)
-		// })
-		// t.Cleanup(func() { report(r, t) })
+		defer report(t, r)
 
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
-			// r.comments = fmt.Sprintf("Error posting: %s", err)
-			// t.Fatal(r.comments)
-			reportError(r, t, "Error posting: %s", err)
+			fatal(t, r, "Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -45,38 +36,44 @@ func TestCreateAnonymousThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-anonymous-td-resp", "", t)
-		})
-		assertStatusCode(response, http.StatusCreated, body, t)
+		r := &record{
+			assertions: []string{"tdd-reg-create-anonymous-td-resp"},
+		}
+		defer report(t, r)
+		assertStatusCode2(t, r, response, http.StatusCreated, body)
 	})
 
 	var systemGeneratedID string
 	t.Run("location header", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-anonymous-td-resp", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-create-anonymous-td-resp"},
+		}
+		defer report(t, r)
+
 		// Check if system-generated id is in response
 		location, err := response.Location()
 		if err != nil {
-			t.Fatal(err.Error())
+			fatal(t, r, err.Error())
 		}
 		systemGeneratedID = location.String()
 		if systemGeneratedID == "" {
-			t.Fatalf("System-generated ID not in response. Get response location: %s", location)
+			fatal(t, r, "System-generated ID not in response. Get response location: %s", location)
 		}
 		if !strings.Contains(systemGeneratedID, "_:") {
-			t.Fatalf("System-generated ID is not a Blank Node Identifier. Get response location: %s", location)
+			fatal(t, r, "System-generated ID is not a Blank Node Identifier. Get response location: %s", location)
 		}
 	})
 
 	t.Run("result", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-anonymous-td", "", t)
-		})
-		if systemGeneratedID == "" {
-			t.Skip()
+		r := &record{
+			assertions: []string{"tdd-reg-create-anonymous-td"},
 		}
+		defer report(t, r)
+
+		if systemGeneratedID == "" {
+			skip(t, r, "previous errors")
+		}
+
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
 
@@ -86,15 +83,13 @@ func TestCreateAnonymousThing(t *testing.T) {
 		td["registration"] = storedTD["registration"]
 
 		if !serializedEqual(td, storedTD) {
-			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 		}
 	})
 }
 
 func TestCreateThing(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -103,13 +98,15 @@ func TestCreateThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-known-td tdd-reg-create-body", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body"},
+		}
+		defer report(t, r)
+
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			t.Fatalf("Error posting: %s", err)
+			fatal(t, r, "Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -118,16 +115,20 @@ func TestCreateThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-known-td-resp", "", t)
-		})
-		assertStatusCode(response, http.StatusCreated, body, t)
+		r := &record{
+			assertions: []string{"tdd-reg-create-known-td-resp"},
+		}
+		defer report(t, r)
+
+		assertStatusCode2(t, r, response, http.StatusCreated, body)
 	})
 
 	t.Run("result", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-create-known-td tdd-reg-create-body", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body"},
+		}
+		defer report(t, r)
+
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
@@ -136,40 +137,56 @@ func TestCreateThing(t *testing.T) {
 		td["registration"] = storedTD["registration"]
 
 		if !serializedEqual(td, storedTD) {
-			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 		}
 	})
 
 	t.Run("reject id mismatch", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("", "no relevant assertions", t)
-		})
-		t.SkipNow() // this is sadly not an expected normative behavior
+		r := &record{
+			assertions: []string{},
+		}
+		defer report(t, r)
+		skip(t, r, "no relevant assertions")
 
 		id := "urn:uuid:" + uuid.NewV4().String()
 		anotherID := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(anotherID)
 		b, _ := json.Marshal(td)
 
-		// submit PUT request
-		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-		if err != nil {
-			t.Fatalf("Error posting: %s", err)
-		}
-		defer res.Body.Close()
-
-		body := httpReadBody(res, t)
+		var response *http.Response
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res, http.StatusConflict, body, t)
+			r := &record{
+				assertions: []string{},
+			}
+			defer report(t, r)
+
+			// submit PUT request
+			res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+			if err != nil {
+				fatal(t, r, "Error posting: %s", err)
+			}
+			response = res
+			// defer res.Body.Close()
+		})
+
+		body := httpReadBody(response, t)
+
+		t.Run("status code", func(t *testing.T) {
+			r := &record{
+				assertions: []string{},
+			}
+			defer report(t, r)
+			assertStatusCode2(t, r, response, http.StatusConflict, body)
 		})
 	})
 
 	t.Run("reject POST", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("", "no relevant assertions", t)
-		})
-		t.SkipNow()
+		r := &record{
+			assertions: []string{},
+		}
+		defer report(t, r)
+		skip(t, r, "no relevant assertions")
 
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -178,23 +195,21 @@ func TestCreateThing(t *testing.T) {
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
-			t.Fatalf("Error posting: %s", err)
+			fatal(t, r, "Error posting: %s", err)
 		}
 		defer res.Body.Close()
 
 		body := httpReadBody(res, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(res, http.StatusBadRequest, body, t)
+			assertStatusCode2(t, r, res, http.StatusBadRequest, body)
 		})
 	})
 
 }
 
 func TestRetrieveThing(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -204,13 +219,15 @@ func TestRetrieveThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-retrieve", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-retrieve"},
+		}
+		defer report(t, r)
+
 		// submit GET request
 		res, err := http.Get(serverURL + "/td/" + id)
 		if err != nil {
-			t.Fatalf("Error getting TD: %s", err)
+			fatal(t, r, "Error getting TD: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -219,46 +236,52 @@ func TestRetrieveThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-retrieve-resp", "", t)
-		})
-		assertStatusCode(response, http.StatusOK, body, t)
+		r := &record{
+			assertions: []string{"tdd-reg-retrieve-resp"},
+		}
+		defer report(t, r)
+
+		assertStatusCode2(t, r, response, http.StatusOK, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-retrieve-resp", "", t)
-		})
-		assertContentMediaType(response, MediaTypeThingDescription, t)
+		r := &record{
+			assertions: []string{"tdd-reg-retrieve-resp"},
+		}
+		defer report(t, r)
+
+		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-retrieve", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-retrieve"},
+		}
+		defer report(t, r)
+
 		var retrievedTD mapAny
 		err := json.Unmarshal(body, &retrievedTD)
 		if err != nil {
-			t.Fatalf("Error decoding body: %s", err)
+			fatal(t, r, "Error decoding body: %s", err)
 		}
 
 		if !serializedEqual(td, storedTD) {
-			t.Fatalf("The retrieved TD is not the same as the added one:\n Added:\n %v \n Retrieved: \n %v", td, retrievedTD)
+			fatal(t, r, "The retrieved TD is not the same as the added one:\n Added:\n %v \n Retrieved: \n %v", td, retrievedTD)
 		}
 	})
 
 	t.Run("enriched result", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("", "TODO", t)
-		})
-		t.SkipNow()
+		r := &record{
+			assertions: []string{},
+		}
+		defer report(t, r)
+
+		skip(t, r, "TODO")
 	})
 }
 
 func TestUpdateThing(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -272,13 +295,15 @@ func TestUpdateThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-update-types", "tdd-reg-update", "tdd-reg-update-contenttype"},
+		}
+		defer report(t, r)
+
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			t.Fatalf("Error putting TD: %s", err)
+			fatal(t, r, "Error putting TD: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -287,16 +312,20 @@ func TestUpdateThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		// t.Cleanup(func() {
-		defer writeTestResult("tdd-reg-update-resp", "", t)
-		// })
-		assertStatusCode(response, http.StatusNoContent, body, t)
+		r := &record{
+			assertions: []string{"tdd-reg-update-resp"},
+		}
+		defer report(t, r)
+
+		assertStatusCode2(t, r, response, http.StatusNoContent, body)
 	})
 
 	t.Run("result", func(t *testing.T) {
-		// t.Cleanup(func() {
-		defer writeTestResult("tdd-reg-update-types tdd-reg-update tdd-reg-update-contenttype", "", t)
-		// })
+		r := &record{
+			assertions: []string{"tdd-reg-update-types", "tdd-reg-update", "tdd-reg-update-contenttype"},
+		}
+		defer report(t, r)
+
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
@@ -305,20 +334,18 @@ func TestUpdateThing(t *testing.T) {
 		td["registration"] = storedTD["registration"]
 
 		if !serializedEqual(td, storedTD) {
-			t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+			fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 		}
 	})
 }
 
 func TestPatch(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
-	const (
-		requestAssertions = "tdd-reg-update-partial tdd-reg-update-partial-partialtd tdd-reg-update-partial-contenttype"
-		statusAssertions  = "tdd-reg-update-partial-resp"
-		resultAssertions  = "tdd-reg-update-partial tdd-reg-update-partial-mergepatch"
+	var (
+		requestAssertions = []string{"tdd-reg-update-partial", "tdd-reg-update-partial-partialtd", "tdd-reg-update-partial-contenttype"}
+		statusAssertions  = []string{"tdd-reg-update-partial-resp"}
+		resultAssertions  = []string{"tdd-reg-update-partial", "tdd-reg-update-partial-mergepatch"}
 	)
 
 	t.Run("replace title", func(t *testing.T) {
@@ -333,13 +360,15 @@ func TestPatch(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: requestAssertions,
+			}
+			defer report(t, r)
+
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				t.Fatalf("Error patching TD: %s", err)
+				fatal(t, r, "Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -348,16 +377,20 @@ func TestPatch(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusOK, body, t)
+			r := &record{
+				assertions: statusAssertions,
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(resultAssertions, "", t)
-			})
+			r := &record{
+				assertions: resultAssertions,
+			}
+			defer report(t, r)
+
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -367,7 +400,7 @@ func TestPatch(t *testing.T) {
 			td["registration"] = storedTD["registration"]
 
 			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 			}
 		})
 	})
@@ -385,13 +418,15 @@ func TestPatch(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: requestAssertions,
+			}
+			defer report(t, r)
+
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				t.Fatalf("Error patching TD: %s", err)
+				fatal(t, r, "Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -400,16 +435,20 @@ func TestPatch(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusOK, body, t)
+			r := &record{
+				assertions: statusAssertions,
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(resultAssertions, "", t)
-			})
+			r := &record{
+				assertions: resultAssertions,
+			}
+			defer report(t, r)
+
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -419,7 +458,7 @@ func TestPatch(t *testing.T) {
 			td["registration"] = storedTD["registration"]
 
 			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				fatal(t, r, "Posted:\n%v\n Retrieved:\n%v\n", td, storedTD)
 			}
 		})
 	})
@@ -443,13 +482,15 @@ func TestPatch(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: requestAssertions,
+			}
+			defer report(t, r)
+
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				t.Fatalf("Error patching TD: %s", err)
+				fatal(t, r, "Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -458,16 +499,20 @@ func TestPatch(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusOK, body, t)
+			r := &record{
+				assertions: statusAssertions,
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(resultAssertions, "", t)
-			})
+			r := &record{
+				assertions: resultAssertions,
+			}
+			defer report(t, r)
+
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -488,7 +533,7 @@ func TestPatch(t *testing.T) {
 			td["registration"] = storedTD["registration"]
 
 			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 			}
 		})
 	})
@@ -515,13 +560,15 @@ func TestPatch(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: requestAssertions,
+			}
+			defer report(t, r)
+
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				t.Fatalf("Error patching TD: %s", err)
+				fatal(t, r, "Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -530,16 +577,20 @@ func TestPatch(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusOK, body, t)
+			r := &record{
+				assertions: statusAssertions,
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(resultAssertions, "", t)
-			})
+			r := &record{
+				assertions: resultAssertions,
+			}
+			defer report(t, r)
+
 			// retrieve the changed TD
 			storedTD := retrieveThing(id, serverURL, t)
 
@@ -556,7 +607,7 @@ func TestPatch(t *testing.T) {
 			td["registration"] = storedTD["registration"]
 
 			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
+				fatal(t, r, "Expected:\n%v\n Retrieved:\n%v\n", td, storedTD)
 			}
 		})
 	})
@@ -573,13 +624,15 @@ func TestPatch(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: requestAssertions,
+			}
+			defer report(t, r)
+
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				t.Fatalf("Error patching TD: %s", err)
+				fatal(t, r, "Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -588,18 +641,18 @@ func TestPatch(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions+" td-validation-syntactic", "", t)
-			})
-			assertStatusCode(response, http.StatusBadRequest, body, t)
+			r := &record{
+				assertions: append(statusAssertions, "td-validation-syntactic"),
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusBadRequest, body)
 		})
 	})
 }
 
 func TestDelete(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	const (
 		requestAssertions = "tdd-reg-delete"
@@ -616,13 +669,15 @@ func TestDelete(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: []string{requestAssertions},
+			}
+			defer report(t, r)
+
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/" + id)
 			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
+				fatal(t, r, "Error deleting TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -631,27 +686,31 @@ func TestDelete(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusNoContent, body, t)
+			r := &record{
+				assertions: []string{statusAssertions},
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(resultAssertions, "", t)
-			})
+			r := &record{
+				assertions: []string{resultAssertions},
+			}
+			defer report(t, r)
+
 			// try to retrieve the deleted TD
 			res, err := http.Get(serverURL + "/things/" + id)
 			if err != nil {
-				t.Fatalf("Error getting TD: %s", err)
+				fatal(t, r, "Error getting TD: %s", err)
 			}
 			defer res.Body.Close()
 
 			body = httpReadBody(res, t)
 
 			t.Run("status code", func(t *testing.T) {
-				assertStatusCode(res, http.StatusNotFound, body, t)
+				assertStatusCode2(t, r, res, http.StatusNotFound, body)
 			})
 		})
 	})
@@ -660,13 +719,15 @@ func TestDelete(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(requestAssertions, "", t)
-			})
+			r := &record{
+				assertions: []string{requestAssertions},
+			}
+			defer report(t, r)
+
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/non-exiting-td")
 			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
+				fatal(t, r, "Error deleting TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -675,96 +736,112 @@ func TestDelete(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			t.Cleanup(func() {
-				writeTestResult(statusAssertions, "", t)
-			})
-			assertStatusCode(response, http.StatusNotFound, body, t)
+			r := &record{
+				assertions: []string{statusAssertions},
+			}
+			defer report(t, r)
+
+			assertStatusCode2(t, r, response, http.StatusNotFound, body)
 		})
 	})
 
 }
 
 func TestListThings(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "", t)
-	})
+	defer report(t, nil)
 
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-method", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-list-method"},
+		}
+		defer report(t, r)
+
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
-			t.Fatalf("Error getting list of TDs: %s", err)
+			fatal(t, r, "Error getting list of TDs: %s", err)
 		}
 		// defer res.Body.Close()
 		response = res
 	})
 
 	t.Run("status code", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-method", "", t)
-		})
-		assertStatusCode(response, http.StatusOK, nil, t)
+		r := &record{
+			assertions: []string{"tdd-reg-list-method"},
+		}
+		defer report(t, r)
+
+		assertStatusCode2(t, r, response, http.StatusOK, nil)
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-resp", "", t)
-		})
-		assertContentMediaType(response, MediaTypeJSONLD, t)
+		r := &record{
+			assertions: []string{"tdd-reg-list-resp"},
+		}
+		defer report(t, r)
+
+		assertContentMediaType2(t, r, response, MediaTypeJSONLD)
 	})
 
 	t.Run("payload", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-resp", "", t)
-		})
+		r := &record{
+			assertions: []string{"tdd-reg-list-resp"},
+		}
+		defer report(t, r)
 
 		body := httpReadBody(response, t)
 
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
 		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
+			fatal(t, r, "Error decoding page: %s", err)
 		}
 
 		for _, td := range collection {
 			if td["title"] == nil || td["title"].(string) == "" {
-				t.Fatalf("Item in list may not be a TD: no mandatory title. Got:\n%s", marshalPrettyJSON(td))
+				fatal(t, r, "Item in list may not be a TD: no mandatory title. Got:\n%s", marshalPrettyJSON(td))
 			}
 		}
 	})
 
 	t.Run("http11 chunking", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-http11", "TODO", t)
-		})
-		t.SkipNow()
+		r := &record{
+			assertions: []string{"tdd-reg-list-http11"},
+		}
+		defer report(t, r)
+
+		skip(t, r, "TODO")
 	})
 
 	t.Run("http2 streaming", func(t *testing.T) {
-		t.Cleanup(func() {
-			writeTestResult("tdd-reg-list-http2", "TODO", t)
-		})
-		t.SkipNow()
+		r := &record{
+			assertions: []string{"tdd-reg-list-http2"},
+		}
+		defer report(t, r)
+
+		skip(t, r, "TODO")
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		t.Cleanup(func() {
-			// tdd-reg-list-pagination tdd-reg-list-pagination-limit tdd-reg-list-pagination-header-nextlink tdd-reg-list-pagination-header-nextlink-attr tdd-reg-list-pagination-header-canonicallink tdd-reg-list-pagination-order-default tdd-reg-list-pagination-order tdd-reg-list-pagination-order-unsupported tdd-reg-list-pagination-order-nextlink
-			writeTestResult("", "TODO", t)
-		})
-		t.SkipNow()
+		r := &record{
+			assertions: []string{},
+		}
+		defer report(t, r)
+
+		// tdd-reg-list-pagination tdd-reg-list-pagination-limit
+		// tdd-reg-list-pagination-header-nextlink tdd-reg-list-pagination-header-nextlink-attr
+		// tdd-reg-list-pagination-header-canonicallink
+		// tdd-reg-list-pagination-order-default tdd-reg-list-pagination-order tdd-reg-list-pagination-order-unsupported
+		// tdd-reg-list-pagination-order-nextlink
+
+		skip(t, r, "TODO")
 	})
 
 }
 
 func TestMinimalValidation(t *testing.T) {
-	t.Cleanup(func() {
-		writeTestResult("", "TODO: validate as part of POST/PUT/PATCH", t)
-	})
+	defer report(t, nil)
 	t.SkipNow()
 
 	t.Run("reject missing context", func(t *testing.T) {

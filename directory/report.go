@@ -84,7 +84,10 @@ type record struct {
 	comments   string
 }
 
-func report(r *record, t *testing.T) {
+func report(t *testing.T, r *record) {
+	if r == nil {
+		r = &record{}
+	}
 	if r.id != "" {
 		panic("id should not be set explicitly: " + r.id)
 	}
@@ -97,6 +100,9 @@ func report(r *record, t *testing.T) {
 	for _, a := range r.assertions {
 		if strings.Contains(a, ",") {
 			panic("Assertion should not contain commas: " + a)
+		}
+		if strings.Contains(a, " ") {
+			panic("Assertion should not contain spaces: " + a)
 		}
 	}
 
@@ -114,7 +120,12 @@ func report(r *record, t *testing.T) {
 	appendRecord(r.id, r.status, strings.Join(r.assertions, " "), r.comments)
 }
 
-func reportError(r *record, t *testing.T, format string, messages ...interface{}) {
+func fatal(t *testing.T, r *record, format string, messages ...interface{}) {
 	r.comments = fmt.Sprintf(format, messages...)
 	t.Fatal(r.comments)
+}
+
+func skip(t *testing.T, r *record, format string, messages ...interface{}) {
+	r.comments = fmt.Sprintf(format, messages...)
+	t.Skip(r.comments)
 }

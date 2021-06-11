@@ -151,6 +151,37 @@ func prettifyJSON(in []byte) []byte {
 	return out.Bytes()
 }
 
+func assertStatusCode2(t *testing.T, r *record, res *http.Response, expected int, body []byte) {
+	t.Helper()
+	if res == nil {
+		skip(t, r, "previous errors")
+	}
+	got := res.StatusCode
+	if got != expected {
+		body = prettifyJSON(body)
+		if len(body) > 0 {
+			t.Logf("Body: %s", body)
+		}
+		fatal(t, r, "Expected status %d, got: %d", expected, got)
+	}
+}
+
+func assertContentMediaType2(t *testing.T, r *record, res *http.Response, expected string) {
+	t.Helper()
+	if res == nil {
+		skip(t, r, "previous errors")
+	}
+	got := res.Header.Get("Content-Type")
+	mediaType, _, err := mime.ParseMediaType(got)
+	if err != nil {
+		fatal(t, r, "Error parsing content media type: %s", err)
+	}
+	if mediaType != expected {
+		fatal(t, r, "Expected Content-Type: %s, got %s", expected, got)
+	}
+}
+
+// Deprecated
 func assertStatusCode(res *http.Response, expected int, body []byte, t *testing.T) {
 	t.Helper()
 	if res == nil {
@@ -167,6 +198,7 @@ func assertStatusCode(res *http.Response, expected int, body []byte, t *testing.
 	}
 }
 
+// Deprecated
 func assertContentMediaType(res *http.Response, expected string, t *testing.T) {
 	t.Helper()
 	if res == nil {
