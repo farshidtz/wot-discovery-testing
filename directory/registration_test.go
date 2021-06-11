@@ -388,7 +388,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusOK, body)
+			assertStatusCode2(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -404,6 +404,7 @@ func TestPatch(t *testing.T) {
 			td["title"] = "new title"
 			// remove system-generated attributes
 			delete(td, "registration")
+			delete(storedTD, "registration")
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
@@ -447,7 +448,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusOK, body)
+			assertStatusCode2(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -463,6 +464,7 @@ func TestPatch(t *testing.T) {
 			delete(td, "description")
 			// remove system-generated attributes
 			delete(td, "registration")
+			delete(storedTD, "registration")
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
@@ -512,7 +514,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusOK, body)
+			assertStatusCode2(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -539,6 +541,7 @@ func TestPatch(t *testing.T) {
 			}
 			// remove system-generated attributes
 			delete(td, "registration")
+			delete(storedTD, "registration")
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
@@ -591,7 +594,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusOK, body)
+			assertStatusCode2(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -614,6 +617,7 @@ func TestPatch(t *testing.T) {
 			}
 			// remove system-generated attributes
 			delete(td, "registration")
+			delete(storedTD, "registration")
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
