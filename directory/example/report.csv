@@ -1,18 +1,46 @@
 AssertionID,Status,Coverage,Details
-td-validation-syntactic,passed,100%,passed:1
+discovery-vocab-created--RegistrationInformation,skipped,0%,skipped:TestTODO
+discovery-vocab-expires--RegistrationInformation,skipped,0%,skipped:TestTODO
+discovery-vocab-modified--RegistrationInformation,skipped,0%,skipped:TestTODO
+discovery-vocab-retrieved--RegistrationInformation,skipped,0%,skipped:TestTODO
+discovery-vocab-ttl--RegistrationInformation,skipped,0%,skipped:TestTODO
+td-validation-jsonschema,skipped,0%,skipped:TestTODO
+td-validation-response,skipped,0%,skipped:TestTODO
+td-validation-result,skipped,0%,skipped:TestTODO
+td-validation-syntactic,passed,50%,passed:1 skipped:TestTODO
+tdd-distributed-search-semantic,skipped,0%,skipped:TestSPARQL
+tdd-distributed-search-semantic-imp,skipped,0%,skipped:TestSPARQL
+tdd-http-errors,skipped,0%,skipped:TestTODO
+tdd-https,skipped,0%,skipped:TestTODO
+tdd-reg-additional-representation,skipped,0%,skipped:TestTODO
+tdd-reg-anonymous-td-identifier,failed,0%,failed:TestCreateAnonymousThing/location_header
 tdd-reg-create-anonymous-td,failed,50%,passed:1 failed:TestCreateAnonymousThing/result
+tdd-reg-create-anonymous-td-generated-id,failed,0%,failed:TestCreateAnonymousThing/location_header
 tdd-reg-create-anonymous-td-resp,failed,50%,passed:1 failed:TestCreateAnonymousThing/location_header
 tdd-reg-create-body,passed,100%,passed:3
+tdd-reg-create-contenttype,failed,0%,failed:TestCreateAnonymousThing/content_type TestCreateThing/content_type
 tdd-reg-create-known-td,passed,100%,passed:2
 tdd-reg-create-known-td-resp,passed,100%,passed:1
+tdd-reg-default-representation,skipped,0%,skipped:TestTODO
 tdd-reg-delete,passed,100%,passed:3
 tdd-reg-delete-resp,passed,100%,passed:2
 tdd-reg-list-http11,skipped,0%,skipped:TestListThings/http11_chunking
 tdd-reg-list-http2,skipped,0%,skipped:TestListThings/http2_streaming
 tdd-reg-list-method,passed,100%,passed:2
+tdd-reg-list-pagination,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-header-canonicallink,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-header-nextlink,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-header-nextlink-attr,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-limit,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-order,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-order-default,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-order-nextlink,skipped,0%,skipped:TestListThings/pagination
+tdd-reg-list-pagination-order-unsupported,skipped,0%,skipped:TestListThings/pagination
 tdd-reg-list-resp,passed,100%,passed:2
+tdd-reg-operations,skipped,0%,skipped:TestTODO
 tdd-reg-retrieve,passed,100%,passed:2
 tdd-reg-retrieve-resp,passed,100%,passed:2
+tdd-reg-types,skipped,0%,skipped:TestTODO
 tdd-reg-update,passed,100%,passed:2
 tdd-reg-update-contenttype,passed,100%,passed:2
 tdd-reg-update-partial,passed,100%,passed:9
@@ -22,7 +50,17 @@ tdd-reg-update-partial-partialtd,passed,100%,passed:5
 tdd-reg-update-partial-resp,passed,100%,passed:5
 tdd-reg-update-resp,passed,100%,passed:1
 tdd-reg-update-types,passed,100%,passed:2
+tdd-registrationinfo-expires-purge,skipped,0%,skipped:TestTODO TestTODO
 tdd-search-apis-jsonPath,passed,100%,passed:2
+tdd-search-apis-sparql,skipped,0%,skipped:TestSPARQL
+tdd-search-apis-xPath,skipped,0%,skipped:TestXPath
 tdd-search-jsonpath-method,passed,100%,passed:2
 tdd-search-jsonpath-parameter,passed,100%,passed:2
 tdd-search-jsonpath-response,passed,100%,passed:3
+tdd-search-semantic-method-get,skipped,0%,skipped:TestSPARQL
+tdd-search-semantic-method-post,skipped,0%,skipped:TestSPARQL
+tdd-search-semantic-parameter,skipped,0%,skipped:TestSPARQL
+tdd-search-semantic-protocol,skipped,0%,skipped:TestSPARQL
+tdd-search-xpath-method,skipped,0%,skipped:TestXPath
+tdd-search-xpath-parameter,skipped,0%,skipped:TestXPath
+tdd-search-xpath-response,skipped,0%,skipped:TestXPath
