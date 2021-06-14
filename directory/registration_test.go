@@ -6,17 +6,11 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
 
-// RFC2119 Assertions IDs:
-// tdd-reg-create-body
-// tdd-reg-create-contenttype
-// tdd-reg-create-anonymous-td
-// tdd-reg-create-anonymous-td-resp
-// tdd-reg-create-anonymous-td-generated-id
-// tdd-reg-anonymous-td-identifier
 func TestCreateAnonymousThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -64,8 +58,8 @@ func TestCreateAnonymousThing(t *testing.T) {
 		r := &record{
 			assertions: []string{
 				"tdd-reg-create-anonymous-td-resp",
-				"tdd-reg-anonymous-td-identifier",
-				"tdd-reg-create-anonymous-td-generated-id"},
+				"tdd-reg-anonymous-td-local-id",
+			},
 		}
 		defer report(t, r)
 
@@ -96,6 +90,8 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
 
+		testRegistrionInfo(t, storedTD)
+
 		// remove system-generated attributes
 		delete(td, "registration")
 		delete(storedTD, "registration")
@@ -107,11 +103,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-create-body
-// tdd-reg-create-contenttype
-// tdd-reg-create-known-td
-// tdd-reg-create-known-td-resp
 func TestCreateThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -242,10 +233,6 @@ func TestCreateThing(t *testing.T) {
 
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-default-representation
-// tdd-reg-retrieve
-// tdd-reg-retrieve-resp
 func TestRetrieveThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -322,11 +309,6 @@ func TestRetrieveThing(t *testing.T) {
 	})
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-update-types
-// tdd-reg-update
-// tdd-reg-update-contenttype
-// tdd-reg-update-resp
 func TestUpdateThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -387,12 +369,6 @@ func TestUpdateThing(t *testing.T) {
 	})
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-update-partial
-// tdd-reg-update-partial-mergepatch
-// tdd-reg-update-partial-contenttype
-// tdd-reg-update-partial-partialtd
-// tdd-reg-update-partial-resp
 func TestPatch(t *testing.T) {
 	defer report(t, nil)
 
@@ -713,9 +689,6 @@ func TestPatch(t *testing.T) {
 	})
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-delete
-// tdd-reg-delete-resp
 func TestDelete(t *testing.T) {
 	defer report(t, nil)
 
@@ -812,20 +785,6 @@ func TestDelete(t *testing.T) {
 
 }
 
-// RFC2119 Assertions IDs:
-// tdd-reg-list-method
-// tdd-reg-list-resp
-// tdd-reg-list-http11
-// tdd-reg-list-http2
-// tdd-reg-list-pagination
-// tdd-reg-list-pagination-limit
-// tdd-reg-list-pagination-header-nextlink
-// tdd-reg-list-pagination-header-nextlink-attr
-// tdd-reg-list-pagination-header-canonicallink
-// tdd-reg-list-pagination-order-default
-// tdd-reg-list-pagination-order
-// tdd-reg-list-pagination-order-unsupported
-// tdd-reg-list-pagination-order-nextlink
 func TestListThings(t *testing.T) {
 	defer report(t, nil)
 
@@ -887,7 +846,7 @@ func TestListThings(t *testing.T) {
 
 	t.Run("http11 chunking", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-list-http11"},
+			assertions: []string{"tdd-reg-list-http11-chunks"},
 		}
 		defer report(t, r)
 
@@ -903,7 +862,7 @@ func TestListThings(t *testing.T) {
 
 	t.Run("http2 streaming", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-list-http2"},
+			assertions: []string{"tdd-reg-list-http2-frames"},
 		}
 		defer report(t, r)
 
@@ -930,52 +889,90 @@ func TestListThings(t *testing.T) {
 	})
 }
 
-// RFC2119 Assertions IDs:
-// table rows:
-// discovery-vocab-created--RegistrationInformation
-// discovery-vocab-modified--RegistrationInformation
-// discovery-vocab-expires--RegistrationInformation
-// discovery-vocab-ttl--RegistrationInformation
-// discovery-vocab-retrieved--RegistrationInformation
-// spans:
-// tdd-registrationinfo-expires-purge
-// tdd-registrationinfo-expires-purge
-// tdd-https
-// tdd-http-errors
-// tdd-reg-default-representation
-// tdd-reg-additional-representation
-// tdd-reg-operations
-// tdd-reg-types
-// td-validation-syntactic
-// td-validation-jsonschema
-// td-validation-result
-// td-validation-response
-func TestTODO(t *testing.T) {
-	defer report(t, &record{
-		comments: "TODO",
-		assertions: []string{
-			// table rows
-			"discovery-vocab-created--RegistrationInformation",
-			"discovery-vocab-modified--RegistrationInformation",
-			"discovery-vocab-expires--RegistrationInformation",
-			"discovery-vocab-ttl--RegistrationInformation",
-			"discovery-vocab-retrieved--RegistrationInformation",
-			// spans
-			"tdd-registrationinfo-expires-purge",
-			"tdd-registrationinfo-expires-purge",
-			"tdd-https",
-			"tdd-http-errors",
-			"tdd-reg-default-representation",
-			"tdd-reg-additional-representation",
-			"tdd-reg-operations",
-			"tdd-reg-types",
-			"td-validation-syntactic",
-			"td-validation-jsonschema",
-			"td-validation-result",
-			"td-validation-response",
-		},
+func testRegistrionInfo(t *testing.T, td mapAny) {
+	t.Run("reg info", func(t *testing.T) {
+		r := &record{
+			assertions: []string{},
+		}
+		defer report(t, r)
+
+		t.Run("created", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-registrationinfo-vocab-created"},
+			}
+			defer report(t, r)
+
+			regInfo, ok := td["registration"].(mapAny)
+			if !ok {
+				fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+			}
+
+			createdStr, ok := regInfo["created"].(string)
+			if !ok {
+				fatal(t, r, "invalid or missing registration.created: %v", regInfo["created"])
+			}
+			created, err := time.Parse(time.RFC3339, createdStr)
+			if err != nil {
+				fatal(t, r, "invalid registration.created format: %s", err)
+			}
+			age := time.Since(created)
+			if age < 0 && age > time.Minute {
+				fatal(t, r, "registration.created is in future or too old: %s", created)
+			}
+		})
+
+		t.Run("modified", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-registrationinfo-vocab-modified"},
+			}
+			defer report(t, r)
+
+			regInfo, ok := td["registration"].(mapAny)
+			if !ok {
+				fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+			}
+
+			modifiedStr, ok := regInfo["modified"].(string)
+			if !ok {
+				fatal(t, r, "invalid or missing registration.modified: %v", regInfo["modified"])
+			}
+			modified, err := time.Parse(time.RFC3339, modifiedStr)
+			if err != nil {
+				fatal(t, r, "invalid registration.modified format: %s", err)
+			}
+			age := time.Since(modified)
+			if age < 0 && age > time.Minute {
+				fatal(t, r, "registration.modified is in future or too old: %s", modified)
+			}
+		})
+
+		t.Run("expires", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-registrationinfo-vocab-expires"},
+			}
+			defer report(t, r)
+
+			t.SkipNow()
+		})
+
+		t.Run("ttl", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-registrationinfo-vocab-ttl"},
+			}
+			defer report(t, r)
+
+			t.SkipNow()
+		})
+
+		t.Run("retrieved", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-registrationinfo-vocab-retrieved"},
+			}
+			defer report(t, r)
+
+			t.SkipNow()
+		})
 	})
-	t.SkipNow()
 }
 
 func TestMinimalValidation(t *testing.T) {

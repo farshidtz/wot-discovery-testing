@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-// tdd-notification-sse
+// RFC2119 Assertions IDs:
 // tdd-notification-event-types
 // tdd-notification-filter-type
 // tdd-notification-data

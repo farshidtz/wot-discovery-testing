@@ -54,6 +54,14 @@ func initReportWriter() (commit func()) {
 		for id, result := range results {
 			sortedResults = append(sortedResults, resultToCSV(id, result))
 		}
+
+		// insert unchecked assertions
+		for _, id := range tddAssertions {
+			if _, found := results[id]; !found {
+				sortedResults = append(sortedResults, []string{id, "skipped", "0%", "untested"})
+			}
+		}
+
 		sort.Slice(sortedResults, func(i, j int) bool {
 			return sortedResults[i][0] < sortedResults[j][0]
 		})
