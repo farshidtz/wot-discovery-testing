@@ -47,7 +47,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 			assertions: []string{"tdd-reg-create-anonymous-td-resp"},
 		}
 		defer report(t, r)
-		assertStatusCode2(t, r, response, http.StatusCreated, body)
+		assertStatusCode(t, r, response, http.StatusCreated, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
@@ -56,7 +56,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
+		assertContentMediaType(t, r, response, MediaTypeThingDescription)
 	})
 
 	var systemGeneratedID string
@@ -144,7 +144,7 @@ func TestCreateThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertStatusCode2(t, r, response, http.StatusCreated, body)
+		assertStatusCode(t, r, response, http.StatusCreated, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
@@ -153,7 +153,7 @@ func TestCreateThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
+		assertContentMediaType(t, r, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
@@ -211,7 +211,7 @@ func TestCreateThing(t *testing.T) {
 				assertions: []string{},
 			}
 			defer report(t, r)
-			assertStatusCode2(t, r, response, http.StatusConflict, body)
+			assertStatusCode(t, r, response, http.StatusConflict, body)
 		})
 	})
 
@@ -236,7 +236,7 @@ func TestCreateThing(t *testing.T) {
 		body := httpReadBody(res, t)
 
 		t.Run("status code", func(t *testing.T) {
-			assertStatusCode2(t, r, res, http.StatusBadRequest, body)
+			assertStatusCode(t, r, res, http.StatusBadRequest, body)
 		})
 	})
 
@@ -279,7 +279,7 @@ func TestRetrieveThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertStatusCode2(t, r, response, http.StatusOK, body)
+		assertStatusCode(t, r, response, http.StatusOK, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
@@ -288,7 +288,7 @@ func TestRetrieveThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
+		assertContentMediaType(t, r, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
@@ -364,7 +364,7 @@ func TestUpdateThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertStatusCode2(t, r, response, http.StatusNoContent, body)
+		assertStatusCode(t, r, response, http.StatusNoContent, body)
 	})
 
 	t.Run("result", func(t *testing.T) {
@@ -436,7 +436,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNoContent, body)
+			assertStatusCode(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -496,7 +496,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNoContent, body)
+			assertStatusCode(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -562,7 +562,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNoContent, body)
+			assertStatusCode(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -642,7 +642,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNoContent, body)
+			assertStatusCode(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -708,7 +708,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusBadRequest, body)
+			assertStatusCode(t, r, response, http.StatusBadRequest, body)
 		})
 	})
 }
@@ -756,7 +756,7 @@ func TestDelete(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNoContent, body)
+			assertStatusCode(t, r, response, http.StatusNoContent, body)
 		})
 
 		t.Run("result", func(t *testing.T) {
@@ -775,7 +775,7 @@ func TestDelete(t *testing.T) {
 			body = httpReadBody(res, t)
 
 			t.Run("status code", func(t *testing.T) {
-				assertStatusCode2(t, r, res, http.StatusNotFound, body)
+				assertStatusCode(t, r, res, http.StatusNotFound, body)
 			})
 		})
 	})
@@ -806,7 +806,7 @@ func TestDelete(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusNotFound, body)
+			assertStatusCode(t, r, response, http.StatusNotFound, body)
 		})
 	})
 
@@ -851,7 +851,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertStatusCode2(t, r, response, http.StatusOK, nil)
+		assertStatusCode(t, r, response, http.StatusOK, nil)
 	})
 
 	t.Run("content type", func(t *testing.T) {
@@ -860,7 +860,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertContentMediaType2(t, r, response, MediaTypeJSONLD)
+		assertContentMediaType(t, r, response, MediaTypeJSONLD)
 	})
 
 	t.Run("payload", func(t *testing.T) {

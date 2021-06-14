@@ -53,7 +53,7 @@ func TestJSONPath(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusOK, body)
+			assertStatusCode(t, r, response, http.StatusOK, body)
 		})
 
 		t.Run("payload", func(t *testing.T) {
@@ -105,7 +105,7 @@ func TestJSONPath(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertStatusCode2(t, r, response, http.StatusBadRequest, nil)
+			assertStatusCode(t, r, response, http.StatusBadRequest, nil)
 		})
 	})
 }
