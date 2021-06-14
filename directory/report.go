@@ -116,8 +116,7 @@ func resultToCSV(assertionID string, r result) []string {
 
 	var details []string
 	if len(r.passed) > 0 {
-		// details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " ")))
-		details = append(details, fmt.Sprint("passed:", len(r.passed)))
+		details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " ")))
 	}
 	if len(r.failed) > 0 {
 		details = append(details, fmt.Sprint("failed:", strings.Join(r.failed, " ")))
