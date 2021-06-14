@@ -10,6 +10,13 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// RFC2119 Assertions IDs:
+// tdd-reg-create-body
+// tdd-reg-create-contenttype
+// tdd-reg-create-anonymous-td
+// tdd-reg-create-anonymous-td-resp
+// tdd-reg-create-anonymous-td-generated-id
+// tdd-reg-anonymous-td-identifier
 func TestCreateAnonymousThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -43,10 +50,22 @@ func TestCreateAnonymousThing(t *testing.T) {
 		assertStatusCode2(t, r, response, http.StatusCreated, body)
 	})
 
+	t.Run("content type", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-create-contenttype"},
+		}
+		defer report(t, r)
+
+		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
+	})
+
 	var systemGeneratedID string
 	t.Run("location header", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-anonymous-td-resp"},
+			assertions: []string{
+				"tdd-reg-create-anonymous-td-resp",
+				"tdd-reg-anonymous-td-identifier",
+				"tdd-reg-create-anonymous-td-generated-id"},
 		}
 		defer report(t, r)
 
@@ -88,6 +107,11 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-create-body
+// tdd-reg-create-contenttype
+// tdd-reg-create-known-td
+// tdd-reg-create-known-td-resp
 func TestCreateThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -121,6 +145,15 @@ func TestCreateThing(t *testing.T) {
 		defer report(t, r)
 
 		assertStatusCode2(t, r, response, http.StatusCreated, body)
+	})
+
+	t.Run("content type", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-create-contenttype"},
+		}
+		defer report(t, r)
+
+		assertContentMediaType2(t, r, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
@@ -209,6 +242,10 @@ func TestCreateThing(t *testing.T) {
 
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-default-representation
+// tdd-reg-retrieve
+// tdd-reg-retrieve-resp
 func TestRetrieveThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -285,6 +322,11 @@ func TestRetrieveThing(t *testing.T) {
 	})
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-update-types
+// tdd-reg-update
+// tdd-reg-update-contenttype
+// tdd-reg-update-resp
 func TestUpdateThing(t *testing.T) {
 	defer report(t, nil)
 
@@ -345,6 +387,12 @@ func TestUpdateThing(t *testing.T) {
 	})
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-update-partial
+// tdd-reg-update-partial-mergepatch
+// tdd-reg-update-partial-contenttype
+// tdd-reg-update-partial-partialtd
+// tdd-reg-update-partial-resp
 func TestPatch(t *testing.T) {
 	defer report(t, nil)
 
@@ -665,6 +713,9 @@ func TestPatch(t *testing.T) {
 	})
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-delete
+// tdd-reg-delete-resp
 func TestDelete(t *testing.T) {
 	defer report(t, nil)
 
@@ -761,6 +812,20 @@ func TestDelete(t *testing.T) {
 
 }
 
+// RFC2119 Assertions IDs:
+// tdd-reg-list-method
+// tdd-reg-list-resp
+// tdd-reg-list-http11
+// tdd-reg-list-http2
+// tdd-reg-list-pagination
+// tdd-reg-list-pagination-limit
+// tdd-reg-list-pagination-header-nextlink
+// tdd-reg-list-pagination-header-nextlink-attr
+// tdd-reg-list-pagination-header-canonicallink
+// tdd-reg-list-pagination-order-default
+// tdd-reg-list-pagination-order
+// tdd-reg-list-pagination-order-unsupported
+// tdd-reg-list-pagination-order-nextlink
 func TestListThings(t *testing.T) {
 	defer report(t, nil)
 
@@ -826,6 +891,13 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
+		if response == nil {
+			skip(t, r, "previous errors")
+		}
+
+		// encoding := response.Header.Get("Transfer-Encoding")
+		// t.Log(response.Header)
+
 		skip(t, r, "TODO")
 	})
 
@@ -840,18 +912,70 @@ func TestListThings(t *testing.T) {
 
 	t.Run("pagination", func(t *testing.T) {
 		r := &record{
-			assertions: []string{},
+			assertions: []string{
+				"tdd-reg-list-pagination",
+				"tdd-reg-list-pagination-limit",
+				"tdd-reg-list-pagination-header-nextlink",
+				"tdd-reg-list-pagination-header-nextlink-attr",
+				"tdd-reg-list-pagination-header-canonicallink",
+				"tdd-reg-list-pagination-order-default",
+				"tdd-reg-list-pagination-order",
+				"tdd-reg-list-pagination-order-unsupported",
+				"tdd-reg-list-pagination-order-nextlink",
+			},
 		}
 		defer report(t, r)
 
-		// tdd-reg-list-pagination tdd-reg-list-pagination-limit
-		// tdd-reg-list-pagination-header-nextlink tdd-reg-list-pagination-header-nextlink-attr
-		// tdd-reg-list-pagination-header-canonicallink
-		// tdd-reg-list-pagination-order-default tdd-reg-list-pagination-order tdd-reg-list-pagination-order-unsupported
-		// tdd-reg-list-pagination-order-nextlink
-
 		skip(t, r, "TODO")
 	})
+}
+
+// RFC2119 Assertions IDs:
+// table rows:
+// discovery-vocab-created--RegistrationInformation
+// discovery-vocab-modified--RegistrationInformation
+// discovery-vocab-expires--RegistrationInformation
+// discovery-vocab-ttl--RegistrationInformation
+// discovery-vocab-retrieved--RegistrationInformation
+// spans:
+// tdd-registrationinfo-expires-purge
+// tdd-registrationinfo-expires-purge
+// tdd-https
+// tdd-http-errors
+// tdd-reg-default-representation
+// tdd-reg-additional-representation
+// tdd-reg-operations
+// tdd-reg-types
+// td-validation-syntactic
+// td-validation-jsonschema
+// td-validation-result
+// td-validation-response
+func TestTODO(t *testing.T) {
+	defer report(t, &record{
+		comments: "TODO",
+		assertions: []string{
+			// table rows
+			"discovery-vocab-created--RegistrationInformation",
+			"discovery-vocab-modified--RegistrationInformation",
+			"discovery-vocab-expires--RegistrationInformation",
+			"discovery-vocab-ttl--RegistrationInformation",
+			"discovery-vocab-retrieved--RegistrationInformation",
+			// spans
+			"tdd-registrationinfo-expires-purge",
+			"tdd-registrationinfo-expires-purge",
+			"tdd-https",
+			"tdd-http-errors",
+			"tdd-reg-default-representation",
+			"tdd-reg-additional-representation",
+			"tdd-reg-operations",
+			"tdd-reg-types",
+			"td-validation-syntactic",
+			"td-validation-jsonschema",
+			"td-validation-result",
+			"td-validation-response",
+		},
+	})
+	t.SkipNow()
 }
 
 func TestMinimalValidation(t *testing.T) {

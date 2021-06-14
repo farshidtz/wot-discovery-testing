@@ -10,6 +10,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// RFC2119 Assertions IDs:
+// tdd-search-apis-jsonPath
+// tdd-search-jsonpath-method
+// tdd-search-jsonpath-parameter
+// tdd-search-jsonpath-response
 func TestJSONPath(t *testing.T) {
 	defer report(t, nil)
 
@@ -105,7 +110,44 @@ func TestJSONPath(t *testing.T) {
 	})
 }
 
+// RFC2119 Assertions IDs:
+// tdd-search-apis-xPath
+// tdd-search-xpath-method
+// tdd-search-xpath-parameter
+// tdd-search-xpath-response
 func TestXPath(t *testing.T) {
-	defer report(t, &record{comments: "TODO"})
+	defer report(t, &record{
+		comments: "TODO",
+		assertions: []string{
+			"tdd-search-apis-xPath",
+			"tdd-search-xpath-method",
+			"tdd-search-xpath-parameter",
+			"tdd-search-xpath-response",
+		},
+	})
+	t.SkipNow()
+}
+
+// RFC2119 Assertions IDs:
+// tdd-search-apis-sparql
+// tdd-search-semantic-protocol
+// tdd-search-semantic-method-get
+// tdd-search-semantic-method-post
+// tdd-search-semantic-parameter
+// tdd-distributed-search-semantic
+// tdd-distributed-search-semantic-imp
+func TestSPARQL(t *testing.T) {
+	defer report(t, &record{
+		comments: "TODO",
+		assertions: []string{
+			"tdd-search-apis-sparql",
+			"tdd-search-semantic-protocol",
+			"tdd-search-semantic-method-get",
+			"tdd-search-semantic-method-post",
+			"tdd-search-semantic-parameter",
+			"tdd-distributed-search-semantic",
+			"tdd-distributed-search-semantic-imp",
+		},
+	})
 	t.SkipNow()
 }
