@@ -27,7 +27,11 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			r := &record{
-				assertions: []string{"tdd-search-apis-jsonPath", "tdd-search-jsonpath-method", "tdd-search-jsonpath-parameter"},
+				assertions: []string{
+					"tdd-search-jsonpath",
+					"tdd-search-jsonpath-method",
+					"tdd-search-jsonpath-parameter",
+				},
 			}
 			defer report(t, r)
 
@@ -91,7 +95,11 @@ func TestJSONPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			r := &record{
-				assertions: []string{"tdd-search-apis-jsonPath", "tdd-search-jsonpath-method", "tdd-search-jsonpath-parameter"},
+				assertions: []string{
+					"tdd-search-jsonpath",
+					"tdd-search-jsonpath-method",
+					"tdd-search-jsonpath-parameter",
+				},
 			}
 			defer report(t, r)
 
@@ -115,16 +123,6 @@ func TestJSONPath(t *testing.T) {
 }
 
 func TestXPath(t *testing.T) {
-	// defer report(t, &record{
-	// 	comments: "TODO",
-	// 	assertions: []string{
-	// 		"tdd-search-xpath",
-	// 		"tdd-search-xpath-method",
-	// 		"tdd-search-xpath-parameter",
-	// 		"tdd-search-xpath-response",
-	// 	},
-	// })
-	// t.SkipNow()
 
 	defer report(t, nil)
 
@@ -142,7 +140,11 @@ func TestXPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			r := &record{
-				assertions: []string{"tdd-search-xpath", "tdd-search-xpath-method", "tdd-search-xpath-parameter"},
+				assertions: []string{
+					"tdd-search-xpath",
+					"tdd-search-xpath-method",
+					"tdd-search-xpath-parameter",
+				},
 			}
 			defer report(t, r)
 
@@ -206,7 +208,11 @@ func TestXPath(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			r := &record{
-				assertions: []string{"tdd-search-xpath", "tdd-search-xpath-method", "tdd-search-xpath-parameter"},
+				assertions: []string{
+					"tdd-search-xpath",
+					"tdd-search-xpath-method",
+					"tdd-search-xpath-parameter",
+				},
 			}
 			defer report(t, r)
 
