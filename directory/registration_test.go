@@ -22,7 +22,12 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-anonymous-td", "tdd-reg-create-body", "tdd-reg-create-contenttype"},
+			assertions: []string{
+				"tdd-reg-crudl",
+				"tdd-reg-create-anonymous-td",
+				"tdd-reg-create-body",
+				"tdd-reg-create-contenttype",
+			},
 		}
 		defer report(t, r)
 
@@ -98,6 +103,28 @@ func TestCreateAnonymousThing(t *testing.T) {
 			fatal(t, r, "Stored TD was does not match the expectations; see logs.")
 		}
 	})
+
+	// reject PUT of anonymous TD
+	t.Run("reject PUT", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-create-known-vs-anonymous"},
+		}
+		defer report(t, r)
+
+		td := mockedTD("") // no id
+		b, _ := json.Marshal(td)
+
+		// submit PUT request
+		res, err := httpPut(serverURL+"/things/", MediaTypeThingDescription, b)
+		if err != nil {
+			fatal(t, r, "Error putting: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode < 400 && res.StatusCode >= 500 {
+			fatal(t, r, "Anonymous TD submission with PUT not rejected. Got status: %d", res.StatusCode)
+		}
+	})
 }
 
 func TestCreateThing(t *testing.T) {
@@ -111,7 +138,12 @@ func TestCreateThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body", "tdd-reg-create-contenttype"},
+			assertions: []string{
+				"tdd-reg-crudl",
+				"tdd-reg-create-known-td",
+				"tdd-reg-create-body",
+				"tdd-reg-create-contenttype",
+			},
 		}
 		defer report(t, r)
 
@@ -137,7 +169,10 @@ func TestCreateThing(t *testing.T) {
 
 	t.Run("result", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body"},
+			assertions: []string{
+				"tdd-reg-create-known-td",
+				"tdd-reg-create-body",
+			},
 		}
 		defer report(t, r)
 
@@ -194,11 +229,13 @@ func TestCreateThing(t *testing.T) {
 		})
 	})
 
+	// reject POST with id
 	t.Run("reject POST", func(t *testing.T) {
 		r := &record{
 			assertions: []string{"tdd-reg-create-known-vs-anonymous"},
 		}
 		defer report(t, r)
+		skip(t, r, "not disallowed explicitly")
 
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -232,7 +269,10 @@ func TestRetrieveThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-retrieve"},
+			assertions: []string{
+				"tdd-reg-crudl",
+				"tdd-reg-retrieve",
+			},
 		}
 		defer report(t, r)
 
@@ -312,7 +352,11 @@ func TestUpdateThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-update-types", "tdd-reg-update", "tdd-reg-update-contenttype"},
+			assertions: []string{
+				"tdd-reg-crudl",
+				"tdd-reg-update-types",
+				"tdd-reg-update",
+				"tdd-reg-update-contenttype"},
 		}
 		defer report(t, r)
 
@@ -360,9 +404,16 @@ func TestPatch(t *testing.T) {
 	defer report(t, nil)
 
 	var (
-		requestAssertions = []string{"tdd-reg-update-partial", "tdd-reg-update-partial-partialtd", "tdd-reg-update-partial-contenttype"}
-		statusAssertions  = []string{"tdd-reg-update-partial-resp"}
-		resultAssertions  = []string{"tdd-reg-update-partial", "tdd-reg-update-partial-mergepatch"}
+		requestAssertions = []string{
+			"tdd-reg-update-partial",
+			"tdd-reg-update-partial-partialtd",
+			"tdd-reg-update-partial-contenttype",
+		}
+		statusAssertions = []string{"tdd-reg-update-partial-resp"}
+		resultAssertions = []string{
+			"tdd-reg-update-partial",
+			"tdd-reg-update-partial-mergepatch",
+		}
 	)
 
 	t.Run("replace title", func(t *testing.T) {
@@ -667,7 +718,7 @@ func TestPatch(t *testing.T) {
 
 		t.Run("status code", func(t *testing.T) {
 			r := &record{
-				assertions: append(statusAssertions, "td-validation-syntactic"),
+				assertions: append(statusAssertions, "tdd-validation-syntactic"),
 			}
 			defer report(t, r)
 
@@ -695,7 +746,7 @@ func TestDelete(t *testing.T) {
 
 		t.Run("submit request", func(t *testing.T) {
 			r := &record{
-				assertions: []string{requestAssertions},
+				assertions: []string{"tdd-reg-crudl", requestAssertions},
 			}
 			defer report(t, r)
 
@@ -779,7 +830,7 @@ func TestListThings(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-list-method"},
+			assertions: []string{"tdd-reg-crudl", "tdd-reg-list-method"},
 		}
 		defer report(t, r)
 

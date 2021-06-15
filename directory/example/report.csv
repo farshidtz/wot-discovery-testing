@@ -1,5 +1,4 @@
 AssertionID,Status,Coverage,Details
-td-validation-syntactic,passed,100%,passed:TestPatch/fail_to_remove_mandatory_title/status_code
 tdd-http-error-response,skipped,0%,untested
 tdd-https,skipped,0%,untested
 tdd-notification-data,skipped,0%,untested
@@ -15,15 +14,15 @@ tdd-notification-filter-type,skipped,0%,untested
 tdd-notification-sse,skipped,0%,untested
 tdd-reg-additional-representation,skipped,0%,untested
 tdd-reg-anonymous-td-identifier,skipped,0%,untested
-tdd-reg-anonymous-td-local-id,failed,0%,failed:TestCreateAnonymousThing/location_header
-tdd-reg-create-anonymous-td,failed,50%,passed:TestCreateAnonymousThing/submit_request failed:TestCreateAnonymousThing/result
-tdd-reg-create-anonymous-td-resp,failed,50%,passed:TestCreateAnonymousThing/status_code failed:TestCreateAnonymousThing/location_header
+tdd-reg-anonymous-td-local-id,passed,100%,passed:TestCreateAnonymousThing/location_header
+tdd-reg-create-anonymous-td,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateAnonymousThing/result
+tdd-reg-create-anonymous-td-resp,passed,100%,passed:TestCreateAnonymousThing/status_code TestCreateAnonymousThing/location_header
 tdd-reg-create-body,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request TestCreateThing/result
-tdd-reg-create-contenttype,failed,0%,failed:TestCreateAnonymousThing/content_type TestCreateThing/content_type
+tdd-reg-create-contenttype,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request
 tdd-reg-create-known-td,passed,100%,passed:TestCreateThing/submit_request TestCreateThing/result
 tdd-reg-create-known-td-resp,passed,100%,passed:TestCreateThing/status_code
-tdd-reg-create-known-vs-anonymous,skipped,0%,untested
-tdd-reg-crudl,skipped,0%,untested
+tdd-reg-create-known-vs-anonymous,passed,50%,passed:TestCreateAnonymousThing/reject_PUT skipped:TestCreateThing/reject_POST
+tdd-reg-crudl,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request TestRetrieveThing/submit_request TestUpdateThing/submit_request TestDelete/existing/submit_request TestListThings/submit_request
 tdd-reg-default-representation,skipped,0%,untested
 tdd-reg-delete,passed,100%,passed:TestDelete/existing/submit_request TestDelete/existing/result TestDelete/non-existing/submit_request
 tdd-reg-delete-resp,passed,100%,passed:TestDelete/existing/status_code TestDelete/non-existing/status_code
@@ -62,19 +61,19 @@ tdd-search-apis-jsonPath,passed,100%,passed:TestJSONPath/filter/submit_request T
 tdd-search-jsonpath,skipped,0%,untested
 tdd-search-jsonpath-method,passed,100%,passed:TestJSONPath/filter/submit_request TestJSONPath/reject_bad_query/submit_request
 tdd-search-jsonpath-parameter,passed,100%,passed:TestJSONPath/filter/submit_request TestJSONPath/reject_bad_query/submit_request
-tdd-search-jsonpath-response,passed,100%,passed:TestJSONPath/filter/status_code TestJSONPath/filter/payload TestJSONPath/reject_bad_query/status_code
-tdd-search-sparql,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-federation,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-federation-imp,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-method-get,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-method-post,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-resp,skipped,0%,skipped:TestSPARQL
-tdd-search-sparql-version,skipped,0%,skipped:TestSPARQL
-tdd-search-xpath,skipped,0%,skipped:TestXPath
-tdd-search-xpath-method,skipped,0%,skipped:TestXPath
-tdd-search-xpath-parameter,skipped,0%,skipped:TestXPath
-tdd-search-xpath-response,skipped,0%,skipped:TestXPath
+tdd-search-jsonpath-response,passed,100%,passed:TestJSONPath/filter/status_code TestJSONPath/filter/content_type TestJSONPath/filter/payload TestJSONPath/reject_bad_query/status_code
+tdd-search-sparql,skipped,0%,untested
+tdd-search-sparql-federation,skipped,0%,untested
+tdd-search-sparql-federation-imp,skipped,0%,untested
+tdd-search-sparql-method-get,skipped,0%,untested
+tdd-search-sparql-method-post,skipped,0%,untested
+tdd-search-sparql-resp,skipped,0%,untested
+tdd-search-sparql-version,skipped,0%,untested
+tdd-search-xpath,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-method,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-parameter,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-response,passed,100%,passed:TestXPath/filter/status_code TestXPath/filter/content_type TestXPath/filter/payload TestXPath/reject_bad_query/status_code
 tdd-validation-jsonschema,skipped,0%,untested
 tdd-validation-response,skipped,0%,untested
 tdd-validation-result,skipped,0%,untested
-tdd-validation-syntactic,skipped,0%,untested
+tdd-validation-syntactic,passed,100%,passed:TestPatch/fail_to_remove_mandatory_title/status_code
