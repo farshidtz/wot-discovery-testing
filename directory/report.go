@@ -96,6 +96,7 @@ func ingestRecord(t *testing.T, r record) {
 			result.failed = append(result.failed, r.name)
 		} else if t.Skipped() {
 			result.skipped = append(result.skipped, r.name)
+			// result.skipped = append(result.skipped, fmt.Sprintf("%s(%s)", r.name, strings.ReplaceAll(r.comments, " ", "_")))
 		} else {
 			result.passed = append(result.passed, r.name)
 		}
@@ -124,13 +125,13 @@ func resultToCSV(assertionID string, r result) []string {
 
 	var details []string
 	if len(r.passed) > 0 {
-		details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " ")))
+		details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " passed:")))
 	}
 	if len(r.failed) > 0 {
-		details = append(details, fmt.Sprint("failed:", strings.Join(r.failed, " ")))
+		details = append(details, fmt.Sprint("failed:", strings.Join(r.failed, " failed:")))
 	}
 	if len(r.skipped) > 0 {
-		details = append(details, fmt.Sprint("skipped:", strings.Join(r.skipped, " ")))
+		details = append(details, fmt.Sprint("skipped:", strings.Join(r.skipped, " skipped:")))
 	}
 
 	return []string{

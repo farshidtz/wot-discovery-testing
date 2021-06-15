@@ -7,12 +7,12 @@ const (
 	MediaTypeMergePatch       = "application/merge-patch+json"
 )
 
-func mockedTD(id string) map[string]any {
-	var td = map[string]any{
+func mockedTD(id string) mapAny {
+	var td = mapAny{
 		"@context": "https://www.w3.org/2019/wot/td/v1",
 		"title":    "example thing",
 		"security": []string{"nosec_sc"},
-		"securityDefinitions": map[string]any{
+		"securityDefinitions": mapAny{
 			"nosec_sc": map[string]string{
 				"scheme": "nosec",
 			},
@@ -23,6 +23,9 @@ func mockedTD(id string) map[string]any {
 	}
 	return td
 }
+
+// Extractor:
+// https://play.golang.org/p/2Kj-RxZ5nek
 
 var tddAssertions = []string{
 	"tdd-registrationinfo-expiry-purge",

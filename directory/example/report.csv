@@ -13,66 +13,65 @@ tdd-notification-event-types,skipped,0%,untested
 tdd-notification-filter-type,skipped,0%,untested
 tdd-notification-sse,skipped,0%,untested
 tdd-reg-additional-representation,skipped,0%,untested
-tdd-reg-anonymous-td-identifier,skipped,0%,untested
+tdd-reg-anonymous-td-identifier,failed,50%,passed:TestJSONPath/filter_anonymous passed:TestXPath/filter_anonymous failed:TestRetrieveThing/anonymous_td_id failed:TestListThings/anonymous_td_id
 tdd-reg-anonymous-td-local-id,passed,100%,passed:TestCreateAnonymousThing/location_header
-tdd-reg-create-anonymous-td,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateAnonymousThing/result
-tdd-reg-create-anonymous-td-resp,passed,100%,passed:TestCreateAnonymousThing/status_code TestCreateAnonymousThing/location_header
-tdd-reg-create-body,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request TestCreateThing/result
-tdd-reg-create-contenttype,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request
-tdd-reg-create-known-td,passed,100%,passed:TestCreateThing/submit_request TestCreateThing/result
+tdd-reg-create-anonymous-td,passed,100%,passed:TestCreateAnonymousThing/submit_request passed:TestCreateAnonymousThing/result
+tdd-reg-create-anonymous-td-resp,passed,100%,passed:TestCreateAnonymousThing/status_code passed:TestCreateAnonymousThing/location_header
+tdd-reg-create-body,passed,100%,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request passed:TestCreateThing/result
+tdd-reg-create-contenttype,passed,100%,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request
+tdd-reg-create-known-td,passed,100%,passed:TestCreateThing/submit_request passed:TestCreateThing/result
 tdd-reg-create-known-td-resp,passed,100%,passed:TestCreateThing/status_code
 tdd-reg-create-known-vs-anonymous,passed,50%,passed:TestCreateAnonymousThing/reject_PUT skipped:TestCreateThing/reject_POST
-tdd-reg-crudl,passed,100%,passed:TestCreateAnonymousThing/submit_request TestCreateThing/submit_request TestRetrieveThing/submit_request TestUpdateThing/submit_request TestDelete/existing/submit_request TestListThings/submit_request
+tdd-reg-crudl,passed,100%,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request passed:TestRetrieveThing/submit_request passed:TestUpdateThing/submit_request passed:TestDelete/existing/submit_request passed:TestListThings/submit_request
 tdd-reg-default-representation,skipped,0%,untested
-tdd-reg-delete,passed,100%,passed:TestDelete/existing/submit_request TestDelete/existing/result TestDelete/non-existing/submit_request
-tdd-reg-delete-resp,passed,100%,passed:TestDelete/existing/status_code TestDelete/non-existing/status_code
-tdd-reg-list-http11-chunks,skipped,0%,skipped:TestListThings/http11_chunking
-tdd-reg-list-http2-frames,skipped,0%,skipped:TestListThings/http2_streaming
-tdd-reg-list-method,passed,100%,passed:TestListThings/submit_request TestListThings/status_code
-tdd-reg-list-pagination,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-header-canonicallink,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-header-nextlink,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-header-nextlink-attr,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-limit,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-order,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-order-default,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-order-nextlink,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-pagination-order-unsupported,skipped,0%,skipped:TestListThings/pagination
-tdd-reg-list-resp,passed,100%,passed:TestListThings/content_type TestListThings/payload
-tdd-reg-retrieve,passed,100%,passed:TestRetrieveThing/submit_request TestRetrieveThing/result
-tdd-reg-retrieve-resp,passed,100%,passed:TestRetrieveThing/status_code TestRetrieveThing/content_type
-tdd-reg-update,passed,100%,passed:TestUpdateThing/submit_request TestUpdateThing/result
-tdd-reg-update-contenttype,passed,100%,passed:TestUpdateThing/submit_request TestUpdateThing/result
-tdd-reg-update-partial,passed,100%,passed:TestPatch/replace_title/submit_request TestPatch/replace_title/result TestPatch/remove_description/submit_request TestPatch/remove_description/result TestPatch/update_properties/submit_request TestPatch/update_properties/result TestPatch/replace_array/submit_request TestPatch/replace_array/result TestPatch/fail_to_remove_mandatory_title/submit_request
-tdd-reg-update-partial-contenttype,passed,100%,passed:TestPatch/replace_title/submit_request TestPatch/remove_description/submit_request TestPatch/update_properties/submit_request TestPatch/replace_array/submit_request TestPatch/fail_to_remove_mandatory_title/submit_request
-tdd-reg-update-partial-mergepatch,passed,100%,passed:TestPatch/replace_title/result TestPatch/remove_description/result TestPatch/update_properties/result TestPatch/replace_array/result
-tdd-reg-update-partial-partialtd,passed,100%,passed:TestPatch/replace_title/submit_request TestPatch/remove_description/submit_request TestPatch/update_properties/submit_request TestPatch/replace_array/submit_request TestPatch/fail_to_remove_mandatory_title/submit_request
-tdd-reg-update-partial-resp,passed,100%,passed:TestPatch/replace_title/status_code TestPatch/remove_description/status_code TestPatch/update_properties/status_code TestPatch/replace_array/status_code TestPatch/fail_to_remove_mandatory_title/status_code
+tdd-reg-delete,passed,100%,passed:TestDelete/existing/submit_request passed:TestDelete/existing/result passed:TestDelete/non-existing/submit_request
+tdd-reg-delete-resp,passed,100%,passed:TestDelete/existing/status_code passed:TestDelete/non-existing/status_code
+tdd-reg-list-http11-chunks,skipped,0%,untested
+tdd-reg-list-http2-frames,skipped,0%,untested
+tdd-reg-list-method,passed,100%,passed:TestListThings/submit_request passed:TestListThings/status_code
+tdd-reg-list-pagination,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-header-canonicallink,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-header-nextlink,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-header-nextlink-attr,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-limit,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-order,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-order-default,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-order-nextlink,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-pagination-order-unsupported,failed,0%,failed:TestListThings/pagination
+tdd-reg-list-resp,passed,100%,passed:TestListThings/content_type passed:TestListThings/payload
+tdd-reg-retrieve,passed,100%,passed:TestRetrieveThing/submit_request passed:TestRetrieveThing/result
+tdd-reg-retrieve-resp,passed,100%,passed:TestRetrieveThing/status_code passed:TestRetrieveThing/content_type
+tdd-reg-update,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
+tdd-reg-update-contenttype,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
+tdd-reg-update-partial,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/replace_title/result passed:TestPatch/remove_description/submit_request passed:TestPatch/remove_description/result passed:TestPatch/update_properties/submit_request passed:TestPatch/update_properties/result passed:TestPatch/replace_array/submit_request passed:TestPatch/replace_array/result passed:TestPatch/fail_to_remove_mandatory_title/submit_request
+tdd-reg-update-partial-contenttype,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request passed:TestPatch/fail_to_remove_mandatory_title/submit_request
+tdd-reg-update-partial-mergepatch,passed,100%,passed:TestPatch/replace_title/result passed:TestPatch/remove_description/result passed:TestPatch/update_properties/result passed:TestPatch/replace_array/result
+tdd-reg-update-partial-partialtd,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request passed:TestPatch/fail_to_remove_mandatory_title/submit_request
+tdd-reg-update-partial-resp,passed,100%,passed:TestPatch/replace_title/status_code passed:TestPatch/remove_description/status_code passed:TestPatch/update_properties/status_code passed:TestPatch/replace_array/status_code passed:TestPatch/fail_to_remove_mandatory_title/status_code
 tdd-reg-update-resp,passed,100%,passed:TestUpdateThing/status_code
-tdd-reg-update-types,passed,100%,passed:TestUpdateThing/submit_request TestUpdateThing/result
+tdd-reg-update-types,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
 tdd-registrationinfo-expiry-config,skipped,0%,untested
 tdd-registrationinfo-expiry-purge,skipped,0%,untested
-tdd-registrationinfo-vocab-created,passed,100%,passed:TestCreateAnonymousThing/result/reg_info/created
-tdd-registrationinfo-vocab-expires,skipped,0%,skipped:TestCreateAnonymousThing/result/reg_info/expires
-tdd-registrationinfo-vocab-modified,passed,100%,passed:TestCreateAnonymousThing/result/reg_info/modified
-tdd-registrationinfo-vocab-retrieved,skipped,0%,skipped:TestCreateAnonymousThing/result/reg_info/retrieved
-tdd-registrationinfo-vocab-ttl,skipped,0%,skipped:TestCreateAnonymousThing/result/reg_info/ttl
-tdd-search-apis-jsonPath,passed,100%,passed:TestJSONPath/filter/submit_request TestJSONPath/reject_bad_query/submit_request
-tdd-search-jsonpath,skipped,0%,untested
-tdd-search-jsonpath-method,passed,100%,passed:TestJSONPath/filter/submit_request TestJSONPath/reject_bad_query/submit_request
-tdd-search-jsonpath-parameter,passed,100%,passed:TestJSONPath/filter/submit_request TestJSONPath/reject_bad_query/submit_request
-tdd-search-jsonpath-response,passed,100%,passed:TestJSONPath/filter/status_code TestJSONPath/filter/content_type TestJSONPath/filter/payload TestJSONPath/reject_bad_query/status_code
-tdd-search-sparql,skipped,0%,untested
-tdd-search-sparql-federation,skipped,0%,untested
-tdd-search-sparql-federation-imp,skipped,0%,untested
-tdd-search-sparql-method-get,skipped,0%,untested
-tdd-search-sparql-method-post,skipped,0%,untested
-tdd-search-sparql-resp,skipped,0%,untested
-tdd-search-sparql-version,skipped,0%,untested
-tdd-search-xpath,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
-tdd-search-xpath-method,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
-tdd-search-xpath-parameter,passed,100%,passed:TestXPath/filter/submit_request TestXPath/reject_bad_query/submit_request
-tdd-search-xpath-response,passed,100%,passed:TestXPath/filter/status_code TestXPath/filter/content_type TestXPath/filter/payload TestXPath/reject_bad_query/status_code
+tdd-registrationinfo-vocab-created,passed,100%,passed:TestCreateAnonymousThing/registration_info/created
+tdd-registrationinfo-vocab-expires,failed,0%,failed:TestCreateAnonymousThing/registration_info/expires
+tdd-registrationinfo-vocab-modified,passed,100%,passed:TestCreateAnonymousThing/registration_info/modified
+tdd-registrationinfo-vocab-retrieved,failed,0%,failed:TestCreateAnonymousThing/registration_info/retrieved
+tdd-registrationinfo-vocab-ttl,failed,0%,failed:TestCreateAnonymousThing/registration_info/ttl
+tdd-search-jsonpath,passed,100%,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
+tdd-search-jsonpath-method,passed,100%,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
+tdd-search-jsonpath-parameter,passed,100%,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
+tdd-search-jsonpath-response,passed,100%,passed:TestJSONPath/filter/status_code passed:TestJSONPath/filter/content_type passed:TestJSONPath/filter/payload passed:TestJSONPath/reject_bad_query/status_code
+tdd-search-sparql,failed,0%,failed:TestSPARQL
+tdd-search-sparql-federation,failed,0%,failed:TestSPARQL
+tdd-search-sparql-federation-imp,failed,0%,failed:TestSPARQL
+tdd-search-sparql-method-get,failed,0%,failed:TestSPARQL
+tdd-search-sparql-method-post,failed,0%,failed:TestSPARQL
+tdd-search-sparql-resp,failed,0%,failed:TestSPARQL
+tdd-search-sparql-version,failed,0%,failed:TestSPARQL
+tdd-search-xpath,passed,100%,passed:TestXPath/filter/submit_request passed:TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-method,passed,100%,passed:TestXPath/filter/submit_request passed:TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-parameter,passed,100%,passed:TestXPath/filter/submit_request passed:TestXPath/reject_bad_query/submit_request
+tdd-search-xpath-response,passed,100%,passed:TestXPath/filter/status_code passed:TestXPath/filter/content_type passed:TestXPath/filter/payload passed:TestXPath/reject_bad_query/status_code
 tdd-validation-jsonschema,skipped,0%,untested
 tdd-validation-response,skipped,0%,untested
 tdd-validation-result,skipped,0%,untested

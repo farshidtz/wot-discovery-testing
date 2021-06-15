@@ -44,9 +44,18 @@ func createThing(id string, td mapAny, serverURL string, t *testing.T) {
 	t.Helper()
 	b, _ := json.Marshal(td)
 
-	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-	if err != nil {
-		t.Fatalf("Error posting: %s", err)
+	var res *http.Response
+	var err error
+	if id == "" { // anonymous TD
+		res, err = http.Post(serverURL+"/things", MediaTypeThingDescription, bytes.NewReader(b))
+		if err != nil {
+			t.Fatalf("Error posting: %s", err)
+		}
+	} else {
+		res, err = httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			t.Fatalf("Error posting: %s", err)
+		}
 	}
 	defer res.Body.Close()
 
@@ -92,7 +101,7 @@ func retrieveAllThings(serverURL string, t *testing.T) []mapAny {
 	return retrievedTDs
 }
 
-func serializedEqual(td1 mapAny, td2 mapAny) bool {
+func serializedEqual(td1, td2 mapAny) bool {
 	// serialize to ease comparison of interfaces and concrete types
 	tdBytes, _ := json.Marshal(td1)
 	storedTDBytes, _ := json.Marshal(td2)
@@ -154,7 +163,7 @@ func prettifyJSON(in []byte) []byte {
 func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int, body []byte) {
 	t.Helper()
 	if res == nil {
-		skip(t, r, "previous errors")
+		fatal(t, r, "previous errors")
 	}
 	got := res.StatusCode
 	if got != expected {
@@ -169,7 +178,7 @@ func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int,
 func assertContentMediaType(t *testing.T, r *record, res *http.Response, expected string) {
 	t.Helper()
 	if res == nil {
-		skip(t, r, "previous errors")
+		fatal(t, r, "previous errors")
 	}
 	got := res.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(got)
@@ -179,4 +188,18 @@ func assertContentMediaType(t *testing.T, r *record, res *http.Response, expecte
 	if mediaType != expected {
 		fatal(t, r, "Expected Content-Type: %s, got %s", expected, got)
 	}
+}
+
+func getID(t *testing.T, r *record, td mapAny) string {
+	t.Helper()
+	var id string
+	if _, found := td["id"]; found {
+		if _, ok := td["id"].(string); ok {
+			id = td["id"].(string)
+		}
+	}
+	if id == "" {
+		fatal(t, r, "No ID in TD: %s", marshalPrettyJSON(td))
+	}
+	return id
 }

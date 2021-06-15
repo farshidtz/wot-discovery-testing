@@ -85,13 +85,11 @@ func TestCreateAnonymousThing(t *testing.T) {
 		defer report(t, r)
 
 		if systemGeneratedID == "" {
-			skip(t, r, "previous errors")
+			fatal(t, r, "previous errors")
 		}
 
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
-
-		testRegistrionInfo(t, storedTD)
 
 		// remove system-generated attributes
 		delete(td, "registration")
@@ -102,6 +100,13 @@ func TestCreateAnonymousThing(t *testing.T) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
 			fatal(t, r, "Stored TD was does not match the expectations; see logs.")
 		}
+	})
+
+	t.Run("registration info", func(t *testing.T) {
+		// retrieve the stored TD
+		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
+
+		testRegistrionInfo(t, storedTD)
 	})
 
 	// reject PUT of anonymous TD
@@ -332,7 +337,16 @@ func TestRetrieveThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		fatal(t, r, "TODO")
+	})
+
+	t.Run("anonymous td id", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-anonymous-td-identifier"},
+		}
+		defer report(t, r)
+
+		fatal(t, r, "TODO")
 	})
 }
 
@@ -880,32 +894,42 @@ func TestListThings(t *testing.T) {
 				fatal(t, r, "Object in array may not be a TD: no mandatory title. See logs.")
 			}
 		}
+
 	})
 
-	t.Run("http11 chunking", func(t *testing.T) {
+	t.Run("anonymous td id", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-list-http11-chunks"},
+			assertions: []string{"tdd-reg-anonymous-td-identifier"},
 		}
 		defer report(t, r)
 
-		if response == nil {
-			skip(t, r, "previous errors")
-		}
-
-		// encoding := response.Header.Get("Transfer-Encoding")
-		// t.Log(response.Header)
-
-		skip(t, r, "TODO")
+		fatal(t, r, "TODO")
 	})
 
-	t.Run("http2 streaming", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-list-http2-frames"},
-		}
-		defer report(t, r)
+	// t.Run("http11 chunking", func(t *testing.T) {
+	// 	r := &record{
+	// 		assertions: []string{"tdd-reg-list-http11-chunks"},
+	// 	}
+	// 	defer report(t, r)
 
-		skip(t, r, "TODO")
-	})
+	// 	if response == nil {
+	// 		fatal(t, r, "previous errors")
+	// 	}
+
+	// 	// encoding := response.Header.Get("Transfer-Encoding")
+	// 	// t.Log(response.Header)
+
+	// 	skip(t, r, "TODO")
+	// })
+
+	// t.Run("http2 streaming", func(t *testing.T) {
+	// 	r := &record{
+	// 		assertions: []string{"tdd-reg-list-http2-frames"},
+	// 	}
+	// 	defer report(t, r)
+
+	// 	skip(t, r, "TODO")
+	// })
 
 	t.Run("pagination", func(t *testing.T) {
 		r := &record{
@@ -923,99 +947,94 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		fatal(t, r, "TODO")
 	})
 }
 
 func testRegistrionInfo(t *testing.T, td mapAny) {
-	t.Run("reg info", func(t *testing.T) {
+
+	t.Run("created", func(t *testing.T) {
 		r := &record{
-			assertions: []string{},
+			assertions: []string{"tdd-registrationinfo-vocab-created"},
 		}
 		defer report(t, r)
 
-		t.Run("created", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-registrationinfo-vocab-created"},
-			}
-			defer report(t, r)
+		regInfo, ok := td["registration"].(mapAny)
+		if !ok {
+			fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+		}
 
-			regInfo, ok := td["registration"].(mapAny)
-			if !ok {
-				fatal(t, r, "invalid or missing registration object: %v", td["registration"])
-			}
-
-			createdStr, ok := regInfo["created"].(string)
-			if !ok {
-				fatal(t, r, "invalid or missing registration.created: %v", regInfo["created"])
-			}
-			created, err := time.Parse(time.RFC3339, createdStr)
-			if err != nil {
-				fatal(t, r, "invalid registration.created format: %s", err)
-			}
-			age := time.Since(created)
-			if age < 0 && age > time.Minute {
-				fatal(t, r, "registration.created is in future or too old: %s", created)
-			}
-		})
-
-		t.Run("modified", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-registrationinfo-vocab-modified"},
-			}
-			defer report(t, r)
-
-			regInfo, ok := td["registration"].(mapAny)
-			if !ok {
-				fatal(t, r, "invalid or missing registration object: %v", td["registration"])
-			}
-
-			modifiedStr, ok := regInfo["modified"].(string)
-			if !ok {
-				fatal(t, r, "invalid or missing registration.modified: %v", regInfo["modified"])
-			}
-			modified, err := time.Parse(time.RFC3339, modifiedStr)
-			if err != nil {
-				fatal(t, r, "invalid registration.modified format: %s", err)
-			}
-			age := time.Since(modified)
-			if age < 0 && age > time.Minute {
-				fatal(t, r, "registration.modified is in future or too old: %s", modified)
-			}
-		})
-
-		t.Run("expires", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-registrationinfo-vocab-expires"},
-			}
-			defer report(t, r)
-
-			t.SkipNow()
-		})
-
-		t.Run("ttl", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-registrationinfo-vocab-ttl"},
-			}
-			defer report(t, r)
-
-			t.SkipNow()
-		})
-
-		t.Run("retrieved", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-registrationinfo-vocab-retrieved"},
-			}
-			defer report(t, r)
-
-			t.SkipNow()
-		})
+		createdStr, ok := regInfo["created"].(string)
+		if !ok {
+			fatal(t, r, "invalid or missing registration.created: %v", regInfo["created"])
+		}
+		created, err := time.Parse(time.RFC3339, createdStr)
+		if err != nil {
+			fatal(t, r, "invalid registration.created format: %s", err)
+		}
+		age := time.Since(created)
+		if age < 0 && age > time.Minute {
+			fatal(t, r, "registration.created is in future or too old: %s", created)
+		}
 	})
+
+	t.Run("modified", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-vocab-modified"},
+		}
+		defer report(t, r)
+
+		regInfo, ok := td["registration"].(mapAny)
+		if !ok {
+			fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+		}
+
+		modifiedStr, ok := regInfo["modified"].(string)
+		if !ok {
+			fatal(t, r, "invalid or missing registration.modified: %v", regInfo["modified"])
+		}
+		modified, err := time.Parse(time.RFC3339, modifiedStr)
+		if err != nil {
+			fatal(t, r, "invalid registration.modified format: %s", err)
+		}
+		age := time.Since(modified)
+		if age < 0 && age > time.Minute {
+			fatal(t, r, "registration.modified is in future or too old: %s", modified)
+		}
+	})
+
+	t.Run("expires", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-vocab-expires"},
+		}
+		defer report(t, r)
+
+		fatal(t, r, "TODO")
+	})
+
+	t.Run("ttl", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-vocab-ttl"},
+		}
+		defer report(t, r)
+
+		fatal(t, r, "TODO")
+	})
+
+	t.Run("retrieved", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-vocab-retrieved"},
+		}
+		defer report(t, r)
+
+		fatal(t, r, "TODO")
+	})
+
 }
 
 func TestMinimalValidation(t *testing.T) {
-	defer report(t, &record{comments: "TODO"})
-	t.SkipNow()
+	// defer report(t, &record{comments: "TODO"})
+	// t.SkipNow()
 
 	// t.Run("reject missing context", func(t *testing.T) {
 	// 	id := "urn:uuid:" + uuid.NewV4().String()
