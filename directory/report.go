@@ -166,11 +166,13 @@ func report(t *testing.T, r *record) {
 }
 
 func fatal(t *testing.T, r *record, format string, messages ...interface{}) {
+	t.Helper()
 	r.comments = fmt.Sprintf(format, messages...)
 	t.Fatal(r.comments)
 }
 
 func skip(t *testing.T, r *record, format string, messages ...interface{}) {
+	t.Helper()
 	r.comments = fmt.Sprintf(format, messages...)
 	t.Skip(r.comments)
 }

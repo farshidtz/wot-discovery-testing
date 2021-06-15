@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -21,7 +22,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-anonymous-td", "tdd-reg-create-body"},
+			assertions: []string{"tdd-reg-create-anonymous-td", "tdd-reg-create-body", "tdd-reg-create-contenttype"},
 		}
 		defer report(t, r)
 
@@ -44,15 +45,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 		assertStatusCode(t, r, response, http.StatusCreated, body)
 	})
 
-	t.Run("content type", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-create-contenttype"},
-		}
-		defer report(t, r)
-
-		assertContentMediaType(t, r, response, MediaTypeThingDescription)
-	})
-
 	var systemGeneratedID string
 	t.Run("location header", func(t *testing.T) {
 		r := &record{
@@ -70,10 +62,14 @@ func TestCreateAnonymousThing(t *testing.T) {
 		}
 		systemGeneratedID = location.String()
 		if systemGeneratedID == "" {
-			fatal(t, r, "System-generated ID not in response. Get response location: %s", location)
+			fatal(t, r, "System-generated ID not in response. Got location header: %s", location)
 		}
-		if !strings.Contains(systemGeneratedID, "_:") {
-			fatal(t, r, "System-generated ID is not a Blank Node Identifier. Get response location: %s", location)
+		_, err = url.ParseRequestURI(systemGeneratedID)
+		if err != nil {
+			fatal(t, r, "System-generated ID not in a valid URI. Got: %s", location)
+		}
+		if !strings.Contains(systemGeneratedID, "urn:uuid:") {
+			fatal(t, r, "System-generated ID doesn't have URN UUID scheme. Got: %s", location)
 		}
 	})
 
@@ -95,6 +91,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// remove system-generated attributes
 		delete(td, "registration")
 		delete(storedTD, "registration")
+		delete(storedTD, "id")
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
@@ -114,7 +111,7 @@ func TestCreateThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
-			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body"},
+			assertions: []string{"tdd-reg-create-known-td", "tdd-reg-create-body", "tdd-reg-create-contenttype"},
 		}
 		defer report(t, r)
 
@@ -136,15 +133,6 @@ func TestCreateThing(t *testing.T) {
 		defer report(t, r)
 
 		assertStatusCode(t, r, response, http.StatusCreated, body)
-	})
-
-	t.Run("content type", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-create-contenttype"},
-		}
-		defer report(t, r)
-
-		assertContentMediaType(t, r, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
@@ -208,10 +196,9 @@ func TestCreateThing(t *testing.T) {
 
 	t.Run("reject POST", func(t *testing.T) {
 		r := &record{
-			assertions: []string{},
+			assertions: []string{"tdd-reg-create-known-vs-anonymous"},
 		}
 		defer report(t, r)
-		skip(t, r, "no relevant assertions")
 
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
