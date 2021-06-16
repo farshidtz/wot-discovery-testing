@@ -132,11 +132,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-http-error-response"},
-		}
-		defer report(t, r)
-
 		td := mockedTD("")  // no id
 		delete(td, "title") // remove the mandatory field
 
@@ -145,15 +140,38 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
-			fatal(t, r, "Error posting: %s", err)
+			t.Fatalf("Error posting: %s", err)
 		}
 		defer res.Body.Close()
 
-		if res.StatusCode != http.StatusBadRequest {
-			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
-		}
+		body = httpReadBody(res, t)
 
-		assertErrorResponse(t, r, res, nil, true)
+		t.Run("status", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-syntactic"},
+			}
+			defer report(t, r)
+
+			assertStatusCode(t, r, res, http.StatusBadRequest, nil)
+		})
+
+		t.Run("response", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-http-error-response"},
+			}
+			defer report(t, r)
+
+			assertErrorResponse(t, r, res, body)
+		})
+
+		t.Run("validation", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-result", "tdd-validation-response"},
+			}
+			defer report(t, r)
+
+			assertValidationResponse(t, r, res, body)
+		})
 	})
 }
 
@@ -260,11 +278,6 @@ func TestCreateThing(t *testing.T) {
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-http-error-response"},
-		}
-		defer report(t, r)
-
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
 		delete(td, "title") // remove the mandatory field
@@ -274,15 +287,38 @@ func TestCreateThing(t *testing.T) {
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			fatal(t, r, "Error putting: %s", err)
+			t.Fatalf("Error putting: %s", err)
 		}
 		defer res.Body.Close()
 
-		if res.StatusCode != http.StatusBadRequest {
-			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
-		}
+		body = httpReadBody(res, t)
 
-		assertErrorResponse(t, r, res, nil, true)
+		t.Run("status", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-syntactic"},
+			}
+			defer report(t, r)
+
+			assertStatusCode(t, r, res, http.StatusBadRequest, body)
+		})
+
+		t.Run("response", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-http-error-response"},
+			}
+			defer report(t, r)
+
+			assertErrorResponse(t, r, res, body)
+		})
+
+		t.Run("validation", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-result", "tdd-validation-response"},
+			}
+			defer report(t, r)
+
+			assertValidationResponse(t, r, res, body)
+		})
 	})
 
 	// reject POST with id
@@ -465,11 +501,6 @@ func TestUpdateThing(t *testing.T) {
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-http-error-response"},
-		}
-		defer report(t, r)
-
 		delete(td, "title") // remove the mandatory field
 
 		b, _ := json.Marshal(td)
@@ -477,15 +508,38 @@ func TestUpdateThing(t *testing.T) {
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			fatal(t, r, "Error putting: %s", err)
+			t.Fatalf("Error putting: %s", err)
 		}
 		defer res.Body.Close()
 
-		if res.StatusCode != http.StatusBadRequest {
-			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
-		}
+		body := httpReadBody(res, t)
 
-		assertErrorResponse(t, r, res, nil, true)
+		t.Run("status", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-syntactic"},
+			}
+			defer report(t, r)
+
+			assertStatusCode(t, r, res, http.StatusBadRequest, body)
+		})
+
+		t.Run("response", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-http-error-response"},
+			}
+			defer report(t, r)
+
+			assertErrorResponse(t, r, res, body)
+		})
+
+		t.Run("validation", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-result", "tdd-validation-response"},
+			}
+			defer report(t, r)
+
+			assertValidationResponse(t, r, res, body)
+		})
 	})
 }
 
@@ -777,7 +831,7 @@ func TestPatch(t *testing.T) {
 		})
 	})
 
-	t.Run("fail to remove mandatory title", func(t *testing.T) {
+	t.Run("reject invalid", func(t *testing.T) {
 		// add a new TD
 		id := "urn:uuid:" + uuid.NewV4().String()
 		td := mockedTD(id)
@@ -786,32 +840,22 @@ func TestPatch(t *testing.T) {
 		// set title to null to remove it
 		jsonTD := `{"title": null}`
 
-		var response *http.Response
+		// submit PATCH request
+		res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
+		if err != nil {
+			t.Fatalf("Error patching TD: %s", err)
+		}
+		defer res.Body.Close()
 
-		t.Run("submit request", func(t *testing.T) {
+		body := httpReadBody(res, t)
+
+		t.Run("status", func(t *testing.T) {
 			r := &record{
-				assertions: requestAssertions,
+				assertions: []string{"tdd-validation-syntactic"},
 			}
 			defer report(t, r)
 
-			// submit PATCH request
-			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
-			if err != nil {
-				fatal(t, r, "Error patching TD: %s", err)
-			}
-			// defer res.Body.Close()
-			response = res
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			r := &record{
-				assertions: append(statusAssertions, "tdd-validation-syntactic"),
-			}
-			defer report(t, r)
-
-			assertStatusCode(t, r, response, http.StatusBadRequest, body)
+			assertStatusCode(t, r, res, http.StatusBadRequest, body)
 		})
 
 		t.Run("response", func(t *testing.T) {
@@ -820,7 +864,16 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertErrorResponse(t, r, response, body, true)
+			assertErrorResponse(t, r, res, body)
+		})
+
+		t.Run("validation", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-validation-result", "tdd-validation-response"},
+			}
+			defer report(t, r)
+
+			assertValidationResponse(t, r, res, body)
 		})
 	})
 }

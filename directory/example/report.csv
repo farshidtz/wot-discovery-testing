@@ -1,5 +1,5 @@
 AssertionID,Status,Coverage,Details
-tdd-http-error-response,passed,100%,passed:TestCreateAnonymousThing/reject_invalid passed:TestCreateThing/reject_invalid passed:TestUpdateThing/reject_invalid passed:TestPatch/fail_to_remove_mandatory_title/response
+tdd-http-error-response,passed,100%,passed:TestCreateAnonymousThing/reject_invalid/response passed:TestCreateThing/reject_invalid/response passed:TestUpdateThing/reject_invalid/response passed:TestPatch/reject_invalid/response
 tdd-https,skipped,0%,untested
 tdd-notification-data,skipped,0%,untested
 tdd-notification-data-create-full,skipped,0%,untested
@@ -43,11 +43,11 @@ tdd-reg-retrieve,passed,100%,passed:TestRetrieveThing/submit_request passed:Test
 tdd-reg-retrieve-resp,passed,100%,passed:TestRetrieveThing/status_code passed:TestRetrieveThing/content_type
 tdd-reg-update,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
 tdd-reg-update-contenttype,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
-tdd-reg-update-partial,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/replace_title/result passed:TestPatch/remove_description/submit_request passed:TestPatch/remove_description/result passed:TestPatch/update_properties/submit_request passed:TestPatch/update_properties/result passed:TestPatch/replace_array/submit_request passed:TestPatch/replace_array/result passed:TestPatch/fail_to_remove_mandatory_title/submit_request
-tdd-reg-update-partial-contenttype,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request passed:TestPatch/fail_to_remove_mandatory_title/submit_request
+tdd-reg-update-partial,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/replace_title/result passed:TestPatch/remove_description/submit_request passed:TestPatch/remove_description/result passed:TestPatch/update_properties/submit_request passed:TestPatch/update_properties/result passed:TestPatch/replace_array/submit_request passed:TestPatch/replace_array/result
+tdd-reg-update-partial-contenttype,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request
 tdd-reg-update-partial-mergepatch,passed,100%,passed:TestPatch/replace_title/result passed:TestPatch/remove_description/result passed:TestPatch/update_properties/result passed:TestPatch/replace_array/result
-tdd-reg-update-partial-partialtd,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request passed:TestPatch/fail_to_remove_mandatory_title/submit_request
-tdd-reg-update-partial-resp,passed,100%,passed:TestPatch/replace_title/status_code passed:TestPatch/remove_description/status_code passed:TestPatch/update_properties/status_code passed:TestPatch/replace_array/status_code passed:TestPatch/fail_to_remove_mandatory_title/status_code
+tdd-reg-update-partial-partialtd,passed,100%,passed:TestPatch/replace_title/submit_request passed:TestPatch/remove_description/submit_request passed:TestPatch/update_properties/submit_request passed:TestPatch/replace_array/submit_request
+tdd-reg-update-partial-resp,passed,100%,passed:TestPatch/replace_title/status_code passed:TestPatch/remove_description/status_code passed:TestPatch/update_properties/status_code passed:TestPatch/replace_array/status_code
 tdd-reg-update-resp,passed,100%,passed:TestUpdateThing/status_code
 tdd-reg-update-types,passed,100%,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
 tdd-registrationinfo-expiry-config,skipped,0%,untested
@@ -73,6 +73,6 @@ tdd-search-xpath-method,passed,100%,passed:TestXPath/filter/submit_request passe
 tdd-search-xpath-parameter,passed,100%,passed:TestXPath/filter/submit_request passed:TestXPath/reject_bad_query/submit_request
 tdd-search-xpath-response,passed,100%,passed:TestXPath/filter/status_code passed:TestXPath/filter/content_type passed:TestXPath/filter/payload passed:TestXPath/reject_bad_query/status_code
 tdd-validation-jsonschema,skipped,0%,untested
-tdd-validation-response,skipped,0%,untested
-tdd-validation-result,skipped,0%,untested
-tdd-validation-syntactic,passed,100%,passed:TestPatch/fail_to_remove_mandatory_title/status_code
+tdd-validation-response,passed,100%,passed:TestCreateAnonymousThing/reject_invalid/validation passed:TestCreateThing/reject_invalid/validation passed:TestUpdateThing/reject_invalid/validation passed:TestPatch/reject_invalid/validation
+tdd-validation-result,passed,100%,passed:TestCreateAnonymousThing/reject_invalid/validation passed:TestCreateThing/reject_invalid/validation passed:TestUpdateThing/reject_invalid/validation passed:TestPatch/reject_invalid/validation
+tdd-validation-syntactic,passed,100%,passed:TestCreateAnonymousThing/reject_invalid/status passed:TestCreateThing/reject_invalid/status passed:TestUpdateThing/reject_invalid/status passed:TestPatch/reject_invalid/status
