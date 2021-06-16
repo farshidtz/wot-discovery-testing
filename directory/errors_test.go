@@ -28,6 +28,9 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 	if res == nil {
 		fatal(t, r, "previous errors")
 	}
+	if res.StatusCode < 400 {
+		fatal(t, r, "Expected error. Status was %d", res.StatusCode)
+	}
 
 	if len(body) == 0 {
 		panic("empty body")
@@ -103,9 +106,11 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 func assertValidationResponse(t *testing.T, r *record, res *http.Response, body []byte) {
 	t.Helper()
 
-	t.Helper()
 	if res == nil {
 		fatal(t, r, "previous errors")
+	}
+	if res.StatusCode < 400 {
+		fatal(t, r, "Expected error. Status was %d", res.StatusCode)
 	}
 
 	if len(body) == 0 {
