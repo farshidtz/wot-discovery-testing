@@ -153,7 +153,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
 		}
 
-		assertErrorResponse(t, r, res)
+		assertErrorResponse(t, r, res, nil, true)
 	})
 }
 
@@ -282,7 +282,7 @@ func TestCreateThing(t *testing.T) {
 			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
 		}
 
-		assertErrorResponse(t, r, res)
+		assertErrorResponse(t, r, res, nil, true)
 	})
 
 	// reject POST with id
@@ -485,7 +485,7 @@ func TestUpdateThing(t *testing.T) {
 			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
 		}
 
-		assertErrorResponse(t, r, res)
+		assertErrorResponse(t, r, res, nil, true)
 	})
 }
 
@@ -820,7 +820,7 @@ func TestPatch(t *testing.T) {
 			}
 			defer report(t, r)
 
-			assertErrorResponse(t, r, response, body...)
+			assertErrorResponse(t, r, response, body, true)
 		})
 	})
 }

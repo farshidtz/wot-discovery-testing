@@ -1,5 +1,5 @@
 AssertionID,Status,Coverage,Details
-tdd-http-error-response,skipped,0%,untested
+tdd-http-error-response,passed,100%,passed:TestCreateAnonymousThing/reject_invalid passed:TestCreateThing/reject_invalid passed:TestUpdateThing/reject_invalid passed:TestPatch/fail_to_remove_mandatory_title/response
 tdd-https,skipped,0%,untested
 tdd-notification-data,skipped,0%,untested
 tdd-notification-data-create-full,skipped,0%,untested

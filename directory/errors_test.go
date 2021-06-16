@@ -7,7 +7,23 @@ import (
 	"testing"
 )
 
-func assertErrorResponse(t *testing.T, r *record, res *http.Response, body ...byte) {
+// RFC7807 Problem Details (https://tools.ietf.org/html/rfc7807)
+type ProblemDetails struct {
+	Type     string `json:"type"`
+	Title    string `json:"title"`
+	Status   int    `json:"status"`
+	Detail   string `json:"detail"`
+	Instance string `json:"instance"`
+	// Discovery extension for validation errors
+	ValidationErrors []ValidationError `json:"validationErrors"`
+}
+
+type ValidationError struct {
+	Field       string `json:"field"`
+	Description string `json:"description"`
+}
+
+func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byte, validation bool) {
 	t.Helper()
 	if res == nil {
 		fatal(t, r, "previous errors")
@@ -17,7 +33,7 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body ...by
 		body = httpReadBody(res, t)
 	}
 
-	var problemDetails map[string]any
+	var problemDetails ProblemDetails
 	err := json.Unmarshal(body, &problemDetails)
 	if err != nil {
 		t.Fatalf("Error decoding body: %s", err)
@@ -37,20 +53,11 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body ...by
 
 			https://datatracker.ietf.org/doc/html/rfc7807#section-3.1
 		*/
-		if _, found := problemDetails["status"]; !found {
-			fatal(t, r, "Missing status field in body: %s", body)
-		}
-		problemDetailsStatusFloat, ok := problemDetails["status"].(float64) // JSON number is float64
-		if !ok {
-			fatal(t, r, "status field not a number: %T: %v", problemDetails["status"], problemDetails["status"])
-		}
-		problemDetailsStatus := int(problemDetailsStatusFloat)
-		if problemDetailsStatus != res.StatusCode {
-			fatal(t, r, "status field not equal to http status code. Got: %d, expected: %d", problemDetailsStatus, res.StatusCode)
+		if problemDetails.Status != res.StatusCode {
+			fatal(t, r, "status field not equal to http status code. Got: %d, expected: %d", problemDetails.Status, res.StatusCode)
 		}
 	})
 
-	problemType := "about:blank"
 	t.Run("type", func(t *testing.T) {
 		/*
 			"type" (string) - A URI reference [RFC3986] that identifies the
@@ -68,20 +75,16 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body ...by
 
 			https://datatracker.ietf.org/doc/html/rfc7807#section-3.1
 		*/
-		if _, found := problemDetails["type"]; !found {
-			skip(t, r, "Missing type field in body: %s", body)
+		if problemDetails.Type == "" {
+			problemDetails.Type = "about:blank"
+			skip(t, r, "Missing type. Defaults to about:blank")
 		}
-		problemDetailsType, ok := problemDetails["title"].(string)
-		if !ok {
-			fatal(t, r, "title field not string: %T: %v", problemDetails["title"], problemDetails["title"])
-		}
-		if problemDetailsType != "about:blank" {
-			_, err = url.ParseRequestURI(problemDetailsType)
+		if problemDetails.Type != "about:blank" {
+			_, err = url.ParseRequestURI(problemDetails.Type)
 			if err != nil {
-				fatal(t, r, "type field not a valid URI. Got: %s", problemDetailsType)
+				fatal(t, r, "type field not a valid URI. Got: %s", problemDetails.Type)
 			}
 		}
-		problemType = problemDetailsType
 	})
 
 	// about:blank
@@ -99,18 +102,36 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body ...by
 
 			https://datatracker.ietf.org/doc/html/rfc7807#section-4.2
 		*/
-		if problemType == "about:blank" {
+		if problemDetails.Type == "about:blank" {
 			skip(t, r, "type field set to about:blank. Skip title test.")
 		}
-		if _, found := problemDetails["title"]; !found {
-			fatal(t, r, "Missing title field in body: %s", body)
-		}
-		problemDetailsTitle, ok := problemDetails["title"].(string)
-		if !ok {
-			fatal(t, r, "title field not string: %T: %v", problemDetails["title"], problemDetails["title"])
-		}
-		if problemDetailsTitle != http.StatusText(res.StatusCode) {
-			fatal(t, r, "title field not equal to http status text. Got: %s, expected: %s", problemDetailsTitle, http.StatusText(res.StatusCode))
+
+		if problemDetails.Title != http.StatusText(res.StatusCode) {
+			fatal(t, r, "title field not equal to http status text. Got: %s, expected: %s", problemDetails.Title, http.StatusText(res.StatusCode))
 		}
 	})
+
+	if validation {
+		assertValidationResponse(t, r, problemDetails.ValidationErrors)
+	}
+}
+
+func assertValidationResponse(t *testing.T, r *record, validationErrors []ValidationError) {
+	t.Helper()
+	t.Run("validation errors", func(t *testing.T) {
+		if len(validationErrors) < 1 {
+			t.Fatalf("expected one or more validation errors, got: %d.", len(validationErrors))
+		}
+		for _, validationError := range validationErrors {
+
+			if validationError.Field == "" {
+				t.Fatalf("Missing validation error field in: %s", marshalPrettyJSON(validationError))
+			}
+
+			if validationError.Description == "" {
+				t.Fatalf("Missing validation error description in: %s", marshalPrettyJSON(validationError))
+			}
+		}
+	})
+
 }
