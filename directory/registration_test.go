@@ -130,6 +130,31 @@ func TestCreateAnonymousThing(t *testing.T) {
 			fatal(t, r, "Anonymous TD submission with PUT not rejected. Got status: %d", res.StatusCode)
 		}
 	})
+
+	t.Run("reject invalid", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-http-error-response"},
+		}
+		defer report(t, r)
+
+		td := mockedTD("")  // no id
+		delete(td, "title") // remove the mandatory field
+
+		b, _ := json.Marshal(td)
+
+		// submit POST request
+		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
+		if err != nil {
+			fatal(t, r, "Error posting: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusBadRequest {
+			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
+		}
+
+		assertErrorResponse(t, r, res)
+	})
 }
 
 func TestCreateThing(t *testing.T) {
@@ -232,6 +257,32 @@ func TestCreateThing(t *testing.T) {
 			defer report(t, r)
 			assertStatusCode(t, r, response, http.StatusConflict, body)
 		})
+	})
+
+	t.Run("reject invalid", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-http-error-response"},
+		}
+		defer report(t, r)
+
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		delete(td, "title") // remove the mandatory field
+
+		b, _ := json.Marshal(td)
+
+		// submit PUT request
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			fatal(t, r, "Error putting: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusBadRequest {
+			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
+		}
+
+		assertErrorResponse(t, r, res)
 	})
 
 	// reject POST with id
@@ -411,6 +462,30 @@ func TestUpdateThing(t *testing.T) {
 			t.Logf("Expected:\n%v\n Retrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
 			fatal(t, r, "Unexpected result body; see logs.")
 		}
+	})
+
+	t.Run("reject invalid", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-http-error-response"},
+		}
+		defer report(t, r)
+
+		delete(td, "title") // remove the mandatory field
+
+		b, _ := json.Marshal(td)
+
+		// submit PUT request
+		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+		if err != nil {
+			fatal(t, r, "Error putting: %s", err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusBadRequest {
+			fatal(t, r, "Expected status %d, got : %d", http.StatusBadRequest, res.StatusCode)
+		}
+
+		assertErrorResponse(t, r, res)
 	})
 }
 
@@ -738,6 +813,15 @@ func TestPatch(t *testing.T) {
 
 			assertStatusCode(t, r, response, http.StatusBadRequest, body)
 		})
+
+		t.Run("response", func(t *testing.T) {
+			r := &record{
+				assertions: []string{"tdd-http-error-response"},
+			}
+			defer report(t, r)
+
+			assertErrorResponse(t, r, response, body...)
+		})
 	})
 }
 
@@ -1029,64 +1113,5 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 
 		fatal(t, r, "TODO")
 	})
-
-}
-
-func TestMinimalValidation(t *testing.T) {
-	// defer report(t, &record{comments: "TODO"})
-	// t.SkipNow()
-
-	// t.Run("reject missing context", func(t *testing.T) {
-	// 	id := "urn:uuid:" + uuid.NewV4().String()
-	// 	td := mockedTD(id)
-
-	// 	// remove the context field
-	// 	delete(td, "@context")
-
-	// 	b, _ := json.Marshal(td)
-
-	// 	// submit with PUT request
-	// 	res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-	// 	if err != nil {
-	// 		t.Fatalf("Error posting: %s", err)
-	// 	}
-	// 	defer res.Body.Close()
-
-	// 	body := httpReadBody(res, t)
-
-	// 	t.Run("status code", func(t *testing.T) {
-	// 		assertStatusCode(res, http.StatusBadRequest, body, t)
-	// 	})
-
-	// 	var problemDetails map[string]any
-	// 	err = json.Unmarshal(body, &problemDetails)
-	// 	if err != nil {
-	// 		t.Fatalf("Error decoding body: %s", err)
-	// 	}
-
-	// 	problemDetailsStatus, ok := problemDetails["status"].(float64) // JSON number is float64
-	// 	if !ok {
-	// 		t.Fatalf("Problem Details: missing status field. Body: %s", body)
-	// 	}
-	// 	if problemDetailsStatus != 400 {
-	// 		t.Fatalf("Problem Details: expected status 400 in body, got: %f", problemDetailsStatus)
-	// 	}
-
-	// 	validationErrors, ok := problemDetails["validationErrors"].([]any)
-	// 	if !ok {
-	// 		t.Fatalf("Problem Details: missing validationErrors field. Body: %s", body)
-	// 	}
-	// 	if len(validationErrors) != 1 {
-	// 		t.Fatalf("Problem Details: expected 1 validation error, got: %d. Body: %s", len(validationErrors), body)
-	// 	}
-
-	// if pd.ValidationErrors[0].Field != "(root)" { // not normative?
-	// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Field, body)
-	// }
-
-	// if pd.ValidationErrors[0].Descr != "@context is required" { // not normative?
-	// 	t.Fatalf("Expected error on root, got: %s. Body: %s", pd.ValidationErrors[0].Descr, body)
-	// }
-	// })
 
 }
