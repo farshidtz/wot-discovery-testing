@@ -6,4 +6,7 @@ WORKDIR /home
 
 ENV CGO_ENABLED=0
 
+# download dependencies
+RUN go get .../.
+
 ENTRYPOINT ["go", "test"]
