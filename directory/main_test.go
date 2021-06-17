@@ -1,34 +1,33 @@
 package directory
 
 import (
+	"flag"
 	"fmt"
 	"net/url"
 	"os"
 	"testing"
 )
 
-const (
-	EnvURL = "URL"
-)
-
-var (
-	serverURL string
-)
+var serverURL string
 
 func TestMain(m *testing.M) {
-	parsedURL, err := url.Parse(os.Getenv(EnvURL))
+	// CLI arguments
+	reportPath := flag.String("report", "report.csv", "Path to create report")
+	flag.StringVar(&serverURL, "server", "", "URL of the directory service")
+	flag.Parse()
+
+	_, err := url.Parse(serverURL)
 	if err != nil {
 		fmt.Printf("Error parsing server URL: %s", err)
 		os.Exit(1)
 	}
-	serverURL = parsedURL.String()
 	if serverURL == "" {
 		fmt.Println("Server URL is not set!")
 		os.Exit(1)
 	}
 	fmt.Printf("Server URL: %s\n", serverURL)
 
-	writeReport := initReportWriter()
+	writeReport := initReportWriter(*reportPath)
 
 	code := m.Run()
 

@@ -3,14 +3,11 @@ package directory
 import (
 	"encoding/csv"
 	"fmt"
-	"io"
 	"os"
 	"sort"
 	"strings"
 	"testing"
 )
-
-const outputFile = "report.csv"
 
 var results map[string]result
 
@@ -27,19 +24,17 @@ type result struct {
 	skipped []string
 }
 
-func initReportWriter() (commit func()) {
+func initReportWriter(path string) (commit func()) {
 	results = make(map[string]result)
 	// csv header
 	header := []string{"AssertionID", "Status", "Coverage", "Details"}
 
-	file, err := os.Create(outputFile)
+	file, err := os.Create(path)
 	if err != nil {
 		fmt.Printf("Error creating report file: %s", err)
 		os.Exit(1)
 	}
-
-	// write to both stdout and file
-	writer := csv.NewWriter(io.MultiWriter(os.Stdout, file))
+	writer := csv.NewWriter(file)
 
 	err = writer.Write(header)
 	if err != nil {
@@ -66,7 +61,7 @@ func initReportWriter() (commit func()) {
 			return sortedResults[i][0] < sortedResults[j][0]
 		})
 
-		fmt.Println("==================== REPORT ====================")
+		fmt.Println("Writing report to", file.Name())
 		for _, result := range sortedResults {
 			err := writer.Write(result)
 			if err != nil {
@@ -75,7 +70,6 @@ func initReportWriter() (commit func()) {
 			}
 		}
 		writer.Flush()
-		fmt.Println("================================================")
 
 		err = writer.Error()
 		if err != nil {
