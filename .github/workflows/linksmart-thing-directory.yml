@@ -24,18 +24,17 @@ jobs:
       run: docker run --name=tdd -p 8081:8081 -d linksmart/td
     
     - name: Test
-      env:
-        URL: http://localhost:8081
-      run: go test
+      if: success()
+      run: go test --server=http://localhost:8081
       working-directory: directory
 
     - name: Export report as artifact
-      if: ${{ always() }}
+      if: success()
       uses: actions/upload-artifact@v2
       with:
         name: report-linksmart-thing-directory
         path: directory/report.csv
     
     - name: Print server logs
-      if: ${{ always() }}
+      if: always()
       run: docker logs tdd
