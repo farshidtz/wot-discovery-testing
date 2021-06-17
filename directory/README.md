@@ -14,6 +14,8 @@ CLI Arguments:
         verbose: print additional output
 ```
 
+The following commands should be executed from the current (i.e. `directory`) directory.
+
 ### Go
 ```bash
 go test --server=http://localhost:8081 
