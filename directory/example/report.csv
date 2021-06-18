@@ -13,7 +13,7 @@ tdd-notification-event-types,skipped,skipped:TestCreateEvent skipped:TestUpdateE
 tdd-notification-filter-type,skipped,skipped:TestCreateEvent skipped:TestUpdateEvent skipped:TestDeleteEvent
 tdd-notification-sse,skipped,skipped:TestCreateEvent skipped:TestUpdateEvent skipped:TestDeleteEvent
 tdd-reg-additional-representation,skipped,untested
-tdd-reg-anonymous-td-identifier,passed,skipped:TestRetrieveThing/anonymous_td_id skipped:TestListThings/anonymous_td_id passed:TestJSONPath/filter_anonymous passed:TestXPath/filter_anonymous
+tdd-reg-anonymous-td-identifier,skipped,skipped:TestRetrieveThing/anonymous_td_id skipped:TestListThings/anonymous_td_id passed:TestJSONPath/filter_anonymous passed:TestXPath/filter_anonymous
 tdd-reg-anonymous-td-local-id,passed,passed:TestCreateAnonymousThing/location_header
 tdd-reg-create-anonymous-td,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateAnonymousThing/result
 tdd-reg-create-anonymous-td-resp,passed,passed:TestCreateAnonymousThing/status_code passed:TestCreateAnonymousThing/location_header
@@ -21,7 +21,7 @@ tdd-reg-create-body,passed,passed:TestCreateAnonymousThing/submit_request passed
 tdd-reg-create-contenttype,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request
 tdd-reg-create-known-td,passed,passed:TestCreateThing/submit_request passed:TestCreateThing/result
 tdd-reg-create-known-td-resp,passed,passed:TestCreateThing/status_code
-tdd-reg-create-known-vs-anonymous,passed,skipped:TestCreateThing/reject_POST passed:TestCreateAnonymousThing/reject_PUT
+tdd-reg-create-known-vs-anonymous,skipped,skipped:TestCreateThing/reject_POST passed:TestCreateAnonymousThing/reject_PUT
 tdd-reg-crudl,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request passed:TestRetrieveThing/submit_request passed:TestUpdateThing/submit_request passed:TestDelete/existing/submit_request passed:TestListThings/submit_request
 tdd-reg-default-representation,skipped,untested
 tdd-reg-delete,passed,passed:TestDelete/existing/submit_request passed:TestDelete/existing/result passed:TestDelete/non-existing/submit_request

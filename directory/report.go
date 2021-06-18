@@ -103,10 +103,10 @@ func resultToCSV(assertionID string, r result) []string {
 	var status string
 	if len(r.failed) > 0 {
 		status = "failed"
-	} else if len(r.passed) > 0 {
-		status = "passed"
-	} else {
+	} else if len(r.skipped) > 0 {
 		status = "skipped"
+	} else {
+		status = "passed"
 	}
 
 	var details []string
