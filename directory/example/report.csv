@@ -13,7 +13,7 @@ tdd-notification-event-types,skipped,skipped:TestCreateEvent skipped:TestUpdateE
 tdd-notification-filter-type,skipped,skipped:TestCreateEvent skipped:TestUpdateEvent skipped:TestDeleteEvent
 tdd-notification-sse,skipped,skipped:TestCreateEvent skipped:TestUpdateEvent skipped:TestDeleteEvent
 tdd-reg-additional-representation,skipped,untested
-tdd-reg-anonymous-td-identifier,skipped,skipped:TestRetrieveThing/anonymous_td_id skipped:TestListThings/anonymous_td_id passed:TestJSONPath/filter_anonymous passed:TestXPath/filter_anonymous
+tdd-reg-anonymous-td-identifier,passed,passed:TestCreateAnonymousThing/registration_info passed:TestListThings/anonymous_td_id passed:TestJSONPath/filter_anonymous passed:TestXPath/filter_anonymous
 tdd-reg-anonymous-td-local-id,passed,passed:TestCreateAnonymousThing/location_header
 tdd-reg-create-anonymous-td,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateAnonymousThing/result
 tdd-reg-create-anonymous-td-resp,passed,passed:TestCreateAnonymousThing/status_code passed:TestCreateAnonymousThing/location_header
@@ -21,7 +21,7 @@ tdd-reg-create-body,passed,passed:TestCreateAnonymousThing/submit_request passed
 tdd-reg-create-contenttype,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request
 tdd-reg-create-known-td,passed,passed:TestCreateThing/submit_request passed:TestCreateThing/result
 tdd-reg-create-known-td-resp,passed,passed:TestCreateThing/status_code
-tdd-reg-create-known-vs-anonymous,skipped,skipped:TestCreateThing/reject_POST passed:TestCreateAnonymousThing/reject_PUT
+tdd-reg-create-known-vs-anonymous,passed,passed:TestCreateAnonymousThing/reject_PUT
 tdd-reg-crudl,passed,passed:TestCreateAnonymousThing/submit_request passed:TestCreateThing/submit_request passed:TestRetrieveThing/submit_request passed:TestUpdateThing/submit_request passed:TestDelete/existing/submit_request passed:TestListThings/submit_request
 tdd-reg-default-representation,skipped,untested
 tdd-reg-delete,passed,passed:TestDelete/existing/submit_request passed:TestDelete/existing/result passed:TestDelete/non-existing/submit_request
@@ -38,7 +38,7 @@ tdd-reg-list-pagination-order,skipped,skipped:TestListThings/pagination
 tdd-reg-list-pagination-order-default,skipped,skipped:TestListThings/pagination
 tdd-reg-list-pagination-order-nextlink,skipped,skipped:TestListThings/pagination
 tdd-reg-list-pagination-order-unsupported,skipped,skipped:TestListThings/pagination
-tdd-reg-list-resp,passed,passed:TestListThings/content_type passed:TestListThings/payload
+tdd-reg-list-resp,passed,passed:TestListThings/content_type passed:TestListThings/payload passed:TestListThings/registration_info
 tdd-reg-retrieve,passed,passed:TestRetrieveThing/submit_request passed:TestRetrieveThing/result
 tdd-reg-retrieve-resp,passed,passed:TestRetrieveThing/status_code passed:TestRetrieveThing/content_type
 tdd-reg-update,passed,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
@@ -51,12 +51,12 @@ tdd-reg-update-partial-resp,passed,passed:TestPatch/replace_title/status_code pa
 tdd-reg-update-resp,passed,passed:TestUpdateThing/status_code
 tdd-reg-update-types,passed,passed:TestUpdateThing/submit_request passed:TestUpdateThing/result
 tdd-registrationinfo-expiry-config,skipped,untested
-tdd-registrationinfo-expiry-purge,skipped,skipped:TestCreateAnonymousThing/registration_info/purge_expired
-tdd-registrationinfo-vocab-created,passed,passed:TestCreateAnonymousThing/registration_info/created
-tdd-registrationinfo-vocab-expires,skipped,skipped:TestCreateAnonymousThing/registration_info/expires
-tdd-registrationinfo-vocab-modified,passed,passed:TestCreateAnonymousThing/registration_info/modified
-tdd-registrationinfo-vocab-retrieved,skipped,skipped:TestCreateAnonymousThing/registration_info/retrieved
-tdd-registrationinfo-vocab-ttl,skipped,skipped:TestCreateAnonymousThing/registration_info/ttl
+tdd-registrationinfo-expiry-purge,skipped,skipped:TestRetrieveThing/registration_info/purge_expired skipped:TestListThings/registration_info/purge_expired
+tdd-registrationinfo-vocab-created,passed,passed:TestRetrieveThing/registration_info/created passed:TestListThings/registration_info/created
+tdd-registrationinfo-vocab-expires,skipped,skipped:TestRetrieveThing/registration_info/expires skipped:TestListThings/registration_info/expires
+tdd-registrationinfo-vocab-modified,passed,passed:TestRetrieveThing/registration_info/modified passed:TestListThings/registration_info/modified
+tdd-registrationinfo-vocab-retrieved,skipped,skipped:TestRetrieveThing/registration_info/retrieved skipped:TestListThings/registration_info/retrieved
+tdd-registrationinfo-vocab-ttl,skipped,skipped:TestRetrieveThing/registration_info/ttl skipped:TestListThings/registration_info/ttl
 tdd-search-jsonpath,passed,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
 tdd-search-jsonpath-method,passed,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
 tdd-search-jsonpath-parameter,passed,passed:TestJSONPath/filter/submit_request passed:TestJSONPath/reject_bad_query/submit_request
