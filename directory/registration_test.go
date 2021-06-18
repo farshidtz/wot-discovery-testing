@@ -433,7 +433,7 @@ func TestRetrieveThing(t *testing.T) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 }
 
@@ -1040,7 +1040,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 
 	// t.Run("http11 chunking", func(t *testing.T) {
@@ -1084,7 +1084,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 }
 
@@ -1146,7 +1146,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 
 	t.Run("ttl", func(t *testing.T) {
@@ -1155,7 +1155,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 
 	t.Run("retrieved", func(t *testing.T) {
@@ -1164,7 +1164,16 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
+	})
+
+	t.Run("purge expired", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-expiry-purge"},
+		}
+		defer report(t, r)
+
+		skip(t, r, "TODO")
 	})
 
 }
