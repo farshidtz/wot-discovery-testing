@@ -8,8 +8,51 @@ import (
 
 	"github.com/r3labs/sse/v2"
 	uuid "github.com/satori/go.uuid"
-	"github.com/subchord/go-sse"
+	net "github.com/subchord/go-sse"
 )
+
+func TestCreateEvent(t *testing.T) {
+	defer report(t, &record{assertions: []string{
+		"tdd-notification-sse",
+		"tdd-notification-event-id",
+		"tdd-notification-event-types",
+		"tdd-notification-filter-type",
+		"tdd-notification-data",
+		"tdd-notification-data-tdid",
+		"tdd-notification-data-create-full",
+		"tdd-notification-data-diff-unsupported",
+	}})
+	t.Skip("TODO")
+}
+
+func TestUpdateEvent(t *testing.T) {
+	defer report(t, &record{assertions: []string{
+		"tdd-notification-sse",
+		"tdd-notification-event-id",
+		"tdd-notification-event-types",
+		"tdd-notification-filter-type",
+		"tdd-notification-data",
+		"tdd-notification-data-tdid",
+		"tdd-notification-data-update-diff",
+		"tdd-notification-data-update-id",
+		"tdd-notification-data-diff-unsupported",
+	}})
+	t.Skip("TODO")
+}
+
+func TestDeleteEvent(t *testing.T) {
+	defer report(t, &record{assertions: []string{
+		"tdd-notification-sse",
+		"tdd-notification-event-id",
+		"tdd-notification-event-types",
+		"tdd-notification-filter-type",
+		"tdd-notification-data",
+		"tdd-notification-data-tdid",
+		"tdd-notification-data-delete-diff",
+		"tdd-notification-data-diff-unsupported",
+	}})
+	t.Skip("TODO")
+}
 
 // RFC2119 Assertions IDs:
 // tdd-notification-event-types
@@ -28,18 +71,18 @@ type Event struct {
 	Data mapAny `json:"data"`
 }
 
-func TestCreateEvent(t *testing.T) {
+func TestCreateEvent3(t *testing.T) {
 	defer report(t, &record{comments: "TODO"})
 
 	// subscribe to create events
-	client := sse.NewClient(serverURL + "/events/create")
+	client := sse.NewClient(serverURL + "/events/blah")
 	client.OnDisconnect(func(c *sse.Client) {
 		t.Fatal("disconnected")
 	})
 
 	c := make(chan *sse.Event)
-	go client.SubscribeChanRaw(c)
-
+	go func() {}()
+	client.on
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -86,14 +129,4 @@ func TestCreateEvent2(t *testing.T) {
 	sub.Close()
 	feed.Close()
 	//t.SkipNow()
-}
-
-func TestUpdateEvent(t *testing.T) {
-	defer report(t, &record{comments: "TODO"})
-	t.SkipNow()
-}
-
-func TestDeleteEvent(t *testing.T) {
-	defer report(t, &record{comments: "TODO"})
-	t.SkipNow()
 }

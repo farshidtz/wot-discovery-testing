@@ -27,7 +27,7 @@ type result struct {
 func initReportWriter(path string) (commit func()) {
 	results = make(map[string]result)
 	// csv header
-	header := []string{"AssertionID", "Status", "Coverage", "Details"}
+	header := []string{"AssertionID", "Status", "Details"}
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -53,7 +53,7 @@ func initReportWriter(path string) (commit func()) {
 		// insert unchecked assertions
 		for _, id := range tddAssertions {
 			if _, found := results[id]; !found {
-				sortedResults = append(sortedResults, []string{id, "skipped", "0%", "untested"})
+				sortedResults = append(sortedResults, []string{id, "skipped", "untested"})
 			}
 		}
 
@@ -103,35 +103,26 @@ func resultToCSV(assertionID string, r result) []string {
 	var status string
 	if len(r.failed) > 0 {
 		status = "failed"
-	} else if len(r.passed) > 0 {
-		status = "passed"
-	} else {
+	} else if len(r.skipped) > 0 {
 		status = "skipped"
-	}
-
-	// calculate ratio of passed tests
-	var coverage float64
-	if len(r.passed)+len(r.failed)+len(r.skipped) == 0 {
-		coverage = 0
 	} else {
-		coverage = float64(len(r.passed)) / float64(len(r.passed)+len(r.failed)+len(r.skipped))
+		status = "passed"
 	}
 
 	var details []string
-	if len(r.passed) > 0 {
-		details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " passed:")))
-	}
 	if len(r.failed) > 0 {
 		details = append(details, fmt.Sprint("failed:", strings.Join(r.failed, " failed:")))
 	}
 	if len(r.skipped) > 0 {
 		details = append(details, fmt.Sprint("skipped:", strings.Join(r.skipped, " skipped:")))
 	}
+	if len(r.passed) > 0 {
+		details = append(details, fmt.Sprint("passed:", strings.Join(r.passed, " passed:")))
+	}
 
 	return []string{
 		assertionID,
 		status,
-		fmt.Sprintf("%.0f%%", coverage*100),
 		strings.Join(details, " "),
 	}
 }

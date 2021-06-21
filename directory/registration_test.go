@@ -103,10 +103,15 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 
 	t.Run("registration info", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-anonymous-td-identifier"},
+		}
+		defer report(t, r)
+
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
-
-		testRegistrionInfo(t, storedTD)
+		// get the ID. This should pass
+		getID(t, r, storedTD)
 	})
 
 	// reject PUT of anonymous TD
@@ -237,6 +242,13 @@ func TestCreateThing(t *testing.T) {
 		}
 	})
 
+	// t.Run("registration info", func(t *testing.T) {
+	// 	// retrieve the stored TD
+	// 	storedTD := retrieveThing(id, serverURL, t)
+
+	// 	testRegistrionInfo(t, storedTD)
+	// })
+
 	t.Run("reject id mismatch", func(t *testing.T) {
 		r := &record{
 			assertions: []string{},
@@ -321,31 +333,30 @@ func TestCreateThing(t *testing.T) {
 		})
 	})
 
-	// reject POST with id
-	t.Run("reject POST", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-create-known-vs-anonymous"},
-		}
-		defer report(t, r)
-		skip(t, r, "not disallowed explicitly")
+	// reject POST with id: not disallowed explicitly
+	// t.Run("reject POST", func(t *testing.T) {
+	// 	r := &record{
+	// 		assertions: []string{"tdd-reg-create-known-vs-anonymous"},
+	// 	}
+	// 	defer report(t, r)
 
-		id := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(id)
-		b, _ := json.Marshal(td)
+	// 	id := "urn:uuid:" + uuid.NewV4().String()
+	// 	td := mockedTD(id)
+	// 	b, _ := json.Marshal(td)
 
-		// submit POST request
-		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
-		if err != nil {
-			fatal(t, r, "Error posting: %s", err)
-		}
-		defer res.Body.Close()
+	// 	// submit POST request
+	// 	res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
+	// 	if err != nil {
+	// 		fatal(t, r, "Error posting: %s", err)
+	// 	}
+	// 	defer res.Body.Close()
 
-		body := httpReadBody(res, t)
+	// 	body := httpReadBody(res, t)
 
-		t.Run("status code", func(t *testing.T) {
-			assertStatusCode(t, r, res, http.StatusBadRequest, body)
-		})
-	})
+	// 	t.Run("status code", func(t *testing.T) {
+	// 		assertStatusCode(t, r, res, http.StatusBadRequest, body)
+	// 	})
+	// })
 
 }
 
@@ -418,23 +429,21 @@ func TestRetrieveThing(t *testing.T) {
 		}
 	})
 
-	t.Run("enriched result", func(t *testing.T) {
-		r := &record{
-			assertions: []string{},
-		}
-		defer report(t, r)
+	t.Run("registration info", func(t *testing.T) {
+		// retrieve the stored TD
+		storedTD := retrieveThing(id, serverURL, t)
 
-		fatal(t, r, "TODO")
+		testRegistrionInfo(t, storedTD)
 	})
 
-	t.Run("anonymous td id", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-anonymous-td-identifier"},
-		}
-		defer report(t, r)
+	// t.Run("anonymous td id", func(t *testing.T) {
+	// 	r := &record{
+	// 		assertions: []string{"tdd-reg-anonymous-td-identifier"},
+	// 	}
+	// 	defer report(t, r)
 
-		fatal(t, r, "TODO")
-	})
+	// 	skip(t, r, "Tested under TestCreateAnonymousThing")
+	// })
 }
 
 func TestUpdateThing(t *testing.T) {
@@ -978,18 +987,29 @@ func TestListThings(t *testing.T) {
 	defer report(t, nil)
 
 	var response *http.Response
+	var body []byte
 
+	tag := uuid.NewV4().String()
 	t.Run("submit request", func(t *testing.T) {
 		r := &record{
 			assertions: []string{"tdd-reg-crudl", "tdd-reg-list-method"},
 		}
 		defer report(t, r)
 
+		for i := 0; i < 3; i++ {
+			id := "urn:uuid:" + uuid.NewV4().String()
+			td := mockedTD(id)
+			// tag the TDs to find later
+			td["tag"] = tag
+			createThing(id, td, serverURL, t)
+		}
+
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
 			fatal(t, r, "Error getting list of TDs: %s", err)
 		}
 		// defer res.Body.Close()
+		body = httpReadBody(res, t)
 		response = res
 	})
 
@@ -999,7 +1019,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		assertStatusCode(t, r, response, http.StatusOK, nil)
+		assertStatusCode(t, r, response, http.StatusOK, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
@@ -1017,7 +1037,36 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		body := httpReadBody(response, t)
+		var collection []mapAny
+		err := json.Unmarshal(body, &collection)
+		if err != nil {
+			fatal(t, r, "Error decoding page: %s", err)
+		}
+
+		if len(collection) == 0 {
+			fatal(t, r, "Unexpected empty collection.")
+		}
+
+		var listedTDs []mapAny
+		for _, td := range collection {
+			if td["title"] == nil || td["title"].(string) == "" {
+				fatal(t, r, "Object in array may not be a TD: no mandatory title. Body:\n%s", marshalPrettyJSON(td))
+			}
+			if td["tag"] != nil && td["tag"].(string) == tag {
+				listedTDs = append(listedTDs, td)
+			}
+		}
+
+		if len(listedTDs) != 3 {
+			fatal(t, r, "Unexpected items in collection: %d. Expected 3 with tag: %s", len(listedTDs), tag)
+		}
+	})
+
+	t.Run("registration info", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-reg-list-resp"},
+		}
+		defer report(t, r)
 
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
@@ -1025,13 +1074,12 @@ func TestListThings(t *testing.T) {
 			fatal(t, r, "Error decoding page: %s", err)
 		}
 
-		for _, td := range collection {
-			if td["title"] == nil || td["title"].(string) == "" {
-				t.Logf("Body:\n%s", marshalPrettyJSON(td))
-				fatal(t, r, "Object in array may not be a TD: no mandatory title. See logs.")
-			}
+		if len(collection) == 0 {
+			fatal(t, r, "Unexpected empty collection.")
 		}
 
+		// just test the first TD
+		testRegistrionInfo(t, collection[0])
 	})
 
 	t.Run("anonymous td id", func(t *testing.T) {
@@ -1040,7 +1088,44 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		// add an anonymous TD
+		createdTD := mockedTD("") // no id
+		// tag the TDs to find later
+		tag2 := uuid.NewV4().String()
+		createdTD["tag"] = tag2
+		createThing("", createdTD, serverURL, t)
+
+		// submit the request
+		res, err := http.Get(serverURL + "/things")
+		if err != nil {
+			fatal(t, r, "Error getting list of TDs: %s", err)
+		}
+		defer res.Body.Close()
+
+		body := httpReadBody(res, t)
+
+		var collection []mapAny
+		err = json.Unmarshal(body, &collection)
+		if err != nil {
+			fatal(t, r, "Error decoding page: %s", err)
+		}
+
+		if len(collection) == 0 {
+			fatal(t, r, "Unexpected empty collection.")
+		}
+
+		var found bool
+		for _, td := range collection {
+			if td["tag"] != nil && td["tag"].(string) == tag2 {
+				// try to get the ID. This should pass
+				getID(t, r, td)
+				found = true
+				break
+			}
+		}
+		if !found {
+			fatal(t, r, "Could not find the created anonymous TD with tag: %s", tag2)
+		}
 	})
 
 	// t.Run("http11 chunking", func(t *testing.T) {
@@ -1084,7 +1169,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 }
 
@@ -1146,7 +1231,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 
 	t.Run("ttl", func(t *testing.T) {
@@ -1155,7 +1240,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
 	})
 
 	t.Run("retrieved", func(t *testing.T) {
@@ -1164,7 +1249,16 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		fatal(t, r, "TODO")
+		skip(t, r, "TODO")
+	})
+
+	t.Run("purge expired", func(t *testing.T) {
+		r := &record{
+			assertions: []string{"tdd-registrationinfo-expiry-purge"},
+		}
+		defer report(t, r)
+
+		skip(t, r, "TODO")
 	})
 
 }
