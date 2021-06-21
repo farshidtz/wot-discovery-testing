@@ -1,7 +1,14 @@
 package directory
 
 import (
+	"fmt"
+	"log"
 	"testing"
+	"time"
+
+	"github.com/r3labs/sse/v2"
+	uuid "github.com/satori/go.uuid"
+	"github.com/subchord/go-sse"
 )
 
 // RFC2119 Assertions IDs:
@@ -15,9 +22,70 @@ import (
 // tdd-notification-data-delete-diff
 // tdd-notification-data-diff-unsupported
 
+type Event struct {
+	ID   string `json:"id"`
+	Type string `json:"event"`
+	Data mapAny `json:"data"`
+}
+
 func TestCreateEvent(t *testing.T) {
 	defer report(t, &record{comments: "TODO"})
-	t.SkipNow()
+
+	// subscribe to create events
+	client := sse.NewClient(serverURL + "/events/create")
+	client.OnDisconnect(func(c *sse.Client) {
+		t.Fatal("disconnected")
+	})
+
+	c := make(chan *sse.Event)
+	go client.SubscribeChanRaw(c)
+
+	// add a new TD
+	id := "urn:uuid:" + uuid.NewV4().String()
+	td := mockedTD(id)
+	createThing(id, td, serverURL, t)
+
+	select {
+	case res := <-c:
+		fmt.Println(res)
+	case <-time.After(3 * time.Second):
+		t.Fatal("timedout")
+	}
+	client.Unsubscribe(c)
+	//t.SkipNow()
+}
+
+func TestCreateEvent2(t *testing.T) {
+	defer report(t, &record{comments: "TODO"})
+	feed, err := net.ConnectWithSSEFeed(serverURL+"/events/create", nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	sub, err := feed.Subscribe("create")
+	if err != nil {
+		return
+	}
+
+	// add a new TD
+	id := "urn:uuid:" + uuid.NewV4().String()
+	td := mockedTD(id)
+	createThing(id, td, serverURL, t)
+
+	select {
+	case evt := <-sub.Feed():
+		log.Print(evt)
+	case err := <-sub.ErrFeed():
+		log.Fatal(err)
+		return
+	case <-time.After(3 * time.Second):
+		t.Fatal("timedout")
+	}
+
+	sub.Close()
+	feed.Close()
+	//t.SkipNow()
 }
 
 func TestUpdateEvent(t *testing.T) {
