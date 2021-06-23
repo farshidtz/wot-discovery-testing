@@ -4,7 +4,7 @@ Test suite for [W3C WoT Discovery](https://www.w3.org/TR/wot-discovery/) APIs.
 The test results are printed to standard output. The test report is written to a file in csv format.
 
 ## Run
-CLI Arguments: 
+Useful CLI Arguments: 
 ```
 --report string
         Path to create report (default "report.csv")
@@ -12,7 +12,11 @@ CLI Arguments:
         URL of the directory service
 -v
         verbose: print additional output
+--run regexp
+        Run only those tests and examples matching the regular expression.      
 ```
+
+For example, `--run=TestCreateThing` can be set to run only the test function named `TestCreateThing`.
 
 The following commands should be executed from the current (i.e. `directory`) directory.
 
