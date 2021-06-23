@@ -3,11 +3,15 @@ package directory
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"mime"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/r3labs/sse/v2"
+	"gopkg.in/cenkalti/backoff.v1"
 )
 
 type any = interface{}
@@ -202,4 +206,36 @@ func getID(t *testing.T, r *record, td mapAny) string {
 		fatal(t, r, "No ID in TD: %s", marshalPrettyJSON(td))
 	}
 	return id
+}
+
+type httpError struct {
+	message string
+	code    int
+}
+
+func (e *httpError) Error() string {
+	return fmt.Sprintf("%d: %s", e.code, e.message)
+}
+func subscribeEvent(t *testing.T, url string, eventCh chan *sse.Event, errCh chan error) *sse.Client {
+	t.Helper()
+	client := sse.NewClient(url)
+	client.ResponseValidator = func(c *sse.Client, resp *http.Response) error {
+		if resp.StatusCode != http.StatusOK {
+			err := &httpError{message: "request failed", code: resp.StatusCode}
+			return backoff.Permanent(err)
+		}
+		return nil
+	}
+	go func() {
+		err := client.SubscribeChanRaw(eventCh)
+		if err != nil {
+			errCh <- err
+		}
+	}()
+	return client
+}
+
+func unsubscribeEvent(t *testing.T, client *sse.Client, eventCh chan *sse.Event) {
+	t.Helper()
+	go client.Unsubscribe(eventCh)
 }

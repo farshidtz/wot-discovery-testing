@@ -3,6 +3,8 @@ module github.com/wot-discovery-testing/directory
 go 1.16
 
 require (
+	github.com/r3labs/sse/v2 v2.3.3
 	github.com/satori/go.uuid v1.2.0
-	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
+	github.com/subchord/go-sse v1.0.5
+	gopkg.in/cenkalti/backoff.v1 v1.1.0
 )
