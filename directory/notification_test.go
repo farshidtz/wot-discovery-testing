@@ -20,30 +20,9 @@ const (
 	EventTypeDelete = "delete"
 )
 
-type dummyLock struct {
-}
-
-func (l dummyLock) Lock() {
-
-}
-
-func (l dummyLock) Unlock() {
-
-}
-
 func TestCreateEvent(t *testing.T) {
 
-	var seqMutex dummyLock
-
-	seq := func() func() {
-		seqMutex.Lock()
-		return func() {
-			seqMutex.Unlock()
-		}
-	}
-
 	t.Run("create event subscriber", func(t *testing.T) {
-		defer seq()()
 
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
@@ -58,16 +37,6 @@ func TestCreateEvent(t *testing.T) {
 		td := mockedTD(id)
 		createThing(id, td, serverURL, t)
 
-		/*defer report(t, &record{assertions: []string{
-			"tdd-notification-sse",
-			//"tdd-notification-event-id",
-			"tdd-notification-event-types",
-			"tdd-notification-filter-type",
-			"tdd-notification-data",
-			"tdd-notification-data-tdid",
-			//"tdd-notification-data-create-full",
-			//"tdd-notification-data-diff-unsupported",
-		}})*/
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
@@ -118,7 +87,6 @@ func TestCreateEvent(t *testing.T) {
 	})
 
 	t.Run("create event with diff subscriber", func(t *testing.T) {
-		defer seq()()
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
@@ -196,7 +164,6 @@ func TestCreateEvent(t *testing.T) {
 	})
 
 	t.Run("all event subscriber", func(t *testing.T) {
-		defer seq()()
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
@@ -259,7 +226,6 @@ func TestCreateEvent(t *testing.T) {
 	})
 
 	t.Run("update event subscriber", func(t *testing.T) {
-		defer seq()()
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
@@ -284,9 +250,6 @@ func TestCreateEvent(t *testing.T) {
 			t.Log("success: did not get any update event")
 		}
 	})
-
-	t.Log("done")
-
 }
 
 func TestUpdateEvent(t *testing.T) {
