@@ -79,6 +79,55 @@ func createThing(id string, td mapAny, serverURL string, t *testing.T) {
 	// return td
 }
 
+// updateThing is a helper function to support tests unrelated to updating the TD
+func updateThing(id string, td mapAny, serverURL string, t *testing.T) {
+	t.Helper()
+	b, _ := json.Marshal(td)
+
+	var res *http.Response
+	var err error
+
+	res, err = httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+	if err != nil {
+		t.Fatalf("Error updateing: %s", err)
+	}
+
+	defer res.Body.Close()
+
+	b, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Fatalf("Error updating test data: %d: %s", res.StatusCode, b)
+	}
+
+}
+
+// deleteThing is a helper function to support tests unrelated to deleting the TD
+func deleteThing(id string, serverURL string, t *testing.T) {
+	t.Helper()
+	var res *http.Response
+	var err error
+
+	res, err = httpDelete(serverURL + "/things/" + id)
+	if err != nil {
+		t.Fatalf("Error updateing: %s", err)
+	}
+
+	defer res.Body.Close()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Fatalf("Error updating test data: %d: %s", res.StatusCode, b)
+	}
+}
+
 // retrieveAllThings is a helper function to support tests unrelated to retrieval of all TDs
 func retrieveAllThings(serverURL string, t *testing.T) []mapAny {
 	t.Helper()

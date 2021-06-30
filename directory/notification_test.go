@@ -253,18 +253,6 @@ func TestCreateEvent(t *testing.T) {
 }
 
 func TestUpdateEvent(t *testing.T) {
-	defer report(t, &record{assertions: []string{
-		"tdd-notification-sse",
-		"tdd-notification-event-id",
-		"tdd-notification-event-types",
-		"tdd-notification-filter-type",
-		"tdd-notification-data",
-		"tdd-notification-data-tdid",
-		"tdd-notification-data-update-diff",
-		"tdd-notification-data-update-id",
-		"tdd-notification-data-diff-unsupported",
-	}})
-
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -282,12 +270,15 @@ func TestUpdateEvent(t *testing.T) {
 
 		// update an attribute
 		td["title"] = "updated title for update event subscriber"
-		createThing(id, td, serverURL, t)
+		updateThing(id, td, serverURL, t)
 
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, &record{assertions: []string{
+					"tdd-notification-sse",
+					"tdd-notification-event-id",
+				}})
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
@@ -344,7 +335,7 @@ func TestUpdateEvent(t *testing.T) {
 
 		// update an attribute
 		td["title"] = "updated title for update diff event subscriber"
-		createThing(id, td, serverURL, t)
+		updateThing(id, td, serverURL, t)
 
 		select {
 		case res := <-eventCh:
@@ -425,7 +416,7 @@ func TestUpdateEvent(t *testing.T) {
 
 		// update an attribute
 		td["title"] = "updated title for all event subscriber"
-		createThing(id, td, serverURL, t)
+		updateThing(id, td, serverURL, t)
 
 		select {
 		case res := <-eventCh:
@@ -486,7 +477,7 @@ func TestUpdateEvent(t *testing.T) {
 
 		// update an attribute
 		td["title"] = "updated title for create event subscriber"
-		createThing(id, td, serverURL, t)
+		updateThing(id, td, serverURL, t)
 
 		select {
 		case <-eventCh:
@@ -503,16 +494,254 @@ func TestUpdateEvent(t *testing.T) {
 }
 
 func TestDeleteEvent(t *testing.T) {
-	defer report(t, &record{assertions: []string{
-		"tdd-notification-sse",
-		"tdd-notification-event-id",
-		"tdd-notification-event-types",
-		"tdd-notification-filter-type",
-		"tdd-notification-data",
-		"tdd-notification-data-tdid",
-		"tdd-notification-data-delete-diff",
-		"tdd-notification-data-diff-unsupported",
-	}})
 
-	t.Skip("TODO")
+	t.Run("delete event subscriber", func(t *testing.T) {
+
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, serverURL, t)
+
+		time.Sleep(waitDuration)
+
+		// subscribe to delete events
+		eventCh := make(chan *sse.Event)
+		errCh := make(chan error)
+		client := subscribeEvent(t, serverURL+"/events/delete", eventCh, errCh)
+		defer unsubscribeEvent(t, client, eventCh)
+
+		time.Sleep(waitDuration)
+
+		deleteThing(id, serverURL, t)
+
+		select {
+		case res := <-eventCh:
+			t.Run("get event ID", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{
+					"tdd-notification-sse",
+					"tdd-notification-event-id",
+				}})
+				if string(res.ID) == "" {
+					t.Fatal("missing event ID")
+				}
+			})
+
+			t.Run("get event type", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{
+					"tdd-notification-sse",
+					"tdd-notification-event-types",
+					"tdd-notification-filter-type",
+				}})
+				if string(res.Event) != EventTypeDelete {
+					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
+				}
+			})
+
+			var data mapAny
+			t.Run("check event data", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				err := json.Unmarshal(res.Data, &data)
+				if err != nil {
+					t.Fatal("unable to unmarshal the event data to TDD")
+				}
+			})
+
+			t.Run("check event data tdid", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				if id != data["id"] {
+					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
+				}
+
+			})
+		case err := <-errCh:
+			t.Run("event subscription errors", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				t.Fatalf("unexpected error while subscribing to notification: %s", err)
+			})
+		case <-time.After(timeoutDuration):
+			t.Run("event subscription timeout", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				t.Fatal("timed out waiting for data")
+			})
+		}
+	})
+
+	t.Run("delete event with diff subscriber", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, serverURL, t)
+
+		time.Sleep(waitDuration)
+
+		// subscribe to delete events
+		eventCh := make(chan *sse.Event)
+		errCh := make(chan error)
+		client := subscribeEvent(t, serverURL+"/events/delete?diff=true", eventCh, errCh)
+		defer unsubscribeEvent(t, client, eventCh)
+
+		time.Sleep(waitDuration)
+
+		// delete the created thing
+		deleteThing(id, serverURL, t)
+
+		select {
+		case res := <-eventCh:
+			t.Run("get event ID", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				if string(res.ID) == "" {
+					t.Fatal("missing event ID")
+				}
+			})
+
+			t.Run("get event type", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{
+					"tdd-notification-sse",
+					"tdd-notification-event-types",
+					"tdd-notification-filter-type",
+				}})
+				if string(res.Event) != EventTypeDelete {
+					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
+				}
+			})
+
+			var data mapAny
+			t.Run("check event data", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				err := json.Unmarshal(res.Data, &data)
+				if err != nil {
+					t.Fatal("unable to unmarshal the event data to TDD")
+				}
+			})
+
+			t.Run("check event data tdid", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				if id != data["id"] {
+					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
+				}
+
+			})
+			t.Run("check event data", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data-delete-diff"}})
+				for key, _ := range data {
+					if key != "id" {
+						t.Fatalf("unexpected part in the delete notification : %s", key)
+					}
+				}
+			})
+		case err := <-errCh:
+			t.Run("event subscription diff unsupported", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data-diff-unsupported"}})
+				var httpErr *httpError
+				if errors.As(err, &httpErr) {
+					if httpErr.code != http.StatusNotImplemented {
+						t.Fatalf("unexpected response code: %d", httpErr.code)
+					}
+				} else {
+					t.Fatalf("unexpected error while subscribing to notification: %s", err)
+				}
+			})
+		case <-time.After(timeoutDuration):
+			t.Fatal("timed out waiting for data")
+		}
+	})
+
+	t.Run("all event subscriber", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, serverURL, t)
+
+		time.Sleep(waitDuration)
+
+		// subscribe to delete events
+		eventCh := make(chan *sse.Event)
+		errCh := make(chan error)
+		client := subscribeEvent(t, serverURL+"/events", eventCh, errCh)
+		defer unsubscribeEvent(t, client, eventCh)
+
+		time.Sleep(waitDuration)
+
+		// delete the created thing
+		deleteThing(id, serverURL, t)
+
+		select {
+		case res := <-eventCh:
+			t.Run("get event ID", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				if string(res.ID) == "" {
+					t.Fatal("missing event ID")
+				}
+			})
+
+			t.Run("get event type", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{
+					"tdd-notification-sse",
+					"tdd-notification-event-types",
+				}})
+				if string(res.Event) != EventTypeDelete {
+					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
+				}
+			})
+
+			var data mapAny
+			t.Run("check event data", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				err := json.Unmarshal(res.Data, &data)
+				if err != nil {
+					t.Fatal("unable to unmarshal the event data to TDD")
+				}
+			})
+
+			t.Run("check event data tdid", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				if id != data["id"] {
+					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
+				}
+
+			})
+		case err := <-errCh:
+			t.Run("event subscription errors", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				t.Fatalf("unexpected error while subscribing to notification: %s", err)
+			})
+		case <-time.After(timeoutDuration):
+			t.Run("event subscription timeout", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				t.Fatal("timed out waiting for data")
+			})
+		}
+	})
+
+	t.Run("create event subscriber", func(t *testing.T) {
+		// add a new TD
+		id := "urn:uuid:" + uuid.NewV4().String()
+		td := mockedTD(id)
+		createThing(id, td, serverURL, t)
+
+		time.Sleep(waitDuration)
+
+		// subscribe to delete events
+		eventCh := make(chan *sse.Event)
+		errCh := make(chan error)
+		client := subscribeEvent(t, serverURL+"/events/create", eventCh, errCh)
+		defer unsubscribeEvent(t, client, eventCh)
+
+		time.Sleep(waitDuration)
+
+		// delete the created thing
+		deleteThing(id, serverURL, t)
+
+		select {
+		case <-eventCh:
+			t.Run("get event type", func(t *testing.T) {
+				defer report(t, &record{assertions: []string{"tdd-notification-filter-type"}})
+				t.Fatal("unexpected create event received for TD delete")
+			})
+		case err := <-errCh:
+			t.Fatalf("unexpected response to create subscription %v", err)
+		case <-time.After(timeoutDuration):
+			t.Log("success: did not get any create event")
+		}
+	})
 }
