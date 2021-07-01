@@ -3,11 +3,15 @@ package directory
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"mime"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/r3labs/sse/v2"
+	"gopkg.in/cenkalti/backoff.v1"
 )
 
 type any = interface{}
@@ -73,6 +77,55 @@ func createThing(id string, td mapAny, serverURL string, t *testing.T) {
 	// add the system-generated attributes
 	// td["registration"] = storedTD["registration"]
 	// return td
+}
+
+// updateThing is a helper function to support tests unrelated to updating the TD
+func updateThing(id string, td mapAny, serverURL string, t *testing.T) {
+	t.Helper()
+	b, _ := json.Marshal(td)
+
+	var res *http.Response
+	var err error
+
+	res, err = httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
+	if err != nil {
+		t.Fatalf("Error updateing: %s", err)
+	}
+
+	defer res.Body.Close()
+
+	b, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Fatalf("Error updating test data: %d: %s", res.StatusCode, b)
+	}
+
+}
+
+// deleteThing is a helper function to support tests unrelated to deleting the TD
+func deleteThing(id string, serverURL string, t *testing.T) {
+	t.Helper()
+	var res *http.Response
+	var err error
+
+	res, err = httpDelete(serverURL + "/things/" + id)
+	if err != nil {
+		t.Fatalf("Error updateing: %s", err)
+	}
+
+	defer res.Body.Close()
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("Error reading response body: %s", err)
+	}
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Fatalf("Error updating test data: %d: %s", res.StatusCode, b)
+	}
 }
 
 // retrieveAllThings is a helper function to support tests unrelated to retrieval of all TDs
@@ -202,4 +255,36 @@ func getID(t *testing.T, r *record, td mapAny) string {
 		fatal(t, r, "No ID in TD: %s", marshalPrettyJSON(td))
 	}
 	return id
+}
+
+type httpError struct {
+	message string
+	code    int
+}
+
+func (e *httpError) Error() string {
+	return fmt.Sprintf("%d: %s", e.code, e.message)
+}
+func subscribeEvent(t *testing.T, url string, eventCh chan *sse.Event, errCh chan error) *sse.Client {
+	t.Helper()
+	client := sse.NewClient(url)
+	client.ResponseValidator = func(c *sse.Client, resp *http.Response) error {
+		if resp.StatusCode != http.StatusOK {
+			err := &httpError{message: "request failed", code: resp.StatusCode}
+			return backoff.Permanent(err)
+		}
+		return nil
+	}
+	go func() {
+		err := client.SubscribeChanRaw(eventCh)
+		if err != nil {
+			errCh <- err
+		}
+	}()
+	return client
+}
+
+func unsubscribeEvent(t *testing.T, client *sse.Client, eventCh chan *sse.Event) {
+	t.Helper()
+	go client.Unsubscribe(eventCh)
 }
