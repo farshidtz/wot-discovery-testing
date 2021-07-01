@@ -39,7 +39,7 @@ func TestJSONPath(t *testing.T) {
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
 			if err != nil {
-				fatal(t, r, "Error getting TDs: %s", err)
+				t.Fatalf("Error getting TDs: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -74,11 +74,11 @@ func TestJSONPath(t *testing.T) {
 			var filterredTDs []mapAny
 			err := json.Unmarshal(body, &filterredTDs)
 			if err != nil {
-				fatal(t, r, "Error decoding page: %s", err)
+				t.Fatalf("Error decoding page: %s", err)
 			}
 
 			if len(createdTD) != len(filterredTDs) {
-				fatal(t, r, "Filtering returned %d TDs, expected %d", len(filterredTDs), len(createdTD))
+				t.Fatalf("Filtering returned %d TDs, expected %d", len(filterredTDs), len(createdTD))
 			}
 
 			createdTDsMap := make(map[string]mapAny)
@@ -91,7 +91,7 @@ func TestJSONPath(t *testing.T) {
 			for _, filterredTD := range filterredTDs {
 				id := getID(t, r, filterredTD)
 				if _, found := createdTDsMap[id]; !found {
-					fatal(t, r, "Result does not include the TD with id: %s", id)
+					t.Fatalf("Result does not include the TD with id: %s", id)
 				}
 
 				// remove system-generated attributes
@@ -121,7 +121,7 @@ func TestJSONPath(t *testing.T) {
 		// submit the request
 		response, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
 		if err != nil {
-			fatal(t, r, "Error getting TDs: %s", err)
+			t.Fatalf("Error getting TDs: %s", err)
 		}
 		defer response.Body.Close()
 
@@ -130,11 +130,11 @@ func TestJSONPath(t *testing.T) {
 		var filterredTDs []mapAny
 		err = json.Unmarshal(body, &filterredTDs)
 		if err != nil {
-			fatal(t, r, "Error decoding page: %s", err)
+			t.Fatalf("Error decoding page: %s", err)
 		}
 
 		if len(filterredTDs) != 1 {
-			fatal(t, r, "Filtering returned %d TDs, expected 1", len(filterredTDs))
+			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
 		}
 
 		// try to get the ID. This should pass
@@ -156,7 +156,7 @@ func TestJSONPath(t *testing.T) {
 
 			res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
 			if err != nil {
-				fatal(t, r, "Error getting TDs: %s", err)
+				t.Fatalf("Error getting TDs: %s", err)
 			}
 			defer res.Body.Close()
 			response = res
@@ -203,7 +203,7 @@ func TestXPath(t *testing.T) {
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/xpath?query=*[tag='%s']", tag))
 			if err != nil {
-				fatal(t, r, "Error getting TDs: %s", err)
+				t.Fatalf("Error getting TDs: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -238,11 +238,11 @@ func TestXPath(t *testing.T) {
 			var filterredTDs []mapAny
 			err := json.Unmarshal(body, &filterredTDs)
 			if err != nil {
-				fatal(t, r, "Error decoding page: %s", err)
+				t.Fatalf("Error decoding page: %s", err)
 			}
 
 			if len(createdTD) != len(filterredTDs) {
-				fatal(t, r, "Filtering returned %d TDs, expected %d", len(filterredTDs), len(createdTD))
+				t.Fatalf("Filtering returned %d TDs, expected %d", len(filterredTDs), len(createdTD))
 			}
 
 			createdTDsMap := make(map[string]mapAny)
@@ -255,7 +255,7 @@ func TestXPath(t *testing.T) {
 			for _, filterredTD := range filterredTDs {
 				id := getID(t, r, filterredTD)
 				if _, found := createdTDsMap[id]; !found {
-					fatal(t, r, "Result does not include the TD with id: %s", id)
+					t.Fatalf("Result does not include the TD with id: %s", id)
 				}
 
 				// remove system-generated attributes
@@ -285,7 +285,7 @@ func TestXPath(t *testing.T) {
 		// submit the request
 		response, err := http.Get(serverURL + fmt.Sprintf("/search/xpath?query=*[tag='%s']", tag))
 		if err != nil {
-			fatal(t, r, "Error getting TDs: %s", err)
+			t.Fatalf("Error getting TDs: %s", err)
 		}
 		defer response.Body.Close()
 
@@ -294,11 +294,11 @@ func TestXPath(t *testing.T) {
 		var filterredTDs []mapAny
 		err = json.Unmarshal(body, &filterredTDs)
 		if err != nil {
-			fatal(t, r, "Error decoding page: %s", err)
+			t.Fatalf("Error decoding page: %s", err)
 		}
 
 		if len(filterredTDs) != 1 {
-			fatal(t, r, "Filtering returned %d TDs, expected 1", len(filterredTDs))
+			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
 		}
 
 		// try to get the ID. This should pass
@@ -320,7 +320,7 @@ func TestXPath(t *testing.T) {
 
 			res, err := http.Get(serverURL + "/search/xpath?query=$[:].id")
 			if err != nil {
-				fatal(t, r, "Error getting TDs: %s", err)
+				t.Fatalf("Error getting TDs: %s", err)
 			}
 			defer res.Body.Close()
 			response = res
@@ -351,5 +351,5 @@ func TestSPARQL(t *testing.T) {
 	}
 	defer report(t, r)
 
-	skip(t, r, "TODO")
+	t.Skipf("TODO")
 }

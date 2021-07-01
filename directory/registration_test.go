@@ -34,7 +34,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 		if err != nil {
-			fatal(t, r, "Error posting: %s", err)
+			t.Fatalf("Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -63,18 +63,18 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// Check if system-generated id is in response
 		location, err := response.Location()
 		if err != nil {
-			fatal(t, r, err.Error())
+			t.Fatalf(err.Error())
 		}
 		systemGeneratedID = location.String()
 		if systemGeneratedID == "" {
-			fatal(t, r, "System-generated ID not in response. Got location header: %s", location)
+			t.Fatalf("System-generated ID not in response. Got location header: %s", location)
 		}
 		_, err = url.ParseRequestURI(systemGeneratedID)
 		if err != nil {
-			fatal(t, r, "System-generated ID not in a valid URI. Got: %s", location)
+			t.Fatalf("System-generated ID not in a valid URI. Got: %s", location)
 		}
 		if !strings.Contains(systemGeneratedID, "urn:uuid:") {
-			fatal(t, r, "System-generated ID doesn't have URN UUID scheme. Got: %s", location)
+			t.Fatalf("System-generated ID doesn't have URN UUID scheme. Got: %s", location)
 		}
 	})
 
@@ -85,7 +85,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		defer report(t, r)
 
 		if systemGeneratedID == "" {
-			fatal(t, r, "previous errors")
+			t.Fatalf("previous errors")
 		}
 
 		// retrieve the stored TD
@@ -98,7 +98,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			fatal(t, r, "Stored TD was does not match the expectations; see logs.")
+			t.Fatalf("Stored TD was does not match the expectations; see logs.")
 		}
 	})
 
@@ -127,12 +127,12 @@ func TestCreateAnonymousThing(t *testing.T) {
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/", MediaTypeThingDescription, b)
 		if err != nil {
-			fatal(t, r, "Error putting: %s", err)
+			t.Fatalf("Error putting: %s", err)
 		}
 		defer res.Body.Close()
 
 		if res.StatusCode < 400 && res.StatusCode >= 500 {
-			fatal(t, r, "Anonymous TD submission with PUT not rejected. Got status: %d", res.StatusCode)
+			t.Fatalf("Anonymous TD submission with PUT not rejected. Got status: %d", res.StatusCode)
 		}
 	})
 
@@ -203,7 +203,7 @@ func TestCreateThing(t *testing.T) {
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			fatal(t, r, "Error posting: %s", err)
+			t.Fatalf("Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -238,7 +238,7 @@ func TestCreateThing(t *testing.T) {
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			fatal(t, r, "Unexpected result body; see logs.")
+			t.Fatalf("Unexpected result body; see logs.")
 		}
 	})
 
@@ -254,7 +254,7 @@ func TestCreateThing(t *testing.T) {
 			assertions: []string{},
 		}
 		defer report(t, r)
-		skip(t, r, "no relevant assertions")
+		t.Skipf("no relevant assertions")
 
 		id := "urn:uuid:" + uuid.NewV4().String()
 		anotherID := "urn:uuid:" + uuid.NewV4().String()
@@ -272,7 +272,7 @@ func TestCreateThing(t *testing.T) {
 			// submit PUT request
 			res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 			if err != nil {
-				fatal(t, r, "Error posting: %s", err)
+				t.Fatalf("Error posting: %s", err)
 			}
 			response = res
 			// defer res.Body.Close()
@@ -347,7 +347,7 @@ func TestCreateThing(t *testing.T) {
 	// 	// submit POST request
 	// 	res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
 	// 	if err != nil {
-	// 		fatal(t, r, "Error posting: %s", err)
+	// 		t.Fatalf( "Error posting: %s", err)
 	// 	}
 	// 	defer res.Body.Close()
 
@@ -382,7 +382,7 @@ func TestRetrieveThing(t *testing.T) {
 		// submit GET request
 		res, err := http.Get(serverURL + "/td/" + id)
 		if err != nil {
-			fatal(t, r, "Error getting TD: %s", err)
+			t.Fatalf("Error getting TD: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -417,7 +417,7 @@ func TestRetrieveThing(t *testing.T) {
 		var retrievedTD mapAny
 		err := json.Unmarshal(body, &retrievedTD)
 		if err != nil {
-			fatal(t, r, "Error decoding body: %s", err)
+			t.Fatalf("Error decoding body: %s", err)
 		}
 
 		// remove system-generated attributes
@@ -425,7 +425,7 @@ func TestRetrieveThing(t *testing.T) {
 
 		if !serializedEqual(td, retrievedTD) {
 			t.Logf("Expected:\n%v\nRetrieved:\n%v", marshalPrettyJSON(td), marshalPrettyJSON(retrievedTD))
-			fatal(t, r, "The retrieved TD is not the same as the added one; see logs.")
+			t.Fatalf("The retrieved TD is not the same as the added one; see logs.")
 		}
 	})
 
@@ -442,7 +442,7 @@ func TestRetrieveThing(t *testing.T) {
 	// 	}
 	// 	defer report(t, r)
 
-	// 	skip(t, r, "Tested under TestCreateAnonymousThing")
+	// 	t.Skipf( "Tested under TestCreateAnonymousThing")
 	// })
 }
 
@@ -473,7 +473,7 @@ func TestUpdateThing(t *testing.T) {
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			fatal(t, r, "Error putting TD: %s", err)
+			t.Fatalf("Error putting TD: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -505,7 +505,7 @@ func TestUpdateThing(t *testing.T) {
 
 		if !serializedEqual(td, storedTD) {
 			t.Logf("Expected:\n%v\n Retrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			fatal(t, r, "Unexpected result body; see logs.")
+			t.Fatalf("Unexpected result body; see logs.")
 		}
 	})
 
@@ -588,7 +588,7 @@ func TestPatch(t *testing.T) {
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				fatal(t, r, "Error patching TD: %s", err)
+				t.Fatalf("Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -622,7 +622,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected result body; see logs.")
+				t.Fatalf("Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -648,7 +648,7 @@ func TestPatch(t *testing.T) {
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				fatal(t, r, "Error patching TD: %s", err)
+				t.Fatalf("Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -682,7 +682,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected result body; see logs.")
+				t.Fatalf("Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -714,7 +714,7 @@ func TestPatch(t *testing.T) {
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				fatal(t, r, "Error patching TD: %s", err)
+				t.Fatalf("Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -759,7 +759,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected result body; see logs.")
+				t.Fatalf("Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -794,7 +794,7 @@ func TestPatch(t *testing.T) {
 			// submit PATCH request
 			res, err := httpPatch(serverURL+"/things/"+id, MediaTypeMergePatch, []byte(jsonTD))
 			if err != nil {
-				fatal(t, r, "Error patching TD: %s", err)
+				t.Fatalf("Error patching TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -835,7 +835,7 @@ func TestPatch(t *testing.T) {
 
 			if !serializedEqual(td, storedTD) {
 				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				fatal(t, r, "Unexpected result body; see logs.")
+				t.Fatalf("Unexpected result body; see logs.")
 			}
 		})
 	})
@@ -913,7 +913,7 @@ func TestDelete(t *testing.T) {
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/" + id)
 			if err != nil {
-				fatal(t, r, "Error deleting TD: %s", err)
+				t.Fatalf("Error deleting TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -939,7 +939,7 @@ func TestDelete(t *testing.T) {
 			// try to retrieve the deleted TD
 			res, err := http.Get(serverURL + "/things/" + id)
 			if err != nil {
-				fatal(t, r, "Error getting TD: %s", err)
+				t.Fatalf("Error getting TD: %s", err)
 			}
 			defer res.Body.Close()
 
@@ -963,7 +963,7 @@ func TestDelete(t *testing.T) {
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/non-exiting-td")
 			if err != nil {
-				fatal(t, r, "Error deleting TD: %s", err)
+				t.Fatalf("Error deleting TD: %s", err)
 			}
 			// defer res.Body.Close()
 			response = res
@@ -1006,7 +1006,7 @@ func TestListThings(t *testing.T) {
 
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
-			fatal(t, r, "Error getting list of TDs: %s", err)
+			t.Fatalf("Error getting list of TDs: %s", err)
 		}
 		// defer res.Body.Close()
 		body = httpReadBody(res, t)
@@ -1040,17 +1040,17 @@ func TestListThings(t *testing.T) {
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
 		if err != nil {
-			fatal(t, r, "Error decoding page: %s", err)
+			t.Fatalf("Error decoding page: %s", err)
 		}
 
 		if len(collection) == 0 {
-			fatal(t, r, "Unexpected empty collection.")
+			t.Fatalf("Unexpected empty collection.")
 		}
 
 		var listedTDs []mapAny
 		for _, td := range collection {
 			if td["title"] == nil || td["title"].(string) == "" {
-				fatal(t, r, "Object in array may not be a TD: no mandatory title. Body:\n%s", marshalPrettyJSON(td))
+				t.Fatalf("Object in array may not be a TD: no mandatory title. Body:\n%s", marshalPrettyJSON(td))
 			}
 			if td["tag"] != nil && td["tag"].(string) == tag {
 				listedTDs = append(listedTDs, td)
@@ -1058,7 +1058,7 @@ func TestListThings(t *testing.T) {
 		}
 
 		if len(listedTDs) != 3 {
-			fatal(t, r, "Unexpected items in collection: %d. Expected 3 with tag: %s", len(listedTDs), tag)
+			t.Fatalf("Unexpected items in collection: %d. Expected 3 with tag: %s", len(listedTDs), tag)
 		}
 	})
 
@@ -1071,11 +1071,11 @@ func TestListThings(t *testing.T) {
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
 		if err != nil {
-			fatal(t, r, "Error decoding page: %s", err)
+			t.Fatalf("Error decoding page: %s", err)
 		}
 
 		if len(collection) == 0 {
-			fatal(t, r, "Unexpected empty collection.")
+			t.Fatalf("Unexpected empty collection.")
 		}
 
 		// just test the first TD
@@ -1098,7 +1098,7 @@ func TestListThings(t *testing.T) {
 		// submit the request
 		res, err := http.Get(serverURL + "/things")
 		if err != nil {
-			fatal(t, r, "Error getting list of TDs: %s", err)
+			t.Fatalf("Error getting list of TDs: %s", err)
 		}
 		defer res.Body.Close()
 
@@ -1107,11 +1107,11 @@ func TestListThings(t *testing.T) {
 		var collection []mapAny
 		err = json.Unmarshal(body, &collection)
 		if err != nil {
-			fatal(t, r, "Error decoding page: %s", err)
+			t.Fatalf("Error decoding page: %s", err)
 		}
 
 		if len(collection) == 0 {
-			fatal(t, r, "Unexpected empty collection.")
+			t.Fatalf("Unexpected empty collection.")
 		}
 
 		var found bool
@@ -1124,7 +1124,7 @@ func TestListThings(t *testing.T) {
 			}
 		}
 		if !found {
-			fatal(t, r, "Could not find the created anonymous TD with tag: %s", tag2)
+			t.Fatalf("Could not find the created anonymous TD with tag: %s", tag2)
 		}
 	})
 
@@ -1135,13 +1135,13 @@ func TestListThings(t *testing.T) {
 	// 	defer report(t, r)
 
 	// 	if response == nil {
-	// 		fatal(t, r, "previous errors")
+	// 		t.Fatalf( "previous errors")
 	// 	}
 
 	// 	// encoding := response.Header.Get("Transfer-Encoding")
 	// 	// t.Log(response.Header)
 
-	// 	skip(t, r, "TODO")
+	// 	t.Skipf( "TODO")
 	// })
 
 	// t.Run("http2 streaming", func(t *testing.T) {
@@ -1150,7 +1150,7 @@ func TestListThings(t *testing.T) {
 	// 	}
 	// 	defer report(t, r)
 
-	// 	skip(t, r, "TODO")
+	// 	t.Skipf( "TODO")
 	// })
 
 	t.Run("pagination", func(t *testing.T) {
@@ -1169,7 +1169,7 @@ func TestListThings(t *testing.T) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		t.Skipf("TODO")
 	})
 }
 
@@ -1183,20 +1183,20 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 
 		regInfo, ok := td["registration"].(mapAny)
 		if !ok {
-			fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+			t.Fatalf("invalid or missing registration object: %v", td["registration"])
 		}
 
 		createdStr, ok := regInfo["created"].(string)
 		if !ok {
-			fatal(t, r, "invalid or missing registration.created: %v", regInfo["created"])
+			t.Fatalf("invalid or missing registration.created: %v", regInfo["created"])
 		}
 		created, err := time.Parse(time.RFC3339, createdStr)
 		if err != nil {
-			fatal(t, r, "invalid registration.created format: %s", err)
+			t.Fatalf("invalid registration.created format: %s", err)
 		}
 		age := time.Since(created)
 		if age < 0 && age > time.Minute {
-			fatal(t, r, "registration.created is in future or too old: %s", created)
+			t.Fatalf("registration.created is in future or too old: %s", created)
 		}
 	})
 
@@ -1208,20 +1208,20 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 
 		regInfo, ok := td["registration"].(mapAny)
 		if !ok {
-			fatal(t, r, "invalid or missing registration object: %v", td["registration"])
+			t.Fatalf("invalid or missing registration object: %v", td["registration"])
 		}
 
 		modifiedStr, ok := regInfo["modified"].(string)
 		if !ok {
-			fatal(t, r, "invalid or missing registration.modified: %v", regInfo["modified"])
+			t.Fatalf("invalid or missing registration.modified: %v", regInfo["modified"])
 		}
 		modified, err := time.Parse(time.RFC3339, modifiedStr)
 		if err != nil {
-			fatal(t, r, "invalid registration.modified format: %s", err)
+			t.Fatalf("invalid registration.modified format: %s", err)
 		}
 		age := time.Since(modified)
 		if age < 0 && age > time.Minute {
-			fatal(t, r, "registration.modified is in future or too old: %s", modified)
+			t.Fatalf("registration.modified is in future or too old: %s", modified)
 		}
 	})
 
@@ -1231,7 +1231,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		t.Skipf("TODO")
 	})
 
 	t.Run("ttl", func(t *testing.T) {
@@ -1240,7 +1240,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		t.Skipf("TODO")
 	})
 
 	t.Run("retrieved", func(t *testing.T) {
@@ -1249,7 +1249,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		t.Skipf("TODO")
 	})
 
 	t.Run("purge expired", func(t *testing.T) {
@@ -1258,7 +1258,7 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 		defer report(t, r)
 
-		skip(t, r, "TODO")
+		t.Skipf("TODO")
 	})
 
 }

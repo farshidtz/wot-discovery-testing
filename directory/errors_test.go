@@ -26,10 +26,10 @@ type ValidationError struct {
 func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byte) {
 	t.Helper()
 	if res == nil {
-		fatal(t, r, "previous errors")
+		t.Fatalf("previous errors")
 	}
 	if res.StatusCode < 400 {
-		fatal(t, r, "Expected error. Status was %d", res.StatusCode)
+		t.Fatalf("Expected error. Status was %d", res.StatusCode)
 	}
 
 	if len(body) == 0 {
@@ -55,7 +55,7 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 		https://datatracker.ietf.org/doc/html/rfc7807#section-3.1
 	*/
 	if problemDetails.Status != res.StatusCode {
-		fatal(t, r, "status field not equal to http status code. Got: %d, expected: %d", problemDetails.Status, res.StatusCode)
+		t.Fatalf("status field not equal to http status code. Got: %d, expected: %d", problemDetails.Status, res.StatusCode)
 	}
 
 	/*
@@ -79,7 +79,7 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 	} else if problemDetails.Type != "about:blank" {
 		_, err = url.ParseRequestURI(problemDetails.Type)
 		if err != nil {
-			fatal(t, r, "type field not a valid URI. Got: %s", problemDetails.Type)
+			t.Fatalf("type field not a valid URI. Got: %s", problemDetails.Type)
 		}
 	}
 
@@ -98,7 +98,7 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 	*/
 	if problemDetails.Type != "about:blank" &&
 		problemDetails.Title != http.StatusText(res.StatusCode) {
-		fatal(t, r, "title field not equal to http status text. Got: %s, expected: %s", problemDetails.Title, http.StatusText(res.StatusCode))
+		t.Fatalf("title field not equal to http status text. Got: %s, expected: %s", problemDetails.Title, http.StatusText(res.StatusCode))
 
 	}
 }
@@ -107,10 +107,10 @@ func assertValidationResponse(t *testing.T, r *record, res *http.Response, body 
 	t.Helper()
 
 	if res == nil {
-		fatal(t, r, "previous errors")
+		t.Fatalf("previous errors")
 	}
 	if res.StatusCode < 400 {
-		fatal(t, r, "Expected error. Status was %d", res.StatusCode)
+		t.Fatalf("Expected error. Status was %d", res.StatusCode)
 	}
 
 	if len(body) == 0 {
@@ -126,16 +126,16 @@ func assertValidationResponse(t *testing.T, r *record, res *http.Response, body 
 	validationErrors := problemDetails.ValidationErrors
 
 	if len(validationErrors) < 1 {
-		fatal(t, r, "expected one or more validation errors, got: %d.", len(validationErrors))
+		t.Fatalf("expected one or more validation errors, got: %d.", len(validationErrors))
 	}
 	for _, validationError := range validationErrors {
 
 		if validationError.Field == "" {
-			fatal(t, r, "Missing validation error field in: %s", marshalPrettyJSON(validationError))
+			t.Fatalf("Missing validation error field in: %s", marshalPrettyJSON(validationError))
 		}
 
 		if validationError.Description == "" {
-			fatal(t, r, "Missing validation error description in: %s", marshalPrettyJSON(validationError))
+			t.Fatalf("Missing validation error description in: %s", marshalPrettyJSON(validationError))
 		}
 	}
 }

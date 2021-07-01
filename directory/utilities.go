@@ -216,7 +216,7 @@ func prettifyJSON(in []byte) []byte {
 func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int, body []byte) {
 	t.Helper()
 	if res == nil {
-		fatal(t, r, "previous errors")
+		t.Fatalf("previous errors")
 	}
 	got := res.StatusCode
 	if got != expected {
@@ -224,22 +224,22 @@ func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int,
 		if len(body) > 0 {
 			t.Logf("Body: %s", body)
 		}
-		fatal(t, r, "Expected status %d, got: %d", expected, got)
+		t.Fatalf("Expected status %d, got: %d", expected, got)
 	}
 }
 
 func assertContentMediaType(t *testing.T, r *record, res *http.Response, expected string) {
 	t.Helper()
 	if res == nil {
-		fatal(t, r, "previous errors")
+		t.Fatalf("previous errors")
 	}
 	got := res.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(got)
 	if err != nil {
-		fatal(t, r, "Error parsing content media type: %s", err)
+		t.Fatalf("Error parsing content media type: %s", err)
 	}
 	if mediaType != expected {
-		fatal(t, r, "Expected Content-Type: %s, got %s", expected, got)
+		t.Fatalf("Expected Content-Type: %s, got %s", expected, got)
 	}
 }
 
@@ -252,7 +252,7 @@ func getID(t *testing.T, r *record, td mapAny) string {
 		}
 	}
 	if id == "" {
-		fatal(t, r, "No ID in TD: %s", marshalPrettyJSON(td))
+		t.Fatalf("No ID in TD: %s", marshalPrettyJSON(td))
 	}
 	return id
 }
