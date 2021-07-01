@@ -11,13 +11,6 @@ import (
 
 var results map[string]result
 
-type record struct {
-	name       string
-	status     string
-	assertions []string
-	comments   string
-}
-
 type result struct {
 	passed  []string
 	failed  []string
@@ -83,16 +76,16 @@ func initReportWriter(path string) (commit func()) {
 	return commit
 }
 
-func ingestRecord(t *testing.T, r record) {
-	for _, a := range r.assertions {
+func ingestRecord(t *testing.T, name string, assertions []string) {
+	for _, a := range assertions {
 		result := results[a]
 		if t.Failed() {
-			result.failed = append(result.failed, r.name)
+			result.failed = append(result.failed, name)
 		} else if t.Skipped() {
-			result.skipped = append(result.skipped, r.name)
+			result.skipped = append(result.skipped, name)
 			// result.skipped = append(result.skipped, fmt.Sprintf("%s(%s)", r.name, strings.ReplaceAll(r.comments, " ", "_")))
 		} else {
-			result.passed = append(result.passed, r.name)
+			result.passed = append(result.passed, name)
 		}
 		results[a] = result
 	}
@@ -128,14 +121,12 @@ func resultToCSV(assertionID string, r result) []string {
 }
 
 // report at the end of tests. Execute with defer statement.
-func report(t *testing.T, r *record) {
-	if r == nil {
-		r = &record{}
-	}
+func report(t *testing.T, assertions ...string) {
+	// if len(assertions) == 0 {
+	// 	panic("no assertions given")
+	// }
 
-	r.name = t.Name()
-
-	for _, a := range r.assertions {
+	for _, a := range assertions {
 		if strings.Contains(a, ",") {
 			panic("Assertion should not contain commas: " + a)
 		}
@@ -144,9 +135,5 @@ func report(t *testing.T, r *record) {
 		}
 	}
 
-	if r.status != "" {
-		panic("status should not be set explicitly: " + r.status)
-	}
-
-	ingestRecord(t, *r)
+	ingestRecord(t, t.Name(), assertions)
 }

@@ -213,7 +213,7 @@ func prettifyJSON(in []byte) []byte {
 	return out.Bytes()
 }
 
-func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int, body []byte) {
+func assertStatusCode(t *testing.T, res *http.Response, expected int, body []byte) {
 	t.Helper()
 	if res == nil {
 		t.Fatalf("previous errors")
@@ -228,7 +228,7 @@ func assertStatusCode(t *testing.T, r *record, res *http.Response, expected int,
 	}
 }
 
-func assertContentMediaType(t *testing.T, r *record, res *http.Response, expected string) {
+func assertContentMediaType(t *testing.T, res *http.Response, expected string) {
 	t.Helper()
 	if res == nil {
 		t.Fatalf("previous errors")
@@ -243,7 +243,7 @@ func assertContentMediaType(t *testing.T, r *record, res *http.Response, expecte
 	}
 }
 
-func getID(t *testing.T, r *record, td mapAny) string {
+func getID(t *testing.T, td mapAny) string {
 	t.Helper()
 	var id string
 	if _, found := td["id"]; found {

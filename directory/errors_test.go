@@ -23,7 +23,7 @@ type ValidationError struct {
 	Description string `json:"description"`
 }
 
-func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byte) {
+func assertErrorResponse(t *testing.T, res *http.Response, body []byte) {
 	t.Helper()
 	if res == nil {
 		t.Fatalf("previous errors")
@@ -103,7 +103,7 @@ func assertErrorResponse(t *testing.T, r *record, res *http.Response, body []byt
 	}
 }
 
-func assertValidationResponse(t *testing.T, r *record, res *http.Response, body []byte) {
+func assertValidationResponse(t *testing.T, res *http.Response, body []byte) {
 	t.Helper()
 
 	if res == nil {

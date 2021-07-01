@@ -10,7 +10,6 @@ import (
 )
 
 func TestJSONPath(t *testing.T) {
-	defer report(t, nil)
 
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
@@ -27,14 +26,11 @@ func TestJSONPath(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			r := &record{
-				assertions: []string{
-					"tdd-search-jsonpath",
-					"tdd-search-jsonpath-method",
-					"tdd-search-jsonpath-parameter",
-				},
-			}
-			defer report(t, r)
+			defer report(t,
+				"tdd-search-jsonpath",
+				"tdd-search-jsonpath-method",
+				"tdd-search-jsonpath-parameter",
+			)
 
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
@@ -48,28 +44,19 @@ func TestJSONPath(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-jsonpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-jsonpath-response")
 
-			assertStatusCode(t, r, response, http.StatusOK, body)
+			assertStatusCode(t, response, http.StatusOK, body)
 		})
 
 		t.Run("content type", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-jsonpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-jsonpath-response")
 
-			assertContentMediaType(t, r, response, MediaTypeJSON)
+			assertContentMediaType(t, response, MediaTypeJSON)
 		})
 
 		t.Run("payload", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-jsonpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-jsonpath-response")
 
 			var filterredTDs []mapAny
 			err := json.Unmarshal(body, &filterredTDs)
@@ -83,13 +70,13 @@ func TestJSONPath(t *testing.T) {
 
 			createdTDsMap := make(map[string]mapAny)
 			for _, createdTD := range createdTD {
-				id := getID(t, r, createdTD)
+				id := getID(t, createdTD)
 				createdTDsMap[id] = createdTD
 			}
 
 			// compare created and filterred
 			for _, filterredTD := range filterredTDs {
-				id := getID(t, r, filterredTD)
+				id := getID(t, filterredTD)
 				if _, found := createdTDsMap[id]; !found {
 					t.Fatalf("Result does not include the TD with id: %s", id)
 				}
@@ -106,10 +93,7 @@ func TestJSONPath(t *testing.T) {
 	})
 
 	t.Run("filter anonymous", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-anonymous-td-identifier"},
-		}
-		defer report(t, r)
+		defer report(t, "tdd-reg-anonymous-td-identifier")
 
 		// add an anonymous TD
 		createdTD := mockedTD("") // no id
@@ -138,21 +122,18 @@ func TestJSONPath(t *testing.T) {
 		}
 
 		// try to get the ID. This should pass
-		getID(t, r, filterredTDs[0])
+		getID(t, filterredTDs[0])
 	})
 
 	t.Run("reject bad query", func(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			r := &record{
-				assertions: []string{
-					"tdd-search-jsonpath",
-					"tdd-search-jsonpath-method",
-					"tdd-search-jsonpath-parameter",
-				},
-			}
-			defer report(t, r)
+			defer report(t,
+				"tdd-search-jsonpath",
+				"tdd-search-jsonpath-method",
+				"tdd-search-jsonpath-parameter",
+			)
 
 			res, err := http.Get(serverURL + "/search/jsonpath?query=*/id")
 			if err != nil {
@@ -163,19 +144,14 @@ func TestJSONPath(t *testing.T) {
 		})
 
 		t.Run("status code", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-jsonpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-jsonpath-response")
 
-			assertStatusCode(t, r, response, http.StatusBadRequest, nil)
+			assertStatusCode(t, response, http.StatusBadRequest, nil)
 		})
 	})
 }
 
 func TestXPath(t *testing.T) {
-	defer report(t, nil)
-
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
 		var createdTD []mapAny
@@ -191,14 +167,11 @@ func TestXPath(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			r := &record{
-				assertions: []string{
-					"tdd-search-xpath",
-					"tdd-search-xpath-method",
-					"tdd-search-xpath-parameter",
-				},
-			}
-			defer report(t, r)
+			defer report(t,
+				"tdd-search-xpath",
+				"tdd-search-xpath-method",
+				"tdd-search-xpath-parameter",
+			)
 
 			// submit the request
 			res, err := http.Get(serverURL + fmt.Sprintf("/search/xpath?query=*[tag='%s']", tag))
@@ -212,28 +185,19 @@ func TestXPath(t *testing.T) {
 		body := httpReadBody(response, t)
 
 		t.Run("status code", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-xpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-xpath-response")
 
-			assertStatusCode(t, r, response, http.StatusOK, body)
+			assertStatusCode(t, response, http.StatusOK, body)
 		})
 
 		t.Run("content type", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-xpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-xpath-response")
 
-			assertContentMediaType(t, r, response, MediaTypeJSON)
+			assertContentMediaType(t, response, MediaTypeJSON)
 		})
 
 		t.Run("payload", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-xpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-xpath-response")
 
 			var filterredTDs []mapAny
 			err := json.Unmarshal(body, &filterredTDs)
@@ -247,13 +211,13 @@ func TestXPath(t *testing.T) {
 
 			createdTDsMap := make(map[string]mapAny)
 			for _, createdTD := range createdTD {
-				id := getID(t, r, createdTD)
+				id := getID(t, createdTD)
 				createdTDsMap[id] = createdTD
 			}
 
 			// compare created and filterred
 			for _, filterredTD := range filterredTDs {
-				id := getID(t, r, filterredTD)
+				id := getID(t, filterredTD)
 				if _, found := createdTDsMap[id]; !found {
 					t.Fatalf("Result does not include the TD with id: %s", id)
 				}
@@ -270,10 +234,7 @@ func TestXPath(t *testing.T) {
 	})
 
 	t.Run("filter anonymous", func(t *testing.T) {
-		r := &record{
-			assertions: []string{"tdd-reg-anonymous-td-identifier"},
-		}
-		defer report(t, r)
+		defer report(t, "tdd-reg-anonymous-td-identifier")
 
 		// add an anonymous TD
 		createdTD := mockedTD("") // no id
@@ -302,21 +263,18 @@ func TestXPath(t *testing.T) {
 		}
 
 		// try to get the ID. This should pass
-		getID(t, r, filterredTDs[0])
+		getID(t, filterredTDs[0])
 	})
 
 	t.Run("reject bad query", func(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			r := &record{
-				assertions: []string{
-					"tdd-search-xpath",
-					"tdd-search-xpath-method",
-					"tdd-search-xpath-parameter",
-				},
-			}
-			defer report(t, r)
+			defer report(t,
+				"tdd-search-xpath",
+				"tdd-search-xpath-method",
+				"tdd-search-xpath-parameter",
+			)
 
 			res, err := http.Get(serverURL + "/search/xpath?query=$[:].id")
 			if err != nil {
@@ -327,29 +285,23 @@ func TestXPath(t *testing.T) {
 		})
 
 		t.Run("status code", func(t *testing.T) {
-			r := &record{
-				assertions: []string{"tdd-search-xpath-response"},
-			}
-			defer report(t, r)
+			defer report(t, "tdd-search-xpath-response")
 
-			assertStatusCode(t, r, response, http.StatusBadRequest, nil)
+			assertStatusCode(t, response, http.StatusBadRequest, nil)
 		})
 	})
 }
 
 func TestSPARQL(t *testing.T) {
-	r := &record{
-		assertions: []string{
-			"tdd-search-sparql",
-			"tdd-search-sparql-version",
-			"tdd-search-sparql-method-get",
-			"tdd-search-sparql-method-post",
-			"tdd-search-sparql-resp",
-			"tdd-search-sparql-federation",
-			"tdd-search-sparql-federation-imp",
-		},
-	}
-	defer report(t, r)
+	defer report(t,
+		"tdd-search-sparql",
+		"tdd-search-sparql-version",
+		"tdd-search-sparql-method-get",
+		"tdd-search-sparql-method-post",
+		"tdd-search-sparql-resp",
+		"tdd-search-sparql-federation",
+		"tdd-search-sparql-federation-imp",
+	)
 
 	t.Skipf("TODO")
 }

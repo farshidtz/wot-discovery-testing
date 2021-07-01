@@ -40,18 +40,18 @@ func TestCreateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeCreate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeCreate)
 				}
@@ -59,7 +59,7 @@ func TestCreateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -67,7 +67,7 @@ func TestCreateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -75,12 +75,12 @@ func TestCreateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for subscription")
 			})
 		}
@@ -103,18 +103,18 @@ func TestCreateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeCreate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeCreate)
 				}
@@ -122,7 +122,7 @@ func TestCreateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -130,14 +130,14 @@ func TestCreateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
 
 			})
 			t.Run("check event data create full", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-create-full"}})
+				defer report(t, "tdd-notification-data-create-full")
 				// remove system-generated attributes
 				delete(data, "registration")
 
@@ -148,7 +148,7 @@ func TestCreateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription diff unsupported", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-diff-unsupported"}})
+				defer report(t, "tdd-notification-data-diff-unsupported")
 				var httpErr *httpError
 				if errors.As(err, &httpErr) {
 					if httpErr.code != http.StatusNotImplemented {
@@ -180,17 +180,17 @@ func TestCreateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
-				}})
+				)
 				if string(res.Event) != EventTypeCreate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeCreate)
 				}
@@ -198,7 +198,7 @@ func TestCreateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -206,7 +206,7 @@ func TestCreateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -214,12 +214,12 @@ func TestCreateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for subscription")
 			})
 		}
@@ -241,7 +241,7 @@ func TestCreateEvent(t *testing.T) {
 		select {
 		case <-eventCh:
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-filter-type"}})
+				defer report(t, "tdd-notification-filter-type")
 				t.Fatal("unexpected update event received for TD create")
 			})
 		case err := <-errCh:
@@ -275,21 +275,21 @@ func TestUpdateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-id",
-				}})
+				)
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeUpdate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeUpdate)
 				}
@@ -297,7 +297,7 @@ func TestUpdateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -305,7 +305,7 @@ func TestUpdateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -313,12 +313,12 @@ func TestUpdateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for data")
 			})
 		}
@@ -340,18 +340,18 @@ func TestUpdateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeUpdate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeUpdate)
 				}
@@ -359,7 +359,7 @@ func TestUpdateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -367,14 +367,14 @@ func TestUpdateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid", "tdd-notification-data-update-id"}})
+				defer report(t, "tdd-notification-data-tdid", "tdd-notification-data-update-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
 
 			})
 			t.Run("check event data update diff", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-update-diff"}})
+				defer report(t, "tdd-notification-data-update-diff")
 				// remove system-generated attributes
 				delete(data, "registration")
 
@@ -390,7 +390,7 @@ func TestUpdateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription diff unsupported", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-diff-unsupported"}})
+				defer report(t, "tdd-notification-data-diff-unsupported")
 				var httpErr *httpError
 				if errors.As(err, &httpErr) {
 					if httpErr.code != http.StatusNotImplemented {
@@ -421,17 +421,17 @@ func TestUpdateEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
-				}})
+				)
 				if string(res.Event) != EventTypeUpdate {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeUpdate)
 				}
@@ -439,7 +439,7 @@ func TestUpdateEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -447,7 +447,7 @@ func TestUpdateEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -455,12 +455,12 @@ func TestUpdateEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for data")
 			})
 		}
@@ -482,7 +482,7 @@ func TestUpdateEvent(t *testing.T) {
 		select {
 		case <-eventCh:
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-filter-type"}})
+				defer report(t, "tdd-notification-filter-type")
 				t.Fatal("unexpected create event received for TD update")
 			})
 		case err := <-errCh:
@@ -517,21 +517,21 @@ func TestDeleteEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-id",
-				}})
+				)
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeDelete {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
 				}
@@ -539,7 +539,7 @@ func TestDeleteEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -547,7 +547,7 @@ func TestDeleteEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -555,12 +555,12 @@ func TestDeleteEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for data")
 			})
 		}
@@ -588,18 +588,18 @@ func TestDeleteEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
-				}})
+				)
 				if string(res.Event) != EventTypeDelete {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
 				}
@@ -607,7 +607,7 @@ func TestDeleteEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -615,14 +615,14 @@ func TestDeleteEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
 
 			})
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-delete-diff"}})
+				defer report(t, "tdd-notification-data-delete-diff")
 				for key, _ := range data {
 					if key != "id" {
 						t.Fatalf("unexpected part in the delete notification : %s", key)
@@ -631,7 +631,7 @@ func TestDeleteEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription diff unsupported", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-diff-unsupported"}})
+				defer report(t, "tdd-notification-data-diff-unsupported")
 				var httpErr *httpError
 				if errors.As(err, &httpErr) {
 					if httpErr.code != http.StatusNotImplemented {
@@ -668,17 +668,17 @@ func TestDeleteEvent(t *testing.T) {
 		select {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse", "tdd-notification-event-id"}})
+				defer report(t, "tdd-notification-sse", "tdd-notification-event-id")
 				if string(res.ID) == "" {
 					t.Fatal("missing event ID")
 				}
 			})
 
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{
+				defer report(t,
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
-				}})
+				)
 				if string(res.Event) != EventTypeDelete {
 					t.Fatalf("Unexpected event type: %s, expected: %s", string(res.Event), EventTypeDelete)
 				}
@@ -686,7 +686,7 @@ func TestDeleteEvent(t *testing.T) {
 
 			var data mapAny
 			t.Run("check event data", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data"}})
+				defer report(t, "tdd-notification-data")
 				err := json.Unmarshal(res.Data, &data)
 				if err != nil {
 					t.Fatal("unable to unmarshal the event data to TDD")
@@ -694,7 +694,7 @@ func TestDeleteEvent(t *testing.T) {
 			})
 
 			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-data-tdid"}})
+				defer report(t, "tdd-notification-data-tdid")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -702,12 +702,12 @@ func TestDeleteEvent(t *testing.T) {
 			})
 		case err := <-errCh:
 			t.Run("event subscription errors", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatalf("unexpected error while subscribing to notification: %s", err)
 			})
 		case <-time.After(timeoutDuration):
 			t.Run("event subscription timeout", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-sse"}})
+				defer report(t, "tdd-notification-sse")
 				t.Fatal("timed out waiting for data")
 			})
 		}
@@ -735,7 +735,7 @@ func TestDeleteEvent(t *testing.T) {
 		select {
 		case <-eventCh:
 			t.Run("get event type", func(t *testing.T) {
-				defer report(t, &record{assertions: []string{"tdd-notification-filter-type"}})
+				defer report(t, "tdd-notification-filter-type")
 				t.Fatal("unexpected create event received for TD delete")
 			})
 		case err := <-errCh:
