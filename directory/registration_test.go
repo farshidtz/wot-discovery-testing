@@ -313,7 +313,7 @@ func TestRetrieveThing(t *testing.T) {
 		)
 
 		// submit GET request
-		res, err := http.Get(serverURL + "/td/" + id)
+		res, err := http.Get(serverURL + "/things/" + id)
 		if err != nil {
 			t.Fatalf("Error getting TD: %s", err)
 		}
