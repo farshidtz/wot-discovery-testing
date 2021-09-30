@@ -66,8 +66,8 @@ func TestCreateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -129,8 +129,8 @@ func TestCreateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -205,8 +205,8 @@ func TestCreateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -304,8 +304,8 @@ func TestUpdateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -366,8 +366,8 @@ func TestUpdateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid", "tdd-notification-data-update-id")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id", "tdd-notification-data-update-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -446,8 +446,8 @@ func TestUpdateEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -546,8 +546,8 @@ func TestDeleteEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -614,8 +614,8 @@ func TestDeleteEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
@@ -693,8 +693,8 @@ func TestDeleteEvent(t *testing.T) {
 				}
 			})
 
-			t.Run("check event data tdid", func(t *testing.T) {
-				defer report(t, "tdd-notification-data-tdid")
+			t.Run("check event data td id", func(t *testing.T) {
+				defer report(t, "tdd-notification-data-td-id")
 				if id != data["id"] {
 					t.Fatalf("td id did not match: expected %s, got %s", id, data["id"])
 				}
