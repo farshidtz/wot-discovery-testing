@@ -155,11 +155,16 @@ func retrieveAllThings(serverURL string, t *testing.T) []mapAny {
 }
 
 func serializedEqual(td1, td2 mapAny) bool {
+	// ignore context for now
+	// See https://github.com/w3c/wot-discovery/issues/291
+	delete(td1, "@context")
+	delete(td2, "@context")
+
 	// serialize to ease comparison of interfaces and concrete types
 	tdBytes, _ := json.Marshal(td1)
-	storedTDBytes, _ := json.Marshal(td2)
+	td2Bytes, _ := json.Marshal(td2)
 
-	return reflect.DeepEqual(tdBytes, storedTDBytes)
+	return reflect.DeepEqual(tdBytes, td2Bytes)
 }
 
 func httpPut(url, contentType string, b []byte) (*http.Response, error) {
