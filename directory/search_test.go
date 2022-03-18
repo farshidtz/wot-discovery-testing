@@ -1,9 +1,11 @@
 package directory
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	uuid "github.com/satori/go.uuid"
@@ -293,15 +295,116 @@ func TestXPath(t *testing.T) {
 }
 
 func TestSPARQL(t *testing.T) {
-	defer report(t,
-		"tdd-search-sparql",
-		"tdd-search-sparql-version",
-		"tdd-search-sparql-method-get",
-		"tdd-search-sparql-method-post",
-		"tdd-search-sparql-resp",
-		"tdd-search-sparql-federation",
-		"tdd-search-sparql-federation-imp",
-	)
 
-	t.Skipf("TODO")
+	const query = `select * { ?s ?p ?o }limit 5`
+	const federatedQuery = `select * {
+		service <https://dbpedia.org/sparql>{
+			 ?s ?p ?o
+		}
+	}limit 5`
+
+	var expectedResult = sparqlResultsSample()
+
+	t.Run("search using GET", func(t *testing.T) {
+		defer report(t,
+			"tdd-search-sparql",
+			"tdd-search-sparql-method-get",
+			"tdd-search-sparql-resp",
+		)
+
+		// submit GET request
+		res, err := http.Get(serverURL + "/search/sparql?query=" + url.QueryEscape(query))
+		if err != nil {
+			t.Fatalf("Error solving query SPARQL: %s", err)
+		}
+		body := httpReadBody(res, t)
+
+		var responseMap mapAny
+		err = json.Unmarshal(body, &responseMap)
+		if err != nil {
+			t.Fatalf("Error decoding response: %s", err)
+		}
+
+		t.Log(responseMap)
+		delete(responseMap, "results")
+
+		if !serializedEqual(responseMap, expectedResult) {
+			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
+				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
+		}
+	})
+
+	t.Run("search using POST", func(t *testing.T) {
+		defer report(t,
+			"tdd-search-sparql",
+			"tdd-search-sparql-method-post",
+			"tdd-search-sparql-resp",
+		)
+
+		// submit POST request
+		res, err := http.Post(serverURL+"/search/sparql",
+			"application/sparql-query",
+			bytes.NewReader([]byte(query)))
+		if err != nil {
+			t.Fatalf("Error solving query SPARQL: %s", err)
+		}
+		body := httpReadBody(res, t)
+
+		var responseMap mapAny
+		err = json.Unmarshal(body, &responseMap)
+		if err != nil {
+			t.Fatalf("Error decoding response: %s", err)
+		}
+
+		t.Log(responseMap)
+		delete(responseMap, "results")
+
+		if !serializedEqual(responseMap, expectedResult) {
+			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
+				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
+		}
+	})
+
+	t.Run("federated search using GET", func(t *testing.T) {
+		defer report(t,
+			"tdd-search-sparql",
+			"tdd-search-sparql-method-get",
+			"tdd-search-sparql-resp",
+			"tdd-search-sparql-federation",
+		)
+
+		// submit GET request
+		res, err := http.Get(serverURL + "/search/sparql?query=" + url.QueryEscape(federatedQuery))
+		if err != nil {
+			t.Fatalf("Error solving query SPARQL: %s", err)
+		}
+		body := httpReadBody(res, t)
+
+		var responseMap mapAny
+		err = json.Unmarshal(body, &responseMap)
+		if err != nil {
+			t.Fatalf("Error decoding response: %s", err)
+		}
+
+		t.Log(responseMap)
+		delete(responseMap, "results")
+
+		if !serializedEqual(responseMap, expectedResult) {
+			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
+				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
+		}
+	})
+}
+
+func sparqlResultsSample() mapAny {
+	var qr = mapAny{
+		"head": mapAny{
+			"vars": []string{
+				"s",
+				"p",
+				"o",
+			},
+		},
+	}
+	return qr
 }
