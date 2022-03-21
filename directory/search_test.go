@@ -95,7 +95,7 @@ func TestJSONPath(t *testing.T) {
 	})
 
 	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-reg-anonymous-td-identifier")
+		defer report(t, "tdd-anonymous-td-identifier")
 
 		// add an anonymous TD
 		createdTD := mockedTD("") // no id
@@ -236,7 +236,7 @@ func TestXPath(t *testing.T) {
 	})
 
 	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-reg-anonymous-td-identifier")
+		defer report(t, "tdd-anonymous-td-identifier")
 
 		// add an anonymous TD
 		createdTD := mockedTD("") // no id

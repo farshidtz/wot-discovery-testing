@@ -20,7 +20,7 @@ type result struct {
 func initReportWriter(path string) (commit func()) {
 	results = make(map[string]result)
 	// csv header
-	header := []string{"AssertionID", "Status", "Details"}
+	header := []string{"ID", "Status", "Comment"}
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -41,13 +41,6 @@ func initReportWriter(path string) (commit func()) {
 		// sort by id
 		for id, result := range results {
 			sortedResults = append(sortedResults, resultToCSV(id, result))
-		}
-
-		// insert unchecked assertions
-		for _, id := range tddAssertions {
-			if _, found := results[id]; !found {
-				sortedResults = append(sortedResults, []string{id, "skipped", "untested"})
-			}
 		}
 
 		sort.Slice(sortedResults, func(i, j int) bool {
@@ -95,11 +88,11 @@ func ingestRecord(t *testing.T, name string, assertions []string) {
 func resultToCSV(assertionID string, r result) []string {
 	var status string
 	if len(r.failed) > 0 {
-		status = "failed"
+		status = "fail"
 	} else if len(r.skipped) > 0 {
-		status = "skipped"
+		status = "null"
 	} else {
-		status = "passed"
+		status = "pass"
 	}
 
 	var details []string
