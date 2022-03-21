@@ -12,6 +12,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// http-head
+
 func TestCreateAnonymousThing(t *testing.T) {
 
 	td := mockedTD("") // without ID
@@ -21,10 +23,9 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
-			"tdd-reg-crudl",
-			"tdd-reg-create-anonymous-td",
-			"tdd-reg-create-body",
-			"tdd-reg-create-contenttype")
+			"tdd-things-crudl",
+			"tdd-things-create-anonymous-td",
+			"tdd-things-create-anonymous-contenttype")
 
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
@@ -38,15 +39,15 @@ func TestCreateAnonymousThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		defer report(t, "tdd-reg-create-anonymous-td-resp")
+		defer report(t, "tdd-things-create-anonymous-td-resp")
 		assertStatusCode(t, response, http.StatusCreated, body)
 	})
 
 	var systemGeneratedID string
 	t.Run("location header", func(t *testing.T) {
 		defer report(t,
-			"tdd-reg-create-anonymous-td-resp",
-			"tdd-reg-anonymous-td-local-id",
+			"tdd-things-create-anonymous-td-resp",
+			"tdd-anonymous-td-local-uuid",
 		)
 
 		// Check if system-generated id is in response
@@ -68,7 +69,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 
 	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-reg-create-anonymous-td")
+		defer report(t, "tdd-things-create-anonymous-td")
 
 		if systemGeneratedID == "" {
 			t.Fatalf("previous errors")
@@ -88,7 +89,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 	})
 
 	t.Run("registration info", func(t *testing.T) {
-		defer report(t, "tdd-reg-anonymous-td-identifier")
+		defer report(t, "tdd-anonymous-td-identifier")
 
 		// retrieve the stored TD
 		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
@@ -98,7 +99,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	// reject PUT of anonymous TD
 	t.Run("reject PUT", func(t *testing.T) {
-		defer report(t, "tdd-reg-create-known-vs-anonymous")
+		defer report(t, "tdd-things-create-known-vs-anonymous")
 
 		td := mockedTD("") // no id
 		b, _ := json.Marshal(td)
@@ -162,10 +163,9 @@ func TestCreateThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		defer report(t, "tdd-reg-crudl",
-			"tdd-reg-create-known-td",
-			"tdd-reg-create-body",
-			"tdd-reg-create-contenttype",
+		defer report(t, "tdd-things-crudl",
+			"tdd-things-create-known-td",
+			"tdd-things-create-known-contenttype",
 		)
 
 		// submit PUT request
@@ -180,14 +180,13 @@ func TestCreateThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		defer report(t, "tdd-reg-create-known-td-resp")
+		defer report(t, "tdd-things-create-known-td-resp")
 		assertStatusCode(t, response, http.StatusCreated, body)
 	})
 
 	t.Run("result", func(t *testing.T) {
 		defer report(t,
-			"tdd-reg-create-known-td",
-			"tdd-reg-create-body",
+			"tdd-things-create-known-td",
 		)
 
 		// retrieve the stored TD
@@ -275,7 +274,7 @@ func TestCreateThing(t *testing.T) {
 
 	// reject POST with id: not disallowed explicitly
 	// t.Run("reject POST", func(t *testing.T) {
-	// 	defer report(t, "tdd-reg-create-known-vs-anonymous")
+	// 	defer report(t, "tdd-things-create-known-vs-anonymous")
 
 	// 	id := "urn:uuid:" + uuid.NewV4().String()
 	// 	td := mockedTD(id)
@@ -308,8 +307,8 @@ func TestRetrieveThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
-			"tdd-reg-crudl",
-			"tdd-reg-retrieve",
+			"tdd-things-crudl",
+			"tdd-things-retrieve",
 		)
 
 		// submit GET request
@@ -324,17 +323,17 @@ func TestRetrieveThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		defer report(t, "tdd-reg-retrieve-resp")
+		defer report(t, "tdd-things-retrieve-resp")
 		assertStatusCode(t, response, http.StatusOK, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		defer report(t, "tdd-reg-retrieve-resp")
+		defer report(t, "tdd-things-retrieve-resp")
 		assertContentMediaType(t, response, MediaTypeThingDescription)
 	})
 
 	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-reg-retrieve")
+		defer report(t, "tdd-things-retrieve")
 
 		var retrievedTD mapAny
 		err := json.Unmarshal(body, &retrievedTD)
@@ -358,7 +357,7 @@ func TestRetrieveThing(t *testing.T) {
 	})
 
 	// t.Run("anonymous td id", func(t *testing.T) {
-	// 	defer report(t, "tdd-reg-anonymous-td-identifier")
+	// 	defer report(t, "tdd-anonymous-td-identifier")
 
 	// 	t.Skipf( "Tested under TestCreateAnonymousThing")
 	// })
@@ -379,10 +378,9 @@ func TestUpdateThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
-			"tdd-reg-crudl",
-			"tdd-reg-update-types",
-			"tdd-reg-update",
-			"tdd-reg-update-contenttype",
+			"tdd-things-crudl",
+			"tdd-things-update",
+			"tdd-things-update-contenttype",
 		)
 
 		// submit PUT request
@@ -397,12 +395,12 @@ func TestUpdateThing(t *testing.T) {
 	body := httpReadBody(response, t)
 
 	t.Run("status code", func(t *testing.T) {
-		defer report(t, "tdd-reg-update-resp")
+		defer report(t, "tdd-things-update-resp")
 		assertStatusCode(t, response, http.StatusNoContent, body)
 	})
 
 	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-reg-update-types", "tdd-reg-update", "tdd-reg-update-contenttype")
+		defer report(t, "tdd-things-update", "tdd-things-update-contenttype")
 
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
@@ -454,14 +452,14 @@ func TestPatch(t *testing.T) {
 
 	var (
 		requestAssertions = []string{
-			"tdd-reg-update-partial",
-			"tdd-reg-update-partial-partialtd",
-			"tdd-reg-update-partial-contenttype",
+			"tdd-things-update-partial",
+			"tdd-things-update-partial-partialtd",
+			"tdd-things-update-partial-contenttype",
 		}
-		statusAssertions = []string{"tdd-reg-update-partial-resp"}
+		statusAssertions = []string{"tdd-things-update-partial-resp"}
 		resultAssertions = []string{
-			"tdd-reg-update-partial",
-			"tdd-reg-update-partial-mergepatch",
+			"tdd-things-update-partial",
+			"tdd-things-update-partial-mergepatch",
 		}
 	)
 
@@ -739,9 +737,9 @@ func TestPatch(t *testing.T) {
 func TestDelete(t *testing.T) {
 
 	const (
-		requestAssertions = "tdd-reg-delete"
-		statusAssertions  = "tdd-reg-delete-resp"
-		resultAssertions  = "tdd-reg-delete"
+		requestAssertions = "tdd-things-delete"
+		statusAssertions  = "tdd-things-delete-resp"
+		resultAssertions  = "tdd-things-delete"
 	)
 
 	// add a new TD
@@ -753,7 +751,7 @@ func TestDelete(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			defer report(t, "tdd-reg-crudl", requestAssertions)
+			defer report(t, "tdd-things-crudl", requestAssertions)
 
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/" + id)
@@ -822,7 +820,7 @@ func TestListThings(t *testing.T) {
 
 	tag := uuid.NewV4().String()
 	t.Run("submit request", func(t *testing.T) {
-		defer report(t, "tdd-reg-crudl", "tdd-reg-list-method")
+		defer report(t, "tdd-things-crudl", "tdd-things-list-method")
 
 		for i := 0; i < 3; i++ {
 			id := "urn:uuid:" + uuid.NewV4().String()
@@ -842,18 +840,18 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("status code", func(t *testing.T) {
-		defer report(t, "tdd-reg-list-method")
+		defer report(t, "tdd-things-list-method")
 
 		assertStatusCode(t, response, http.StatusOK, body)
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		defer report(t, "tdd-reg-list-resp")
+		defer report(t, "tdd-things-list-resp")
 		assertContentMediaType(t, response, MediaTypeJSONLD)
 	})
 
 	t.Run("payload", func(t *testing.T) {
-		defer report(t, "tdd-reg-list-resp")
+		defer report(t, "tdd-things-list-resp")
 
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
@@ -881,7 +879,7 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("registration info", func(t *testing.T) {
-		defer report(t, "tdd-reg-list-resp")
+		defer report(t, "tdd-things-list-resp")
 
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
@@ -898,7 +896,7 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("anonymous td id", func(t *testing.T) {
-		defer report(t, "tdd-reg-anonymous-td-identifier")
+		defer report(t, "tdd-anonymous-td-identifier")
 
 		// add an anonymous TD
 		createdTD := mockedTD("") // no id
@@ -940,40 +938,21 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
-	// t.Run("http11 chunking", func(t *testing.T) {
-	// 	defer report(t, "tdd-reg-list-http11-chunks")
+	// t.Run("pagination", func(t *testing.T) {
+	// 	defer report(t,
+	// 		"tdd-things-list-pagination",
+	// 		"tdd-things-list-pagination-limit",
+	// 		"tdd-things-list-pagination-header-nextlink",
+	// 		"tdd-things-list-pagination-header-nextlink-attr",
+	// 		"tdd-things-list-pagination-header-canonicallink",
+	// 		"tdd-things-list-pagination-order-default",
+	// 		"tdd-things-list-pagination-order",
+	// 		"tdd-things-list-pagination-order-unsupported",
+	// 		"tdd-things-list-pagination-order-nextlink",
+	// 	)
 
-	// 	if response == nil {
-	// 		t.Fatalf( "previous errors")
-	// 	}
-
-	// 	// encoding := response.Header.Get("Transfer-Encoding")
-	// 	// t.Log(response.Header)
-
-	// 	t.Skipf( "TODO")
+	// 	t.Skipf("TODO")
 	// })
-
-	// t.Run("http2 streaming", func(t *testing.T) {
-	// 	defer report(t, "tdd-reg-list-http2-frames")
-
-	// 	t.Skipf( "TODO")
-	// })
-
-	t.Run("pagination", func(t *testing.T) {
-		defer report(t,
-			"tdd-reg-list-pagination",
-			"tdd-reg-list-pagination-limit",
-			"tdd-reg-list-pagination-header-nextlink",
-			"tdd-reg-list-pagination-header-nextlink-attr",
-			"tdd-reg-list-pagination-header-canonicallink",
-			"tdd-reg-list-pagination-order-default",
-			"tdd-reg-list-pagination-order",
-			"tdd-reg-list-pagination-order-unsupported",
-			"tdd-reg-list-pagination-order-nextlink",
-		)
-
-		t.Skipf("TODO")
-	})
 }
 
 func testRegistrionInfo(t *testing.T, td mapAny) {
