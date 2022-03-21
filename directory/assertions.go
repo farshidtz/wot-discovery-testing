@@ -7,23 +7,6 @@ const (
 	MediaTypeMergePatch       = "application/merge-patch+json"
 )
 
-func mockedTD(id string) mapAny {
-	var td = mapAny{
-		"@context": "https://www.w3.org/2019/wot/td/v1",
-		"title":    "example thing",
-		"security": []string{"nosec_sc"},
-		"securityDefinitions": mapAny{
-			"nosec_sc": map[string]string{
-				"scheme": "nosec",
-			},
-		},
-	}
-	if id != "" {
-		td["id"] = id
-	}
-	return td
-}
-
 // Extractor:
 // https://play.golang.org/p/2Kj-RxZ5nek
 

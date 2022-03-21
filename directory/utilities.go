@@ -17,6 +17,23 @@ import (
 type any = interface{}
 type mapAny = map[string]any
 
+func mockedTD(id string) mapAny {
+	var td = mapAny{
+		"@context": "https://www.w3.org/2019/wot/td/v1",
+		"title":    "example thing",
+		"security": []string{"nosec_sc"},
+		"securityDefinitions": mapAny{
+			"nosec_sc": map[string]string{
+				"scheme": "nosec",
+			},
+		},
+	}
+	if id != "" {
+		td["id"] = id
+	}
+	return td
+}
+
 // retrieveThing is a helper function to support tests unrelated to retrieval of a TD
 func retrieveThing(id, serverURL string, t *testing.T) mapAny {
 	t.Helper()
