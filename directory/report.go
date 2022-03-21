@@ -36,28 +36,36 @@ func initReportWriter(path string) (commit func()) {
 	}
 
 	// return commit function and run after all tests
-	var sortedResults [][]string
+	var resultsSlice [][]string
 	commit = func() {
-		// sort by id
+		// convert to csv
 		for id, result := range results {
-			sortedResults = append(sortedResults, resultToCSV(id, result))
+			resultsSlice = append(resultsSlice, resultToCSV(id, result))
+		}
+		// sort by id
+		sort.Slice(resultsSlice, func(i, j int) bool {
+			return resultsSlice[i][0] < resultsSlice[j][0]
+		})
+
+		fmt.Println("\nThe following tested assertions do not exist in the list of normative assertions:")
+		for i := range resultsSlice {
+			id := resultsSlice[i][0]
+			if !inSlice(tddAssertions, id) {
+				fmt.Println("-", id)
+			}
 		}
 
 		// insert unchecked assertions
 		fmt.Println("\nThe following assertions were not tested:")
 		for _, id := range tddAssertions {
 			if _, found := results[id]; !found {
-				sortedResults = append(sortedResults, []string{id, "null", "scripted tests not available"})
-				fmt.Println(id)
+				resultsSlice = append(resultsSlice, []string{id, "null", "scripted tests not available"})
+				fmt.Println("-", id)
 			}
 		}
 
-		sort.Slice(sortedResults, func(i, j int) bool {
-			return sortedResults[i][0] < sortedResults[j][0]
-		})
-
 		fmt.Println("\nWriting report to", file.Name())
-		for _, result := range sortedResults {
+		for _, result := range resultsSlice {
 			err := writer.Write(result)
 			if err != nil {
 				fmt.Printf("Error writing the report: %s", err)
@@ -138,4 +146,13 @@ func report(t *testing.T, assertions ...string) {
 	}
 
 	ingestRecord(t, t.Name(), assertions)
+}
+
+func inSlice(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
