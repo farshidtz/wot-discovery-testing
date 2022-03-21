@@ -43,11 +43,20 @@ func initReportWriter(path string) (commit func()) {
 			sortedResults = append(sortedResults, resultToCSV(id, result))
 		}
 
+		// insert unchecked assertions
+		fmt.Println("\nThe following assertions were not tested:")
+		for _, id := range tddAssertions {
+			if _, found := results[id]; !found {
+				sortedResults = append(sortedResults, []string{id, "null", "scripted tests not available"})
+				fmt.Println(id)
+			}
+		}
+
 		sort.Slice(sortedResults, func(i, j int) bool {
 			return sortedResults[i][0] < sortedResults[j][0]
 		})
 
-		fmt.Println("Writing report to", file.Name())
+		fmt.Println("\nWriting report to", file.Name())
 		for _, result := range sortedResults {
 			err := writer.Write(result)
 			if err != nil {

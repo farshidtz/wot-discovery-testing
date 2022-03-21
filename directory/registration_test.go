@@ -12,6 +12,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// http-head
+
 func TestCreateAnonymousThing(t *testing.T) {
 
 	td := mockedTD("") // without ID
@@ -940,40 +942,21 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
-	// t.Run("http11 chunking", func(t *testing.T) {
-	// 	defer report(t, "tdd-things-list-http11-chunks")
+	// t.Run("pagination", func(t *testing.T) {
+	// 	defer report(t,
+	// 		"tdd-things-list-pagination",
+	// 		"tdd-things-list-pagination-limit",
+	// 		"tdd-things-list-pagination-header-nextlink",
+	// 		"tdd-things-list-pagination-header-nextlink-attr",
+	// 		"tdd-things-list-pagination-header-canonicallink",
+	// 		"tdd-things-list-pagination-order-default",
+	// 		"tdd-things-list-pagination-order",
+	// 		"tdd-things-list-pagination-order-unsupported",
+	// 		"tdd-things-list-pagination-order-nextlink",
+	// 	)
 
-	// 	if response == nil {
-	// 		t.Fatalf( "previous errors")
-	// 	}
-
-	// 	// encoding := response.Header.Get("Transfer-Encoding")
-	// 	// t.Log(response.Header)
-
-	// 	t.Skipf( "TODO")
+	// 	t.Skipf("TODO")
 	// })
-
-	// t.Run("http2 streaming", func(t *testing.T) {
-	// 	defer report(t, "tdd-things-list-http2-frames")
-
-	// 	t.Skipf( "TODO")
-	// })
-
-	t.Run("pagination", func(t *testing.T) {
-		defer report(t,
-			"tdd-things-list-pagination",
-			"tdd-things-list-pagination-limit",
-			"tdd-things-list-pagination-header-nextlink",
-			"tdd-things-list-pagination-header-nextlink-attr",
-			"tdd-things-list-pagination-header-canonicallink",
-			"tdd-things-list-pagination-order-default",
-			"tdd-things-list-pagination-order",
-			"tdd-things-list-pagination-order-unsupported",
-			"tdd-things-list-pagination-order-nextlink",
-		)
-
-		t.Skipf("TODO")
-	})
 }
 
 func testRegistrionInfo(t *testing.T, td mapAny) {
