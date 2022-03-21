@@ -309,7 +309,7 @@ func TestSPARQL(t *testing.T) {
 		defer report(t,
 			"tdd-search-sparql",
 			"tdd-search-sparql-method-get",
-			"tdd-search-sparql-resp",
+			"tdd-search-sparql-resp-select-ask",
 		)
 
 		// submit GET request
@@ -338,7 +338,7 @@ func TestSPARQL(t *testing.T) {
 		defer report(t,
 			"tdd-search-sparql",
 			"tdd-search-sparql-method-post",
-			"tdd-search-sparql-resp",
+			"tdd-search-sparql-resp-select-ask",
 		)
 
 		// submit POST request
@@ -369,7 +369,7 @@ func TestSPARQL(t *testing.T) {
 		defer report(t,
 			"tdd-search-sparql",
 			"tdd-search-sparql-method-get",
-			"tdd-search-sparql-resp",
+			"tdd-search-sparql-resp-select-ask",
 			"tdd-search-sparql-federation",
 		)
 

@@ -25,8 +25,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		defer report(t,
 			"tdd-things-crudl",
 			"tdd-things-create-anonymous-td",
-			"tdd-things-create-body",
-			"tdd-things-create-contenttype")
+			"tdd-things-create-anonymous-contenttype")
 
 		// submit POST request
 		res, err := http.Post(serverURL+"/things/", MediaTypeThingDescription, bytes.NewReader(b))
@@ -166,8 +165,7 @@ func TestCreateThing(t *testing.T) {
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t, "tdd-things-crudl",
 			"tdd-things-create-known-td",
-			"tdd-things-create-body",
-			"tdd-things-create-contenttype",
+			"tdd-things-create-known-contenttype",
 		)
 
 		// submit PUT request
@@ -189,7 +187,6 @@ func TestCreateThing(t *testing.T) {
 	t.Run("result", func(t *testing.T) {
 		defer report(t,
 			"tdd-things-create-known-td",
-			"tdd-things-create-body",
 		)
 
 		// retrieve the stored TD
@@ -382,7 +379,6 @@ func TestUpdateThing(t *testing.T) {
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
 			"tdd-things-crudl",
-			"tdd-things-update-types",
 			"tdd-things-update",
 			"tdd-things-update-contenttype",
 		)
@@ -404,7 +400,7 @@ func TestUpdateThing(t *testing.T) {
 	})
 
 	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-things-update-types", "tdd-things-update", "tdd-things-update-contenttype")
+		defer report(t, "tdd-things-update", "tdd-things-update-contenttype")
 
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
