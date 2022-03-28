@@ -361,6 +361,17 @@ func TestRetrieveThing(t *testing.T) {
 
 	// 	t.Skipf( "Tested under TestCreateAnonymousThing")
 	// })
+
+	t.Run("HEAD", func(t *testing.T) {
+		defer report(t, "tdd-http-head")
+
+		res, err := httpRequest(http.MethodHead, serverURL+"/things/"+id, "", nil)
+		if err != nil {
+			t.Fatalf("Error making HEAD request: %s", err)
+		}
+		body := httpReadBody(res, t)
+		assertStatusCode(t, res, http.StatusOK, body)
+	})
 }
 
 func TestUpdateThing(t *testing.T) {
@@ -953,6 +964,18 @@ func TestListThings(t *testing.T) {
 
 	// 	t.Skipf("TODO")
 	// })
+
+	t.Run("HEAD", func(t *testing.T) {
+		defer report(t, "tdd-http-head")
+
+		res, err := httpRequest(http.MethodHead, serverURL+"/things", "", nil)
+		if err != nil {
+			t.Fatalf("Error making HEAD request: %s", err)
+		}
+		body := httpReadBody(res, t)
+		assertStatusCode(t, res, http.StatusOK, body)
+	})
+
 }
 
 func testRegistrionInfo(t *testing.T, td mapAny) {

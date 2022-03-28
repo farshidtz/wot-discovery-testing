@@ -394,6 +394,17 @@ func TestSPARQL(t *testing.T) {
 				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
 		}
 	})
+
+	t.Run("HEAD", func(t *testing.T) {
+		defer report(t, "tdd-http-head")
+
+		res, err := httpRequest(http.MethodHead, serverURL+"/search/sparql?query="+url.QueryEscape(query), "", nil)
+		if err != nil {
+			t.Fatalf("Error solving query SPARQL: %s", err)
+		}
+		body := httpReadBody(res, t)
+		assertStatusCode(t, res, http.StatusOK, body)
+	})
 }
 
 func sparqlResultsSample() mapAny {
