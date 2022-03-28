@@ -20,7 +20,7 @@ type result struct {
 func initReportWriter(path string) (commit func()) {
 	results = make(map[string]result)
 	// csv header
-	header := []string{"AssertionID", "Status", "Details"}
+	header := []string{"ID", "Status", "Comment"}
 
 	file, err := os.Create(path)
 	if err != nil {
@@ -36,26 +36,36 @@ func initReportWriter(path string) (commit func()) {
 	}
 
 	// return commit function and run after all tests
-	var sortedResults [][]string
+	var resultsSlice [][]string
 	commit = func() {
-		// sort by id
+		// convert to csv
 		for id, result := range results {
-			sortedResults = append(sortedResults, resultToCSV(id, result))
+			resultsSlice = append(resultsSlice, resultToCSV(id, result))
 		}
+		// sort by id
+		sort.Slice(resultsSlice, func(i, j int) bool {
+			return resultsSlice[i][0] < resultsSlice[j][0]
+		})
 
-		// insert unchecked assertions
-		for _, id := range tddAssertions {
-			if _, found := results[id]; !found {
-				sortedResults = append(sortedResults, []string{id, "skipped", "untested"})
+		fmt.Println("\nThe following tested assertions do not exist in the list of normative assertions:")
+		for i := range resultsSlice {
+			id := resultsSlice[i][0]
+			if !inSlice(tddAssertions, id) {
+				fmt.Println("-", id)
 			}
 		}
 
-		sort.Slice(sortedResults, func(i, j int) bool {
-			return sortedResults[i][0] < sortedResults[j][0]
-		})
+		// insert unchecked assertions
+		fmt.Println("\nThe following assertions were not tested:")
+		for _, id := range tddAssertions {
+			if _, found := results[id]; !found {
+				resultsSlice = append(resultsSlice, []string{id, "null", "scripted tests not available"})
+				fmt.Println("-", id)
+			}
+		}
 
-		fmt.Println("Writing report to", file.Name())
-		for _, result := range sortedResults {
+		fmt.Println("\nWriting report to", file.Name())
+		for _, result := range resultsSlice {
 			err := writer.Write(result)
 			if err != nil {
 				fmt.Printf("Error writing the report: %s", err)
@@ -95,11 +105,11 @@ func ingestRecord(t *testing.T, name string, assertions []string) {
 func resultToCSV(assertionID string, r result) []string {
 	var status string
 	if len(r.failed) > 0 {
-		status = "failed"
+		status = "fail"
 	} else if len(r.skipped) > 0 {
-		status = "skipped"
+		status = "null"
 	} else {
-		status = "passed"
+		status = "pass"
 	}
 
 	var details []string
@@ -136,4 +146,13 @@ func report(t *testing.T, assertions ...string) {
 	}
 
 	ingestRecord(t, t.Name(), assertions)
+}
+
+func inSlice(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
