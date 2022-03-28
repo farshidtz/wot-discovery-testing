@@ -24,6 +24,7 @@ const (
 )
 
 func TestCreateEvent(t *testing.T) {
+	defer report(t, "tdd-notification")
 
 	t.Run("create event subscriber", func(t *testing.T) {
 
@@ -256,6 +257,8 @@ func TestCreateEvent(t *testing.T) {
 }
 
 func TestUpdateEvent(t *testing.T) {
+	defer report(t, "tdd-notification")
+
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -497,6 +500,7 @@ func TestUpdateEvent(t *testing.T) {
 }
 
 func TestDeleteEvent(t *testing.T) {
+	defer report(t, "tdd-notification")
 
 	t.Run("delete event subscriber", func(t *testing.T) {
 
