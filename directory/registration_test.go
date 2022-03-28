@@ -965,21 +965,21 @@ func TestListThings(t *testing.T) {
 	// 	t.Skipf("TODO")
 	// })
 
-	t.Run("pagination", func(t *testing.T) {
-		defer report(t,
-			"tdd-reg-list-pagination",
-			"tdd-reg-list-pagination-limit",
-			"tdd-reg-list-pagination-header-nextlink",
-			"tdd-reg-list-pagination-header-nextlink-attr",
-			"tdd-reg-list-pagination-header-canonicallink",
-			"tdd-reg-list-pagination-order-default",
-			"tdd-reg-list-pagination-order",
-			"tdd-reg-list-pagination-order-unsupported",
-			"tdd-reg-list-pagination-order-nextlink",
-		)
+	// 	t.Run("pagination", func(t *testing.T) {
+	// 		defer report(t,
+	// 			"tdd-reg-list-pagination",
+	// 			"tdd-reg-list-pagination-limit",
+	// 			"tdd-reg-list-pagination-header-nextlink",
+	// 			"tdd-reg-list-pagination-header-nextlink-attr",
+	// 			"tdd-reg-list-pagination-header-canonicallink",
+	// 			"tdd-reg-list-pagination-order-default",
+	// 			"tdd-reg-list-pagination-order",
+	// 			"tdd-reg-list-pagination-order-unsupported",
+	// 			"tdd-reg-list-pagination-order-nextlink",
+	// 		)
 
-		t.Skipf("TODO")
-	})
+	// 		t.Skipf("TODO")
+	// 	})
 
 	t.Run("HEAD", func(t *testing.T) {
 		defer report(t, "tdd-http-head")
