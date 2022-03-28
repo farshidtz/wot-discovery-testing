@@ -332,7 +332,9 @@ func TestRetrieveThing(t *testing.T) {
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		defer report(t, "tdd-things-retrieve-resp")
+		defer report(t,
+			"tdd-things-default-representation",
+			"tdd-things-retrieve-resp")
 		assertContentMediaType(t, response, MediaTypeThingDescription)
 	})
 
@@ -867,7 +869,9 @@ func TestListThings(t *testing.T) {
 	})
 
 	t.Run("content type", func(t *testing.T) {
-		defer report(t, "tdd-things-list-resp")
+		defer report(t,
+			"tdd-things-default-representation",
+			"tdd-things-list-resp")
 		assertContentMediaType(t, response, MediaTypeJSONLD)
 	})
 
