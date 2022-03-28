@@ -52,7 +52,9 @@ func TestJSONPath(t *testing.T) {
 		})
 
 		t.Run("content type", func(t *testing.T) {
-			defer report(t, "tdd-search-jsonpath-response")
+			defer report(t,
+				// "tdd-things-default-representation", // skip non-normative search
+				"tdd-search-jsonpath-response")
 
 			assertContentMediaType(t, response, MediaTypeJSON)
 		})
@@ -193,7 +195,9 @@ func TestXPath(t *testing.T) {
 		})
 
 		t.Run("content type", func(t *testing.T) {
-			defer report(t, "tdd-search-xpath-response")
+			defer report(t,
+				// "tdd-things-default-representation", // skip non-normative search
+				"tdd-search-xpath-response")
 
 			assertContentMediaType(t, response, MediaTypeJSON)
 		})
