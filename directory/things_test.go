@@ -23,6 +23,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
+			"tdd-things-crud",
 			"tdd-things-crudl",
 			"tdd-things-create-anonymous-td",
 			"tdd-things-create-anonymous-contenttype")
@@ -163,7 +164,9 @@ func TestCreateThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("submit request", func(t *testing.T) {
-		defer report(t, "tdd-things-crudl",
+		defer report(t,
+			"tdd-things-crud",
+			"tdd-things-crudl",
 			"tdd-things-create-known-td",
 			"tdd-things-create-known-contenttype",
 		)
@@ -307,6 +310,7 @@ func TestRetrieveThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
+			"tdd-things-crud",
 			"tdd-things-crudl",
 			"tdd-things-retrieve",
 		)
@@ -389,6 +393,7 @@ func TestUpdateThing(t *testing.T) {
 
 	t.Run("submit request", func(t *testing.T) {
 		defer report(t,
+			"tdd-things-crud",
 			"tdd-things-crudl",
 			"tdd-things-update",
 			"tdd-things-update-contenttype",
@@ -762,7 +767,10 @@ func TestDelete(t *testing.T) {
 		var response *http.Response
 
 		t.Run("submit request", func(t *testing.T) {
-			defer report(t, "tdd-things-crudl", requestAssertions)
+			defer report(t,
+				"tdd-things-crud",
+				"tdd-things-crudl",
+				requestAssertions)
 
 			// submit DELETE request
 			res, err := httpDelete(serverURL + "/things/" + id)
@@ -825,13 +833,15 @@ func TestDelete(t *testing.T) {
 }
 
 func TestListThings(t *testing.T) {
-
 	var response *http.Response
 	var body []byte
 
 	tag := uuid.NewV4().String()
 	t.Run("submit request", func(t *testing.T) {
-		defer report(t, "tdd-things-crudl", "tdd-things-list-method")
+		defer report(t,
+			"tdd-things-list-only",
+			"tdd-things-crudl",
+			"tdd-things-list-method")
 
 		for i := 0; i < 3; i++ {
 			id := "urn:uuid:" + uuid.NewV4().String()
