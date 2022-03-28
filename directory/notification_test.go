@@ -18,9 +18,9 @@ const (
 	timeoutDuration = 5 * time.Second
 	waitDuration    = time.Second
 	// TD event types
-	EventTypeCreate = "create"
-	EventTypeUpdate = "update"
-	EventTypeDelete = "delete"
+	EventTypeCreate = "thing_created"
+	EventTypeUpdate = "thing_updated"
+	EventTypeDelete = "thing_deleted"
 )
 
 func TestCreateEvent(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCreateEvent(t *testing.T) {
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/create", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -94,7 +94,7 @@ func TestCreateEvent(t *testing.T) {
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/create?diff=true", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate+"?diff=true", eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -233,7 +233,7 @@ func TestCreateEvent(t *testing.T) {
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/update", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeUpdate, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 		time.Sleep(waitDuration)
 
@@ -269,7 +269,7 @@ func TestUpdateEvent(t *testing.T) {
 		// subscribe to update events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/update", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeUpdate, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -334,7 +334,7 @@ func TestUpdateEvent(t *testing.T) {
 		// subscribe to update events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/update?diff=true", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeUpdate+"?diff=true", eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -476,7 +476,7 @@ func TestUpdateEvent(t *testing.T) {
 		// subscribe to create events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/create", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -514,7 +514,7 @@ func TestDeleteEvent(t *testing.T) {
 		// subscribe to delete events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/delete", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeDelete, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -584,7 +584,7 @@ func TestDeleteEvent(t *testing.T) {
 		// subscribe to delete events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/delete?diff=true", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeDelete+"?diff=true", eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
@@ -731,7 +731,7 @@ func TestDeleteEvent(t *testing.T) {
 		// subscribe to delete events
 		eventCh := make(chan *sse.Event)
 		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/create", eventCh, errCh)
+		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
 		defer unsubscribeEvent(t, client, eventCh)
 
 		time.Sleep(waitDuration)
