@@ -24,7 +24,6 @@ const (
 )
 
 func TestCreateEvent(t *testing.T) {
-	defer report(t, "tdd-notification")
 
 	t.Run("create event subscriber", func(t *testing.T) {
 
@@ -52,6 +51,7 @@ func TestCreateEvent(t *testing.T) {
 
 			t.Run("get event type", func(t *testing.T) {
 				defer report(t,
+					"tdd-notification",
 					"tdd-notification-sse",
 					"tdd-notification-event-types",
 					"tdd-notification-filter-type",
@@ -229,35 +229,34 @@ func TestCreateEvent(t *testing.T) {
 		}
 	})
 
-	t.Run("update event subscriber", func(t *testing.T) {
-		// subscribe to create events
-		eventCh := make(chan *sse.Event)
-		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/"+EventTypeUpdate, eventCh, errCh)
-		defer unsubscribeEvent(t, client, eventCh)
-		time.Sleep(waitDuration)
+	// t.Run("update event subscriber", func(t *testing.T) {
+	// 	// subscribe to create events
+	// 	eventCh := make(chan *sse.Event)
+	// 	errCh := make(chan error)
+	// 	client := subscribeEvent(t, serverURL+"/events/"+EventTypeUpdate, eventCh, errCh)
+	// 	defer unsubscribeEvent(t, client, eventCh)
+	// 	time.Sleep(waitDuration)
 
-		// add a new TD
-		id := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(id)
-		createThing(id, td, serverURL, t)
+	// 	// add a new TD
+	// 	id := "urn:uuid:" + uuid.NewV4().String()
+	// 	td := mockedTD(id)
+	// 	createThing(id, td, serverURL, t)
 
-		select {
-		case <-eventCh:
-			t.Run("get event type", func(t *testing.T) {
-				defer report(t, "tdd-notification-filter-type")
-				t.Fatal("unexpected update event received for TD create")
-			})
-		case err := <-errCh:
-			t.Fatalf("unexpected response to update subscription %v", err)
-		case <-time.After(timeoutDuration):
-			t.Log("success: did not get any update event")
-		}
-	})
+	// 	select {
+	// 	case <-eventCh:
+	// 		t.Run("get event type", func(t *testing.T) {
+	// 			defer report(t, "tdd-notification-filter-type")
+	// 			t.Fatal("unexpected update event received for TD create")
+	// 		})
+	// 	case err := <-errCh:
+	// 		t.Fatalf("unexpected response to update subscription %v", err)
+	// 	case <-time.After(timeoutDuration):
+	// 		t.Log("success: did not get any update event")
+	// 	}
+	// })
 }
 
 func TestUpdateEvent(t *testing.T) {
-	defer report(t, "tdd-notification")
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -282,6 +281,7 @@ func TestUpdateEvent(t *testing.T) {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
 				defer report(t,
+					"tdd-notification",
 					"tdd-notification-sse",
 					"tdd-notification-event-id",
 				)
@@ -472,35 +472,34 @@ func TestUpdateEvent(t *testing.T) {
 		}
 	})
 
-	t.Run("create event subscriber", func(t *testing.T) {
-		// subscribe to create events
-		eventCh := make(chan *sse.Event)
-		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
-		defer unsubscribeEvent(t, client, eventCh)
+	// t.Run("create event subscriber", func(t *testing.T) {
+	// 	// subscribe to create events
+	// 	eventCh := make(chan *sse.Event)
+	// 	errCh := make(chan error)
+	// 	client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
+	// 	defer unsubscribeEvent(t, client, eventCh)
 
-		time.Sleep(waitDuration)
+	// 	time.Sleep(waitDuration)
 
-		// update an attribute
-		td["title"] = "updated title for create event subscriber"
-		updateThing(id, td, serverURL, t)
+	// 	// update an attribute
+	// 	td["title"] = "updated title for create event subscriber"
+	// 	updateThing(id, td, serverURL, t)
 
-		select {
-		case <-eventCh:
-			t.Run("get event type", func(t *testing.T) {
-				defer report(t, "tdd-notification-filter-type")
-				t.Fatal("unexpected create event received for TD update")
-			})
-		case err := <-errCh:
-			t.Fatalf("unexpected response to create subscription %v", err)
-		case <-time.After(timeoutDuration):
-			t.Log("success: did not get any create event")
-		}
-	})
+	// 	select {
+	// 	case <-eventCh:
+	// 		t.Run("get event type", func(t *testing.T) {
+	// 			defer report(t, "tdd-notification-filter-type")
+	// 			t.Fatal("unexpected create event received for TD update")
+	// 		})
+	// 	case err := <-errCh:
+	// 		t.Fatalf("unexpected response to create subscription %v", err)
+	// 	case <-time.After(timeoutDuration):
+	// 		t.Log("success: did not get any create event")
+	// 	}
+	// })
 }
 
 func TestDeleteEvent(t *testing.T) {
-	defer report(t, "tdd-notification")
 
 	t.Run("delete event subscriber", func(t *testing.T) {
 
@@ -525,6 +524,7 @@ func TestDeleteEvent(t *testing.T) {
 		case res := <-eventCh:
 			t.Run("get event ID", func(t *testing.T) {
 				defer report(t,
+					"tdd-notification",
 					"tdd-notification-sse",
 					"tdd-notification-event-id",
 				)
@@ -720,35 +720,35 @@ func TestDeleteEvent(t *testing.T) {
 		}
 	})
 
-	t.Run("create event subscriber", func(t *testing.T) {
-		// add a new TD
-		id := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(id)
-		createThing(id, td, serverURL, t)
+	// t.Run("create event subscriber", func(t *testing.T) {
+	// 	// add a new TD
+	// 	id := "urn:uuid:" + uuid.NewV4().String()
+	// 	td := mockedTD(id)
+	// 	createThing(id, td, serverURL, t)
 
-		time.Sleep(waitDuration)
+	// 	time.Sleep(waitDuration)
 
-		// subscribe to delete events
-		eventCh := make(chan *sse.Event)
-		errCh := make(chan error)
-		client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
-		defer unsubscribeEvent(t, client, eventCh)
+	// 	// subscribe to delete events
+	// 	eventCh := make(chan *sse.Event)
+	// 	errCh := make(chan error)
+	// 	client := subscribeEvent(t, serverURL+"/events/"+EventTypeCreate, eventCh, errCh)
+	// 	defer unsubscribeEvent(t, client, eventCh)
 
-		time.Sleep(waitDuration)
+	// 	time.Sleep(waitDuration)
 
-		// delete the created thing
-		deleteThing(id, serverURL, t)
+	// 	// delete the created thing
+	// 	deleteThing(id, serverURL, t)
 
-		select {
-		case <-eventCh:
-			t.Run("get event type", func(t *testing.T) {
-				defer report(t, "tdd-notification-filter-type")
-				t.Fatal("unexpected create event received for TD delete")
-			})
-		case err := <-errCh:
-			t.Fatalf("unexpected response to create subscription %v", err)
-		case <-time.After(timeoutDuration):
-			t.Log("success: did not get any create event")
-		}
-	})
+	// 	select {
+	// 	case <-eventCh:
+	// 		t.Run("get event type", func(t *testing.T) {
+	// 			defer report(t, "tdd-notification-filter-type")
+	// 			t.Fatal("unexpected create event received for TD delete")
+	// 		})
+	// 	case err := <-errCh:
+	// 		t.Fatalf("unexpected response to create subscription %v", err)
+	// 	case <-time.After(timeoutDuration):
+	// 		t.Log("success: did not get any create event")
+	// 	}
+	// })
 }
