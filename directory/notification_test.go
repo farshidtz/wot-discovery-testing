@@ -145,10 +145,7 @@ func TestCreateEvent(t *testing.T) {
 				// remove system-generated attributes
 				delete(data, "registration")
 
-				if !serializedEqual(td, data) {
-					t.Fatalf("notification data is not same as the one created: Expected:\n%v\nRetrieved:\n%v", marshalPrettyJSON(td), marshalPrettyJSON(data))
-				}
-
+				assertEqualTitle(t, td, data)
 			})
 		case err := <-errCh:
 			t.Run("event subscription diff unsupported", func(t *testing.T) {
