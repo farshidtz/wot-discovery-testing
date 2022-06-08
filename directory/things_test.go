@@ -1019,28 +1019,21 @@ func testRegistrionInfo(t *testing.T, td mapAny) {
 		}
 	})
 
-	t.Run("expires", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-vocab-expires")
+	// t.Run("expires", func(t *testing.T) {
+	// 	defer report(t, "tdd-registrationinfo-vocab-expires")
 
-		t.Skipf("TODO")
-	})
+	// 	t.Skipf("TODO")
+	// })
 
-	t.Run("ttl", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-vocab-ttl")
+	// t.Run("ttl", func(t *testing.T) {
+	// 	defer report(t, "tdd-registrationinfo-vocab-ttl")
 
-		t.Skipf("TODO")
-	})
+	// 	t.Skipf("TODO")
+	// })
 
-	t.Run("retrieved", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-vocab-retrieved")
+	// t.Run("retrieved", func(t *testing.T) {
+	// 	defer report(t, "tdd-registrationinfo-vocab-retrieved")
 
-		t.Skipf("TODO")
-	})
-
-	t.Run("purge expired", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-expiry-purge")
-
-		t.Skipf("TODO")
-	})
-
+	// 	t.Skipf("TODO")
+	// })
 }
