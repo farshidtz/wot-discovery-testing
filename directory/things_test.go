@@ -84,9 +84,7 @@ func TestCreateAnonymousThing(t *testing.T) {
 		delete(storedTD, "registration")
 		delete(storedTD, "id")
 
-		if !serializedEqual(td, storedTD) {
-			t.Fatalf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-		}
+		assertEqualTitle(t, td, storedTD)
 	})
 
 	t.Run("registration info", func(t *testing.T) {
@@ -199,9 +197,7 @@ func TestCreateThing(t *testing.T) {
 		delete(td, "registration")
 		delete(storedTD, "registration")
 
-		if !serializedEqual(td, storedTD) {
-			t.Fatalf("Expected:\n%v\nRetrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-		}
+		assertEqualTitle(t, td, storedTD)
 	})
 
 	// t.Run("registration info", func(t *testing.T) {
@@ -350,9 +346,7 @@ func TestRetrieveThing(t *testing.T) {
 		// remove system-generated attributes
 		delete(retrievedTD, "registration")
 
-		if !serializedEqual(td, retrievedTD) {
-			t.Fatalf("Expected:\n%v\nRetrieved:\n%v", marshalPrettyJSON(td), marshalPrettyJSON(retrievedTD))
-		}
+		assertEqualTitle(t, td, retrievedTD)
 	})
 
 	t.Run("registration info", func(t *testing.T) {
@@ -427,10 +421,7 @@ func TestUpdateThing(t *testing.T) {
 		delete(td, "registration")
 		delete(storedTD, "registration")
 
-		if !serializedEqual(td, storedTD) {
-			t.Logf("Expected:\n%v\n Retrieved:\n%v\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			t.Fatalf("Unexpected result body; see logs.")
-		}
+		assertEqualTitle(t, td, storedTD)
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
@@ -524,9 +515,7 @@ func TestPatch(t *testing.T) {
 			delete(td, "registration")
 			delete(storedTD, "registration")
 
-			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			}
+			assertEqualTitle(t, td, storedTD)
 		})
 	})
 
@@ -573,9 +562,7 @@ func TestPatch(t *testing.T) {
 			delete(td, "registration")
 			delete(storedTD, "registration")
 
-			if !serializedEqual(td, storedTD) {
-				t.Fatalf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-			}
+			assertEqualTitle(t, td, storedTD)
 		})
 	})
 
@@ -640,10 +627,7 @@ func TestPatch(t *testing.T) {
 			delete(td, "registration")
 			delete(storedTD, "registration")
 
-			if !serializedEqual(td, storedTD) {
-				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				t.Fatalf("Unexpected result body; see logs.")
-			}
+			assertEqualTitle(t, td, storedTD)
 		})
 	})
 
@@ -707,10 +691,7 @@ func TestPatch(t *testing.T) {
 			delete(td, "registration")
 			delete(storedTD, "registration")
 
-			if !serializedEqual(td, storedTD) {
-				t.Logf("Expected:\n%s\n Retrieved:\n%s\n", marshalPrettyJSON(td), marshalPrettyJSON(storedTD))
-				t.Fatalf("Unexpected result body; see logs.")
-			}
+			assertEqualTitle(t, td, storedTD)
 		})
 	})
 

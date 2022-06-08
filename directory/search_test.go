@@ -88,10 +88,7 @@ func TestJSONPath(t *testing.T) {
 				// remove system-generated attributes
 				delete(filterredTD, "registration")
 
-				if !serializedEqual(createdTDsMap[id], filterredTD) {
-					t.Fatalf("Expected:\n%v\nGot:\n%v\n",
-						marshalPrettyJSON(createdTDsMap[id]), marshalPrettyJSON(filterredTD))
-				}
+				assertEqualTitle(t, createdTDsMap[id], filterredTD)
 			}
 		})
 	})
@@ -231,10 +228,7 @@ func TestXPath(t *testing.T) {
 				// remove system-generated attributes
 				delete(filterredTD, "registration")
 
-				if !serializedEqual(createdTDsMap[id], filterredTD) {
-					t.Fatalf("Expected:\n%v\nGot:\n%v\n",
-						marshalPrettyJSON(createdTDsMap[id]), marshalPrettyJSON(filterredTD))
-				}
+				assertEqualTitle(t, createdTDsMap[id], filterredTD)
 			}
 		})
 	})
@@ -332,10 +326,7 @@ func TestSPARQL(t *testing.T) {
 		t.Log(responseMap)
 		delete(responseMap, "results")
 
-		if !serializedEqual(responseMap, expectedResult) {
-			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
-				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
-		}
+		assertEqualTitle(t, expectedResult, responseMap)
 	})
 
 	t.Run("search using POST", func(t *testing.T) {
@@ -363,10 +354,7 @@ func TestSPARQL(t *testing.T) {
 		t.Log(responseMap)
 		delete(responseMap, "results")
 
-		if !serializedEqual(responseMap, expectedResult) {
-			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
-				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
-		}
+		assertEqualTitle(t, expectedResult, responseMap)
 	})
 
 	t.Run("federated search using GET", func(t *testing.T) {
@@ -393,10 +381,7 @@ func TestSPARQL(t *testing.T) {
 		t.Log(responseMap)
 		delete(responseMap, "results")
 
-		if !serializedEqual(responseMap, expectedResult) {
-			t.Fatalf("Expected:\n%v\nGot:\n%v\n",
-				marshalPrettyJSON(expectedResult), marshalPrettyJSON(responseMap))
-		}
+		assertEqualTitle(t, expectedResult, responseMap)
 	})
 
 	t.Run("HEAD", func(t *testing.T) {
