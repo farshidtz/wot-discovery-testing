@@ -19,9 +19,14 @@ var serverURL string
 
 func TestMain(m *testing.M) {
 	// CLI arguments
-	reportPath := flag.String("report", "report.csv", "Path to create report")
+	reportPath := flag.String("report", "", "Path to create report")
 	flag.StringVar(&serverURL, "server", "", "URL of the directory service")
 	flag.Parse()
+
+	if *reportPath != "" {
+		fmt.Printf("Bad input. Report path is now hardcoded to %s\n", reportFile)
+		os.Exit(1)
+	}
 
 	_, err := url.Parse(serverURL)
 	if err != nil {
@@ -34,7 +39,7 @@ func TestMain(m *testing.M) {
 	}
 	fmt.Printf("Server URL: %s\n", serverURL)
 
-	writeReport := initReportWriter(*reportPath)
+	writeReport := initReportWriter()
 
 	code := m.Run()
 

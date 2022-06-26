@@ -7,7 +7,9 @@ If this file is not available, it will be downloaded from [wot-discovery/testing
 To download the latest assertions, simply remove the local file so that it gets re-downloaded.
 To use an assertion list other than the one from the main branch of wot-discovery, simply place the file at the same path.
 
-The output report is written to `report/tdd.csv`
+The output testing reports are written to:
+- `report/tdd-auto.csv` (test report)
+- `report/tdd-manual.csv` (untested assertions)
 
 The test results are printed to standard output.
 
