@@ -154,6 +154,24 @@ func TestCreateAnonymousThing(t *testing.T) {
 }
 
 func TestCreateThing(t *testing.T) {
+	var (
+		request = []string{
+			"tdd-things-crud",
+			"tdd-things-crudl",
+			"tdd-things-create-known-td",
+			"tdd-things-create-known-contenttype",
+		}
+		statusCode = []string{
+			"tdd-things-create-known-td-resp",
+		}
+		badRequest = []string{
+			"tdd-validation-syntactic",
+			"tdd-http-error-response",
+			"tdd-validation-result",
+			"tdd-validation-response",
+		}
+	)
+	defer reportGroup(t, request, statusCode, badRequest)
 
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -161,18 +179,13 @@ func TestCreateThing(t *testing.T) {
 
 	var response *http.Response
 
-	t.Run("submit request", func(t *testing.T) {
-		defer report(t,
-			"tdd-things-crud",
-			"tdd-things-crudl",
-			"tdd-things-create-known-td",
-			"tdd-things-create-known-contenttype",
-		)
+	t.Run("request", func(t *testing.T) {
+		defer report(t, request...)
 
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			t.Fatalf("Error posting: %s", err)
+			t.Errorf("Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -183,59 +196,6 @@ func TestCreateThing(t *testing.T) {
 	t.Run("status code", func(t *testing.T) {
 		defer report(t, "tdd-things-create-known-td-resp")
 		assertStatusCode(t, response, http.StatusCreated, body)
-	})
-
-	t.Run("result", func(t *testing.T) {
-		defer report(t,
-			"tdd-things-create-known-td",
-		)
-
-		// retrieve the stored TD
-		storedTD := retrieveThing(id, serverURL, t)
-
-		// remove system-generated attributes
-		delete(td, "registration")
-		delete(storedTD, "registration")
-
-		assertEqualTitle(t, td, storedTD)
-	})
-
-	// t.Run("registration info", func(t *testing.T) {
-	// 	// retrieve the stored TD
-	// 	storedTD := retrieveThing(id, serverURL, t)
-
-	// 	testRegistrionInfo(t, storedTD)
-	// })
-
-	t.Run("reject id mismatch", func(t *testing.T) {
-		defer report(t)
-		t.Skipf("no relevant assertions")
-
-		id := "urn:uuid:" + uuid.NewV4().String()
-		anotherID := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(anotherID)
-		b, _ := json.Marshal(td)
-
-		var response *http.Response
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t)
-
-			// submit PUT request
-			res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-			if err != nil {
-				t.Fatalf("Error posting: %s", err)
-			}
-			response = res
-			// defer res.Body.Close()
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t)
-			assertStatusCode(t, response, http.StatusConflict, body)
-		})
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
@@ -270,29 +230,6 @@ func TestCreateThing(t *testing.T) {
 			assertValidationResponse(t, res, body)
 		})
 	})
-
-	// reject POST with id: not disallowed explicitly
-	// t.Run("reject POST", func(t *testing.T) {
-	// 	defer report(t, "tdd-things-create-known-vs-anonymous")
-
-	// 	id := "urn:uuid:" + uuid.NewV4().String()
-	// 	td := mockedTD(id)
-	// 	b, _ := json.Marshal(td)
-
-	// 	// submit POST request
-	// 	res, err := http.Post(serverURL+"/things", MediaTypeThingDescription, bytes.NewReader(b))
-	// 	if err != nil {
-	// 		t.Fatalf( "Error posting: %s", err)
-	// 	}
-	// 	defer res.Body.Close()
-
-	// 	body := httpReadBody(res, t)
-
-	// 	t.Run("status code", func(t *testing.T) {
-	// 		assertStatusCode(t, res, http.StatusBadRequest, body)
-	// 	})
-	// })
-
 }
 
 func TestRetrieveThing(t *testing.T) {

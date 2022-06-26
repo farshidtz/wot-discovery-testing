@@ -93,39 +93,6 @@ func TestJSONPath(t *testing.T) {
 		})
 	})
 
-	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-anonymous-td-identifier")
-
-		// add an anonymous TD
-		createdTD := mockedTD("") // no id
-		// tag the TDs to find later
-		tag := uuid.NewV4().String()
-		createdTD["tag"] = tag
-		createThing("", createdTD, serverURL, t)
-
-		// submit the request
-		response, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer response.Body.Close()
-
-		body := httpReadBody(response, t)
-
-		var filterredTDs []mapAny
-		err = json.Unmarshal(body, &filterredTDs)
-		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
-		}
-
-		if len(filterredTDs) != 1 {
-			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
-		}
-
-		// try to get the ID. This should pass
-		getID(t, filterredTDs[0])
-	})
-
 	t.Run("reject bad query", func(t *testing.T) {
 		var response *http.Response
 
@@ -231,39 +198,6 @@ func TestXPath(t *testing.T) {
 				assertEqualTitle(t, createdTDsMap[id], filterredTD)
 			}
 		})
-	})
-
-	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-anonymous-td-identifier")
-
-		// add an anonymous TD
-		createdTD := mockedTD("") // no id
-		// tag the TDs to find later
-		tag := uuid.NewV4().String()
-		createdTD["tag"] = tag
-		createThing("", createdTD, serverURL, t)
-
-		// submit the request
-		response, err := http.Get(serverURL + fmt.Sprintf("/search/xpath?query=*[tag='%s']", tag))
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer response.Body.Close()
-
-		body := httpReadBody(response, t)
-
-		var filterredTDs []mapAny
-		err = json.Unmarshal(body, &filterredTDs)
-		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
-		}
-
-		if len(filterredTDs) != 1 {
-			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
-		}
-
-		// try to get the ID. This should pass
-		getID(t, filterredTDs[0])
 	})
 
 	t.Run("reject bad query", func(t *testing.T) {

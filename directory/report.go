@@ -45,7 +45,7 @@ func initReportWriter() (commit func()) {
 	return func() {
 		// Generate auto testing report
 		// convert to csv records (2D slice)
-	var resultsSlice [][]string
+		var resultsSlice [][]string
 		for id, result := range results {
 			resultsSlice = append(resultsSlice, resultToCSVRecord(id, result))
 		}
@@ -72,8 +72,8 @@ func initReportWriter() (commit func()) {
 				fmt.Println("-", id)
 			}
 		}
-		}
 	}
+}
 
 // loadAssertions returns the list of assertions.
 // It will read from a local file.
@@ -215,6 +215,13 @@ func report(t *testing.T, assertions ...string) {
 	}
 
 	insertRecord(t, t.Name(), assertions)
+}
+
+// report at the end of tests. Execute with defer statement.
+func reportGroup(t *testing.T, assertionGroups ...[]string) {
+	for _, ag := range assertionGroups {
+		report(t, ag...)
+	}
 }
 
 func inSlice(s []string, e string) bool {
