@@ -155,7 +155,7 @@ func TestCreateThing(t *testing.T) {
 		"tdd-things-crud",
 		"tdd-things-crudl",
 		"tdd-things-create-known-td",
-		"tdd-things-create-known-contenttype",
+		// "tdd-things-create-known-contenttype", // not tested
 		"tdd-things-create-known-td-resp",
 		"tdd-validation-syntactic",
 		"tdd-http-error-response",
@@ -173,13 +173,12 @@ func TestCreateThing(t *testing.T) {
 		defer report(t,
 			"tdd-things-crud",
 			"tdd-things-crudl",
-			"tdd-things-create-known-td",
-			"tdd-things-create-known-contenttype")
+			"tdd-things-create-known-td")
 
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
 		if err != nil {
-			t.Errorf("Error posting: %s", err)
+			t.Fatalf("Error posting: %s", err)
 		}
 		response = res
 		// defer res.Body.Close()
@@ -291,14 +290,19 @@ func TestRetrieveThing(t *testing.T) {
 		assertEqualTitle(t, td, retrievedTD)
 	})
 
-	t.Run("registration info", func(t *testing.T) {
-		defer report(t,
-			"tdd-registrationinfo-vocab-created",
-			"tdd-registrationinfo-vocab-modified")
+	t.Run("registrationInfo created", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-created")
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
 		testRegistrationInfoCreated(t, storedTD)
+	})
+
+	t.Run("registrationInfo modified", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-modified")
+		// retrieve the stored TD
+		storedTD := retrieveThing(id, serverURL, t)
+
 		testRegistrationInfoModified(t, storedTD)
 	})
 
@@ -713,56 +717,30 @@ func TestDelete(t *testing.T) {
 	td := mockedTD(id)
 	createThing(id, td, serverURL, t)
 
-	t.Run("existing", func(t *testing.T) {
-		var response *http.Response
+	var response *http.Response
 
-		t.Run("submit request", func(t *testing.T) {
-			defer report(t,
-				"tdd-things-crud",
-				"tdd-things-crudl",
-				"tdd-things-delete")
+	t.Run("submit request", func(t *testing.T) {
+		defer report(t,
+			"tdd-things-crud",
+			"tdd-things-crudl",
+			"tdd-things-delete")
 
-			// submit DELETE request
-			res, err := httpDelete(serverURL + "/things/" + id)
-			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
-			}
-			// defer res.Body.Close()
-			response = res
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t, "tdd-things-delete-resp")
-
-			assertStatusCode(t, response, http.StatusNoContent, body)
-		})
+		// submit DELETE request
+		res, err := httpDelete(serverURL + "/things/" + id)
+		if err != nil {
+			t.Fatalf("Error deleting TD: %s", err)
+		}
+		// defer res.Body.Close()
+		response = res
 	})
 
-	t.Run("non-existing", func(t *testing.T) {
-		var response *http.Response
+	body := httpReadBody(response, t)
 
-		t.Run("submit request", func(t *testing.T) {
-			defer report(t, "tdd-things-delete")
+	t.Run("status code", func(t *testing.T) {
+		defer report(t, "tdd-things-delete-resp")
 
-			// submit DELETE request
-			res, err := httpDelete(serverURL + "/things/non-exiting-td")
-			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
-			}
-			// defer res.Body.Close()
-			response = res
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t, "tdd-things-delete-resp")
-			assertStatusCode(t, response, http.StatusNotFound, body)
-		})
+		assertStatusCode(t, response, http.StatusNoContent, body)
 	})
-
 }
 
 func TestListThings(t *testing.T) {
@@ -848,7 +826,7 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
-	t.Run("RegistrationInfo created", func(t *testing.T) {
+	t.Run("registrationInfo created", func(t *testing.T) {
 		defer report(t, "tdd-registrationinfo-vocab-created")
 
 		var collection []mapAny
@@ -865,7 +843,7 @@ func TestListThings(t *testing.T) {
 		testRegistrationInfoCreated(t, collection[0])
 	})
 
-	t.Run("RegistrationInfo modified", func(t *testing.T) {
+	t.Run("registrationInfo modified", func(t *testing.T) {
 		defer report(t, "tdd-registrationinfo-vocab-modified")
 
 		var collection []mapAny
