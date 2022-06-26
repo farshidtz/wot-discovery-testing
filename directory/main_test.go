@@ -8,6 +8,13 @@ import (
 	"testing"
 )
 
+const (
+	MediaTypeJSON             = "application/json"
+	MediaTypeJSONLD           = "application/ld+json"
+	MediaTypeThingDescription = "application/td+json"
+	MediaTypeMergePatch       = "application/merge-patch+json"
+)
+
 var serverURL string
 
 func TestMain(m *testing.M) {

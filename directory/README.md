@@ -3,6 +3,15 @@ Test suite for [W3C WoT Discovery](https://www.w3.org/TR/wot-discovery/) APIs.
 
 The test results are printed to standard output. The test report is written to a file in csv format.
 
+
+The list of assertions is read from `report/template.csv`.
+If this file is not available, it will be downloaded from [wot-discovery/testing/template.csv](https://github.com/w3c/wot-discovery/blob/main/testing/template.csv) (main branch) and stored locally.
+To download the latest assertions, simply remove the local file so that it gets re-downloaded.
+To use an assertion list other than the one from the main branch of wot-discovery, simply place the file at the same path.
+
+
+
+
 ## Run
 Useful CLI Arguments: 
 ```

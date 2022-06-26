@@ -2,11 +2,19 @@ package directory
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"testing"
+)
+
+const (
+	assertionsTemplateURL = "https://raw.githubusercontent.com/w3c/wot-discovery/main/testing/template.csv"
+	templateFile          = "report/template.csv"
 )
 
 var results map[string]result
@@ -18,6 +26,14 @@ type result struct {
 }
 
 func initReportWriter(path string) (commit func()) {
+	err := os.MkdirAll("report", 0755)
+	if err != nil {
+		fmt.Printf("Error creating report directory: %s\n", err)
+		os.Exit(1)
+	}
+
+	tddAssertions := loadAssertions()
+
 	results = make(map[string]result)
 	// csv header
 	header := []string{"ID", "Status", "Comment"}
@@ -84,6 +100,54 @@ func initReportWriter(path string) (commit func()) {
 	}
 
 	return commit
+}
+
+func loadAssertions() []string {
+	if _, err := os.Stat(templateFile); errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Downloading assertions from", assertionsTemplateURL)
+		resp, err := http.Get(assertionsTemplateURL)
+		if err != nil {
+			fmt.Printf("Error downloading assertions template: %s\n", err)
+			os.Exit(1)
+		}
+		defer resp.Body.Close()
+
+		file, err := os.Create(templateFile)
+		if err != nil {
+			fmt.Printf("Error creating assertions template file: %s\n", err)
+			os.Exit(1)
+		}
+		defer file.Close()
+
+		totalBytes, err := io.Copy(file, resp.Body)
+		if err != nil {
+			fmt.Printf("Error copying http response to assertions template file: %s\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Wrote %d bytes to %s\n", totalBytes, templateFile)
+	}
+
+	file, err := os.Open(templateFile)
+	if err != nil {
+		fmt.Printf("Error opening assertions template file: %s\n", err)
+		os.Exit(1)
+	}
+
+	records, err := csv.NewReader(file).ReadAll()
+	if err != nil {
+		fmt.Printf("Error reading assertions template file: %s\n", err)
+		os.Exit(1)
+	}
+
+	var tddAssertions []string
+	for _, record := range records {
+		id := record[0]
+		if strings.HasPrefix(id, "tdd-") {
+			tddAssertions = append(tddAssertions, id)
+		}
+	}
+
+	return tddAssertions
 }
 
 func ingestRecord(t *testing.T, name string, assertions []string) {
