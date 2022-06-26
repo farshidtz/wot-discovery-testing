@@ -15,6 +15,7 @@ import (
 const (
 	assertionsTemplateURL = "https://raw.githubusercontent.com/w3c/wot-discovery/main/testing/template.csv"
 	templateFile          = "report/template.csv"
+	reportFile            = "report/tdd.csv"
 )
 
 var results map[string]result
@@ -25,7 +26,7 @@ type result struct {
 	skipped []string
 }
 
-func initReportWriter(path string) (commit func()) {
+func initReportWriter() (commit func()) {
 	err := os.MkdirAll("report", 0755)
 	if err != nil {
 		fmt.Printf("Error creating report directory: %s\n", err)
@@ -38,7 +39,7 @@ func initReportWriter(path string) (commit func()) {
 	// csv header
 	header := []string{"ID", "Status", "Comment"}
 
-	file, err := os.Create(path)
+	file, err := os.Create(reportFile)
 	if err != nil {
 		fmt.Printf("Error creating report file: %s", err)
 		os.Exit(1)

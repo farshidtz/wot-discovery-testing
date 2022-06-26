@@ -1,22 +1,19 @@
 # WoT Discovery Testing
 Test suite for [W3C WoT Discovery](https://www.w3.org/TR/wot-discovery/) APIs.
 
-The test results are printed to standard output. The test report is written to a file in csv format.
-
 
 The list of assertions is read from `report/template.csv`.
 If this file is not available, it will be downloaded from [wot-discovery/testing/template.csv](https://github.com/w3c/wot-discovery/blob/main/testing/template.csv) (main branch) and stored locally.
 To download the latest assertions, simply remove the local file so that it gets re-downloaded.
 To use an assertion list other than the one from the main branch of wot-discovery, simply place the file at the same path.
 
+The output report is written to `report/tdd.csv`
 
-
+The test results are printed to standard output.
 
 ## Run
 Useful CLI Arguments: 
 ```
---report string
-        Path to create report (default "report.csv")
 --server string
         URL of the directory service
 -v
@@ -59,6 +56,6 @@ docker run --rm --net=host wot-discovery-testing --server=http://localhost:8081
 ##### Report
 To get the report, mount a volume on where the report is being generated. E.g.:
 ```
-docker run --rm -v $(pwd)/report:/report wot-discovery-testing --server=http://directory:8081 --report=/report/report.csv
+docker run --rm -v $(pwd)/report:/report wot-discovery-testing --server=http://directory:8081
 ```
 where `$(pwd)/report` is the path to the directory on the host.
