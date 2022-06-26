@@ -12,9 +12,51 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// http-head
-
 func TestCreateAnonymousThing(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-create-anonymous-td",
+		"tdd-things-create-anonymous-contenttype",
+		"tdd-things-create-anonymous-td-resp",
+		"tdd-things-create-anonymous-td-resp",
+		"tdd-anonymous-td-local-uuid",
+		"tdd-anonymous-td-identifier",
+		"tdd-things-create-known-vs-anonymous",
+		"tdd-http-error-response",
+		"tdd-validation-syntactic",
+		"tdd-validation-result",
+		"tdd-validation-response",
+	)
+	// var (
+	// 	request = []string{
+	// 		"tdd-things-crud",
+	// 		"tdd-things-crudl",
+	// 		"tdd-things-create-anonymous-td",
+	// 		"tdd-things-create-anonymous-contenttype",
+	// 	}
+	// 	statusCode = []string{
+	// 		"tdd-things-create-anonymous-td-resp",
+	// 	}
+	// 	locationHeader = []string{
+	// 		"tdd-things-create-anonymous-td-resp",
+	// 		"tdd-anonymous-td-local-uuid",
+	// 	}
+	// 	tdIdentifier = []string{
+	// 		"tdd-anonymous-td-identifier",
+	// 	}
+	// 	rejectAnonymousPUT = []string{
+	// 		"tdd-things-create-known-vs-anonymous",
+	// 	}
+	// 	badRequest = []string{
+	// 		"tdd-validation-syntactic",
+	// 		"tdd-http-error-response",
+	// 		"tdd-validation-result",
+	// 		"tdd-validation-response",
+	// 	}
+	// )
+	// defer reportGroup(t, request, statusCode, badRequest)
 
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
@@ -67,24 +109,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 		if !strings.Contains(systemGeneratedID, "urn:uuid:") {
 			t.Fatalf("System-generated ID doesn't have URN UUID scheme. Got: %s", location)
 		}
-	})
-
-	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-things-create-anonymous-td")
-
-		if systemGeneratedID == "" {
-			t.Fatalf("previous errors")
-		}
-
-		// retrieve the stored TD
-		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
-
-		// remove system-generated attributes
-		delete(td, "registration")
-		delete(storedTD, "registration")
-		delete(storedTD, "id")
-
-		assertEqualTitle(t, td, storedTD)
 	})
 
 	t.Run("registration info", func(t *testing.T) {
@@ -154,24 +178,36 @@ func TestCreateAnonymousThing(t *testing.T) {
 }
 
 func TestCreateThing(t *testing.T) {
-	var (
-		request = []string{
-			"tdd-things-crud",
-			"tdd-things-crudl",
-			"tdd-things-create-known-td",
-			"tdd-things-create-known-contenttype",
-		}
-		statusCode = []string{
-			"tdd-things-create-known-td-resp",
-		}
-		badRequest = []string{
-			"tdd-validation-syntactic",
-			"tdd-http-error-response",
-			"tdd-validation-result",
-			"tdd-validation-response",
-		}
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-create-known-td",
+		"tdd-things-create-known-contenttype",
+		"tdd-things-create-known-td-resp",
+		"tdd-validation-syntactic",
+		"tdd-http-error-response",
+		"tdd-validation-result",
+		"tdd-validation-response",
 	)
-	defer reportGroup(t, request, statusCode, badRequest)
+	// var (
+	// 	request = []string{
+	// 		"tdd-things-crud",
+	// 		"tdd-things-crudl",
+	// 		"tdd-things-create-known-td",
+	// 		"tdd-things-create-known-contenttype",
+	// 	}
+	// 	statusCode = []string{
+	// 		"tdd-things-create-known-td-resp",
+	// 	}
+	// 	badRequest = []string{
+	// 		"tdd-validation-syntactic",
+	// 		"tdd-http-error-response",
+	// 		"tdd-validation-result",
+	// 		"tdd-validation-response",
+	// 	}
+	// )
+	// defer reportGroup(t, request, statusCode, badRequest)
 
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -180,7 +216,11 @@ func TestCreateThing(t *testing.T) {
 	var response *http.Response
 
 	t.Run("request", func(t *testing.T) {
-		defer report(t, request...)
+		defer report(t,
+			"tdd-things-crud",
+			"tdd-things-crudl",
+			"tdd-things-create-known-td",
+			"tdd-things-create-known-contenttype")
 
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
