@@ -12,6 +12,9 @@ import (
 )
 
 func TestJSONPath(t *testing.T) {
+	if !testJSONPath {
+		t.Skip("Not enabled.")
+	}
 
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
@@ -120,6 +123,10 @@ func TestJSONPath(t *testing.T) {
 }
 
 func TestXPath(t *testing.T) {
+	if !testXPath {
+		t.Skip("Not enabled.")
+	}
+
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
 		var createdTD []mapAny

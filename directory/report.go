@@ -65,12 +65,16 @@ func initReportWriter() (commit func()) {
 		}
 		writeCSVReport(manualReportFile, manualList)
 
-		fmt.Println("\nWarning: The following tested assertions do not exist in the list of normative assertions:")
+		// find invalid assertions
+		var invalidAssertions []string
 		for i := range resultsSlice {
 			id := resultsSlice[i][0]
 			if !inSlice(tddAssertions, id) {
-				fmt.Println("-", id)
+				invalidAssertions = append(invalidAssertions, id)
 			}
+		}
+		if len(invalidAssertions) > 0 {
+			fmt.Printf("\nWarning: The following tested assertions do not exist in the list of normative assertions: %v\n\n", invalidAssertions)
 		}
 	}
 }
