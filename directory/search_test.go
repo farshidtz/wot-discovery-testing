@@ -234,6 +234,14 @@ func TestXPath(t *testing.T) {
 }
 
 func TestSPARQL(t *testing.T) {
+	defer report(t,
+		"tdd-search-sparql",
+		"tdd-search-sparql-method-get",
+		"tdd-search-sparql-resp-select-ask",
+		"tdd-search-sparql-method-post",
+		"tdd-search-sparql-federation",
+		"tdd-http-head", // need to skip this if SPARQL GET isn't implemented
+	)
 
 	const query = `select * { ?s ?p ?o }limit 5`
 	const federatedQuery = `select * {
@@ -257,6 +265,8 @@ func TestSPARQL(t *testing.T) {
 			t.Fatalf("Error solving query SPARQL: %s", err)
 		}
 		body := httpReadBody(res, t)
+
+		assertStatusCode(t, res, http.StatusOK, body)
 
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
@@ -286,6 +296,8 @@ func TestSPARQL(t *testing.T) {
 		}
 		body := httpReadBody(res, t)
 
+		assertStatusCode(t, res, http.StatusOK, body)
+
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
 		if err != nil {
@@ -312,6 +324,8 @@ func TestSPARQL(t *testing.T) {
 			t.Fatalf("Error solving query SPARQL: %s", err)
 		}
 		body := httpReadBody(res, t)
+
+		assertStatusCode(t, res, http.StatusOK, body)
 
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
