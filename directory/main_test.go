@@ -15,12 +15,17 @@ const (
 	MediaTypeMergePatch       = "application/merge-patch+json"
 )
 
-var serverURL string
+var (
+	serverURL               string
+	testJSONPath, testXPath bool
+)
 
 func TestMain(m *testing.M) {
 	// CLI arguments
 	reportPath := flag.String("report", "", "Path to create report")
-	flag.StringVar(&serverURL, "server", "", "URL of the directory service")
+	flag.BoolVar(&testJSONPath, "testJSONPath", false, "Enable JSONPath testing")
+	flag.BoolVar(&testXPath, "testXPath", false, "Enable XPath testing")
+	flag.StringVar(&serverURL, "server", "", "Base URL of the directory service")
 	flag.Parse()
 
 	if *reportPath != "" {

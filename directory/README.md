@@ -18,6 +18,10 @@ Useful CLI Arguments:
 ```
 --server string
         URL of the directory service
+-testJSONPath
+        perform informative JSONPath testing
+-testXPath
+        perform informative XPath testing
 -v
         verbose: print additional output
 --run regexp

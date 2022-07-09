@@ -45,7 +45,7 @@ func initReportWriter() (commit func()) {
 	return func() {
 		// Generate auto testing report
 		// convert to csv records (2D slice)
-	var resultsSlice [][]string
+		var resultsSlice [][]string
 		for id, result := range results {
 			resultsSlice = append(resultsSlice, resultToCSVRecord(id, result))
 		}
@@ -65,15 +65,19 @@ func initReportWriter() (commit func()) {
 		}
 		writeCSVReport(manualReportFile, manualList)
 
-		fmt.Println("\nWarning: The following tested assertions do not exist in the list of normative assertions:")
+		// find invalid assertions
+		var invalidAssertions []string
 		for i := range resultsSlice {
 			id := resultsSlice[i][0]
 			if !inSlice(tddAssertions, id) {
-				fmt.Println("-", id)
+				invalidAssertions = append(invalidAssertions, id)
 			}
 		}
+		if len(invalidAssertions) > 0 {
+			fmt.Printf("\nWarning: The following tested assertions do not exist in the list of normative assertions: %v\n\n", invalidAssertions)
 		}
 	}
+}
 
 // loadAssertions returns the list of assertions.
 // It will read from a local file.
@@ -215,6 +219,13 @@ func report(t *testing.T, assertions ...string) {
 	}
 
 	insertRecord(t, t.Name(), assertions)
+}
+
+// report at the end of tests. Execute with defer statement.
+func reportGroup(t *testing.T, assertionGroups ...[]string) {
+	for _, ag := range assertionGroups {
+		report(t, ag...)
+	}
 }
 
 func inSlice(s []string, e string) bool {

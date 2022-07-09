@@ -12,9 +12,23 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// http-head
-
 func TestCreateAnonymousThing(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-create-anonymous-td",
+		"tdd-things-create-anonymous-contenttype",
+		"tdd-things-create-anonymous-td-resp",
+		"tdd-things-create-anonymous-td-resp",
+		"tdd-anonymous-td-local-uuid",
+		"tdd-anonymous-td-identifier",
+		"tdd-things-create-known-vs-anonymous",
+		"tdd-http-error-response",
+		"tdd-validation-syntactic",
+		"tdd-validation-result",
+		"tdd-validation-response",
+	)
 
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
@@ -67,24 +81,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 		if !strings.Contains(systemGeneratedID, "urn:uuid:") {
 			t.Fatalf("System-generated ID doesn't have URN UUID scheme. Got: %s", location)
 		}
-	})
-
-	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-things-create-anonymous-td")
-
-		if systemGeneratedID == "" {
-			t.Fatalf("previous errors")
-		}
-
-		// retrieve the stored TD
-		storedTD := retrieveThing(systemGeneratedID, serverURL, t)
-
-		// remove system-generated attributes
-		delete(td, "registration")
-		delete(storedTD, "registration")
-		delete(storedTD, "id")
-
-		assertEqualTitle(t, td, storedTD)
 	})
 
 	t.Run("registration info", func(t *testing.T) {
@@ -154,6 +150,18 @@ func TestCreateAnonymousThing(t *testing.T) {
 }
 
 func TestCreateThing(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-create-known-td",
+		// "tdd-things-create-known-contenttype", // not tested
+		"tdd-things-create-known-td-resp",
+		"tdd-validation-syntactic",
+		"tdd-http-error-response",
+		"tdd-validation-result",
+		"tdd-validation-response",
+	)
 
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -161,13 +169,11 @@ func TestCreateThing(t *testing.T) {
 
 	var response *http.Response
 
-	t.Run("submit request", func(t *testing.T) {
+	t.Run("request", func(t *testing.T) {
 		defer report(t,
 			"tdd-things-crud",
 			"tdd-things-crudl",
-			"tdd-things-create-known-td",
-			"tdd-things-create-known-contenttype",
-		)
+			"tdd-things-create-known-td")
 
 		// submit PUT request
 		res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
@@ -183,59 +189,6 @@ func TestCreateThing(t *testing.T) {
 	t.Run("status code", func(t *testing.T) {
 		defer report(t, "tdd-things-create-known-td-resp")
 		assertStatusCode(t, response, http.StatusCreated, body)
-	})
-
-	t.Run("result", func(t *testing.T) {
-		defer report(t,
-			"tdd-things-create-known-td",
-		)
-
-		// retrieve the stored TD
-		storedTD := retrieveThing(id, serverURL, t)
-
-		// remove system-generated attributes
-		delete(td, "registration")
-		delete(storedTD, "registration")
-
-		assertEqualTitle(t, td, storedTD)
-	})
-
-	// t.Run("registration info", func(t *testing.T) {
-	// 	// retrieve the stored TD
-	// 	storedTD := retrieveThing(id, serverURL, t)
-
-	// 	testRegistrionInfo(t, storedTD)
-	// })
-
-	t.Run("reject id mismatch", func(t *testing.T) {
-		defer report(t)
-		t.Skipf("no relevant assertions")
-
-		id := "urn:uuid:" + uuid.NewV4().String()
-		anotherID := "urn:uuid:" + uuid.NewV4().String()
-		td := mockedTD(anotherID)
-		b, _ := json.Marshal(td)
-
-		var response *http.Response
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t)
-
-			// submit PUT request
-			res, err := httpPut(serverURL+"/things/"+id, MediaTypeThingDescription, b)
-			if err != nil {
-				t.Fatalf("Error posting: %s", err)
-			}
-			response = res
-			// defer res.Body.Close()
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t)
-			assertStatusCode(t, response, http.StatusConflict, body)
-		})
 	})
 
 	t.Run("reject invalid", func(t *testing.T) {
@@ -270,32 +223,20 @@ func TestCreateThing(t *testing.T) {
 			assertValidationResponse(t, res, body)
 		})
 	})
-
-	// reject POST with id: not disallowed explicitly
-	// t.Run("reject POST", func(t *testing.T) {
-	// 	defer report(t, "tdd-things-create-known-vs-anonymous")
-
-	// 	id := "urn:uuid:" + uuid.NewV4().String()
-	// 	td := mockedTD(id)
-	// 	b, _ := json.Marshal(td)
-
-	// 	// submit POST request
-	// 	res, err := http.Post(serverURL+"/things", MediaTypeThingDescription, bytes.NewReader(b))
-	// 	if err != nil {
-	// 		t.Fatalf( "Error posting: %s", err)
-	// 	}
-	// 	defer res.Body.Close()
-
-	// 	body := httpReadBody(res, t)
-
-	// 	t.Run("status code", func(t *testing.T) {
-	// 		assertStatusCode(t, res, http.StatusBadRequest, body)
-	// 	})
-	// })
-
 }
 
 func TestRetrieveThing(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-retrieve",
+		"tdd-things-default-representation",
+		"tdd-things-retrieve-resp",
+		"tdd-registrationinfo-vocab-created",
+		"tdd-registrationinfo-vocab-modified",
+		"tdd-http-head",
+	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -334,7 +275,7 @@ func TestRetrieveThing(t *testing.T) {
 		assertContentMediaType(t, response, MediaTypeThingDescription)
 	})
 
-	t.Run("result", func(t *testing.T) {
+	t.Run("payload", func(t *testing.T) {
 		defer report(t, "tdd-things-retrieve")
 
 		var retrievedTD mapAny
@@ -349,11 +290,20 @@ func TestRetrieveThing(t *testing.T) {
 		assertEqualTitle(t, td, retrievedTD)
 	})
 
-	t.Run("registration info", func(t *testing.T) {
+	t.Run("registrationInfo created", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-created")
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
 
-		testRegistrionInfo(t, storedTD)
+		testRegistrationInfoCreated(t, storedTD)
+	})
+
+	t.Run("registrationInfo modified", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-modified")
+		// retrieve the stored TD
+		storedTD := retrieveThing(id, serverURL, t)
+
+		testRegistrationInfoModified(t, storedTD)
 	})
 
 	// t.Run("anonymous td id", func(t *testing.T) {
@@ -375,6 +325,19 @@ func TestRetrieveThing(t *testing.T) {
 }
 
 func TestUpdateThing(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-update",
+		"tdd-things-update-contenttype",
+		"tdd-things-update-resp",
+		"tdd-things-update-contenttype",
+		"tdd-validation-syntactic",
+		"tdd-http-error-response",
+		"tdd-validation-result",
+		"tdd-validation-response",
+	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -392,7 +355,7 @@ func TestUpdateThing(t *testing.T) {
 			"tdd-things-crud",
 			"tdd-things-crudl",
 			"tdd-things-update",
-			"tdd-things-update-contenttype",
+			// "tdd-things-update-contenttype", // not tested
 		)
 
 		// submit PUT request
@@ -411,8 +374,8 @@ func TestUpdateThing(t *testing.T) {
 		assertStatusCode(t, response, http.StatusNoContent, body)
 	})
 
-	t.Run("result", func(t *testing.T) {
-		defer report(t, "tdd-things-update", "tdd-things-update-contenttype")
+	t.Run("payload", func(t *testing.T) {
+		defer report(t, "tdd-things-update")
 
 		// retrieve the stored TD
 		storedTD := retrieveThing(id, serverURL, t)
@@ -458,7 +421,6 @@ func TestUpdateThing(t *testing.T) {
 }
 
 func TestPatch(t *testing.T) {
-
 	var (
 		requestAssertions = []string{
 			"tdd-things-update-partial",
@@ -471,6 +433,14 @@ func TestPatch(t *testing.T) {
 			"tdd-things-update-partial-mergepatch",
 		}
 	)
+	// initialize related assertions
+	defer reportGroup(t, requestAssertions, statusAssertions, resultAssertions,
+		[]string{
+			"tdd-validation-syntactic",
+			"tdd-http-error-response",
+			"tdd-validation-result",
+			"tdd-validation-response",
+		})
 
 	t.Run("replace title", func(t *testing.T) {
 		// add a new TD
@@ -734,11 +704,12 @@ func TestPatch(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-
-	const (
-		requestAssertions = "tdd-things-delete"
-		statusAssertions  = "tdd-things-delete-resp"
-		resultAssertions  = "tdd-things-delete"
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-crud",
+		"tdd-things-crudl",
+		"tdd-things-delete",
+		"tdd-things-delete-resp",
 	)
 
 	// add a new TD
@@ -746,76 +717,46 @@ func TestDelete(t *testing.T) {
 	td := mockedTD(id)
 	createThing(id, td, serverURL, t)
 
-	t.Run("existing", func(t *testing.T) {
-		var response *http.Response
+	var response *http.Response
 
-		t.Run("submit request", func(t *testing.T) {
-			defer report(t,
-				"tdd-things-crud",
-				"tdd-things-crudl",
-				requestAssertions)
+	t.Run("submit request", func(t *testing.T) {
+		defer report(t,
+			"tdd-things-crud",
+			"tdd-things-crudl",
+			"tdd-things-delete")
 
-			// submit DELETE request
-			res, err := httpDelete(serverURL + "/things/" + id)
-			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
-			}
-			// defer res.Body.Close()
-			response = res
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t, statusAssertions)
-
-			assertStatusCode(t, response, http.StatusNoContent, body)
-		})
-
-		t.Run("result", func(t *testing.T) {
-			defer report(t, resultAssertions)
-
-			// try to retrieve the deleted TD
-			res, err := http.Get(serverURL + "/things/" + id)
-			if err != nil {
-				t.Fatalf("Error getting TD: %s", err)
-			}
-			defer res.Body.Close()
-
-			body = httpReadBody(res, t)
-
-			t.Run("status code", func(t *testing.T) {
-				assertStatusCode(t, res, http.StatusNotFound, body)
-			})
-		})
+		// submit DELETE request
+		res, err := httpDelete(serverURL + "/things/" + id)
+		if err != nil {
+			t.Fatalf("Error deleting TD: %s", err)
+		}
+		// defer res.Body.Close()
+		response = res
 	})
 
-	t.Run("non-existing", func(t *testing.T) {
-		var response *http.Response
+	body := httpReadBody(response, t)
 
-		t.Run("submit request", func(t *testing.T) {
-			defer report(t, requestAssertions)
+	t.Run("status code", func(t *testing.T) {
+		defer report(t, "tdd-things-delete-resp")
 
-			// submit DELETE request
-			res, err := httpDelete(serverURL + "/things/non-exiting-td")
-			if err != nil {
-				t.Fatalf("Error deleting TD: %s", err)
-			}
-			// defer res.Body.Close()
-			response = res
-		})
-
-		body := httpReadBody(response, t)
-
-		t.Run("status code", func(t *testing.T) {
-			defer report(t, statusAssertions)
-			assertStatusCode(t, response, http.StatusNotFound, body)
-		})
+		assertStatusCode(t, response, http.StatusNoContent, body)
 	})
-
 }
 
 func TestListThings(t *testing.T) {
+	// initialize related assertions
+	defer report(t,
+		"tdd-things-list-only",
+		"tdd-things-crudl",
+		"tdd-things-list-method",
+		"tdd-things-default-representation",
+		"tdd-things-list-resp",
+		"tdd-registrationinfo-vocab-created",
+		"tdd-registrationinfo-vocab-modified",
+		"tdd-anonymous-td-identifier",
+		"tdd-http-head",
+	)
+
 	var response *http.Response
 	var body []byte
 
@@ -824,7 +765,8 @@ func TestListThings(t *testing.T) {
 		defer report(t,
 			"tdd-things-list-only",
 			"tdd-things-crudl",
-			"tdd-things-list-method")
+			"tdd-things-list-method",
+		)
 
 		for i := 0; i < 3; i++ {
 			id := "urn:uuid:" + uuid.NewV4().String()
@@ -884,8 +826,8 @@ func TestListThings(t *testing.T) {
 		}
 	})
 
-	t.Run("registration info", func(t *testing.T) {
-		defer report(t, "tdd-things-list-resp")
+	t.Run("registrationInfo created", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-created")
 
 		var collection []mapAny
 		err := json.Unmarshal(body, &collection)
@@ -898,7 +840,24 @@ func TestListThings(t *testing.T) {
 		}
 
 		// just test the first TD
-		testRegistrionInfo(t, collection[0])
+		testRegistrationInfoCreated(t, collection[0])
+	})
+
+	t.Run("registrationInfo modified", func(t *testing.T) {
+		defer report(t, "tdd-registrationinfo-vocab-modified")
+
+		var collection []mapAny
+		err := json.Unmarshal(body, &collection)
+		if err != nil {
+			t.Fatalf("Error decoding page: %s", err)
+		}
+
+		if len(collection) == 0 {
+			t.Fatalf("Unexpected empty collection.")
+		}
+
+		// just test the first TD
+		testRegistrationInfoCreated(t, collection[0])
 	})
 
 	t.Run("anonymous td id", func(t *testing.T) {
@@ -973,67 +932,64 @@ func TestListThings(t *testing.T) {
 
 }
 
-func testRegistrionInfo(t *testing.T, td mapAny) {
+func testRegistrationInfoCreated(t *testing.T, td mapAny) {
+	// defer report(t, "tdd-registrationinfo-vocab-created")
 
-	t.Run("created", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-vocab-created")
+	regInfo, ok := td["registration"].(mapAny)
+	if !ok {
+		t.Fatalf("invalid or missing registration object: %v", td["registration"])
+	}
 
-		regInfo, ok := td["registration"].(mapAny)
-		if !ok {
-			t.Fatalf("invalid or missing registration object: %v", td["registration"])
-		}
-
-		createdStr, ok := regInfo["created"].(string)
-		if !ok {
-			t.Fatalf("invalid or missing registration.created: %v", regInfo["created"])
-		}
-		created, err := time.Parse(time.RFC3339, createdStr)
-		if err != nil {
-			t.Fatalf("invalid registration.created format: %s", err)
-		}
-		age := time.Since(created)
-		if age < 0 && age > time.Minute {
-			t.Fatalf("registration.created is in future or too old: %s", created)
-		}
-	})
-
-	t.Run("modified", func(t *testing.T) {
-		defer report(t, "tdd-registrationinfo-vocab-modified")
-
-		regInfo, ok := td["registration"].(mapAny)
-		if !ok {
-			t.Fatalf("invalid or missing registration object: %v", td["registration"])
-		}
-
-		modifiedStr, ok := regInfo["modified"].(string)
-		if !ok {
-			t.Fatalf("invalid or missing registration.modified: %v", regInfo["modified"])
-		}
-		modified, err := time.Parse(time.RFC3339, modifiedStr)
-		if err != nil {
-			t.Fatalf("invalid registration.modified format: %s", err)
-		}
-		age := time.Since(modified)
-		if age < 0 && age > time.Minute {
-			t.Fatalf("registration.modified is in future or too old: %s", modified)
-		}
-	})
-
-	// t.Run("expires", func(t *testing.T) {
-	// 	defer report(t, "tdd-registrationinfo-vocab-expires")
-
-	// 	t.Skipf("TODO")
-	// })
-
-	// t.Run("ttl", func(t *testing.T) {
-	// 	defer report(t, "tdd-registrationinfo-vocab-ttl")
-
-	// 	t.Skipf("TODO")
-	// })
-
-	// t.Run("retrieved", func(t *testing.T) {
-	// 	defer report(t, "tdd-registrationinfo-vocab-retrieved")
-
-	// 	t.Skipf("TODO")
-	// })
+	createdStr, ok := regInfo["created"].(string)
+	if !ok {
+		t.Fatalf("invalid or missing registration.created: %v", regInfo["created"])
+	}
+	created, err := time.Parse(time.RFC3339, createdStr)
+	if err != nil {
+		t.Fatalf("invalid registration.created format: %s", err)
+	}
+	age := time.Since(created)
+	if age < 0 && age > time.Minute {
+		t.Fatalf("registration.created is in future or too old: %s", created)
+	}
 }
+
+func testRegistrationInfoModified(t *testing.T, td mapAny) {
+	// defer report(t, "tdd-registrationinfo-vocab-modified")
+
+	regInfo, ok := td["registration"].(mapAny)
+	if !ok {
+		t.Fatalf("invalid or missing registration object: %v", td["registration"])
+	}
+
+	modifiedStr, ok := regInfo["modified"].(string)
+	if !ok {
+		t.Fatalf("invalid or missing registration.modified: %v", regInfo["modified"])
+	}
+	modified, err := time.Parse(time.RFC3339, modifiedStr)
+	if err != nil {
+		t.Fatalf("invalid registration.modified format: %s", err)
+	}
+	age := time.Since(modified)
+	if age < 0 && age > time.Minute {
+		t.Fatalf("registration.modified is in future or too old: %s", modified)
+	}
+}
+
+// t.Run("expires", func(t *testing.T) {
+// 	defer report(t, "tdd-registrationinfo-vocab-expires")
+
+// 	t.Skipf("TODO")
+// })
+
+// t.Run("ttl", func(t *testing.T) {
+// 	defer report(t, "tdd-registrationinfo-vocab-ttl")
+
+// 	t.Skipf("TODO")
+// })
+
+// t.Run("retrieved", func(t *testing.T) {
+// 	defer report(t, "tdd-registrationinfo-vocab-retrieved")
+
+// 	t.Skipf("TODO")
+// })

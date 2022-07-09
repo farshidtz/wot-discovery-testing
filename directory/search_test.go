@@ -12,6 +12,9 @@ import (
 )
 
 func TestJSONPath(t *testing.T) {
+	if !testJSONPath {
+		t.Skip("Not enabled.")
+	}
 
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
@@ -93,39 +96,6 @@ func TestJSONPath(t *testing.T) {
 		})
 	})
 
-	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-anonymous-td-identifier")
-
-		// add an anonymous TD
-		createdTD := mockedTD("") // no id
-		// tag the TDs to find later
-		tag := uuid.NewV4().String()
-		createdTD["tag"] = tag
-		createThing("", createdTD, serverURL, t)
-
-		// submit the request
-		response, err := http.Get(serverURL + fmt.Sprintf("/search/jsonpath?query=$[?(@.tag=='%s')]", tag))
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer response.Body.Close()
-
-		body := httpReadBody(response, t)
-
-		var filterredTDs []mapAny
-		err = json.Unmarshal(body, &filterredTDs)
-		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
-		}
-
-		if len(filterredTDs) != 1 {
-			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
-		}
-
-		// try to get the ID. This should pass
-		getID(t, filterredTDs[0])
-	})
-
 	t.Run("reject bad query", func(t *testing.T) {
 		var response *http.Response
 
@@ -153,6 +123,10 @@ func TestJSONPath(t *testing.T) {
 }
 
 func TestXPath(t *testing.T) {
+	if !testXPath {
+		t.Skip("Not enabled.")
+	}
+
 	t.Run("filter", func(t *testing.T) {
 		tag := uuid.NewV4().String()
 		var createdTD []mapAny
@@ -233,39 +207,6 @@ func TestXPath(t *testing.T) {
 		})
 	})
 
-	t.Run("filter anonymous", func(t *testing.T) {
-		defer report(t, "tdd-anonymous-td-identifier")
-
-		// add an anonymous TD
-		createdTD := mockedTD("") // no id
-		// tag the TDs to find later
-		tag := uuid.NewV4().String()
-		createdTD["tag"] = tag
-		createThing("", createdTD, serverURL, t)
-
-		// submit the request
-		response, err := http.Get(serverURL + fmt.Sprintf("/search/xpath?query=*[tag='%s']", tag))
-		if err != nil {
-			t.Fatalf("Error getting TDs: %s", err)
-		}
-		defer response.Body.Close()
-
-		body := httpReadBody(response, t)
-
-		var filterredTDs []mapAny
-		err = json.Unmarshal(body, &filterredTDs)
-		if err != nil {
-			t.Fatalf("Error decoding page: %s", err)
-		}
-
-		if len(filterredTDs) != 1 {
-			t.Fatalf("Filtering returned %d TDs, expected 1", len(filterredTDs))
-		}
-
-		// try to get the ID. This should pass
-		getID(t, filterredTDs[0])
-	})
-
 	t.Run("reject bad query", func(t *testing.T) {
 		var response *http.Response
 
@@ -293,6 +234,14 @@ func TestXPath(t *testing.T) {
 }
 
 func TestSPARQL(t *testing.T) {
+	defer report(t,
+		"tdd-search-sparql",
+		"tdd-search-sparql-method-get",
+		"tdd-search-sparql-resp-select-ask",
+		"tdd-search-sparql-method-post",
+		"tdd-search-sparql-federation",
+		"tdd-http-head", // need to skip this if SPARQL GET isn't implemented
+	)
 
 	const query = `select * { ?s ?p ?o }limit 5`
 	const federatedQuery = `select * {
@@ -316,6 +265,8 @@ func TestSPARQL(t *testing.T) {
 			t.Fatalf("Error solving query SPARQL: %s", err)
 		}
 		body := httpReadBody(res, t)
+
+		assertStatusCode(t, res, http.StatusOK, body)
 
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
@@ -345,6 +296,8 @@ func TestSPARQL(t *testing.T) {
 		}
 		body := httpReadBody(res, t)
 
+		assertStatusCode(t, res, http.StatusOK, body)
+
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
 		if err != nil {
@@ -371,6 +324,8 @@ func TestSPARQL(t *testing.T) {
 			t.Fatalf("Error solving query SPARQL: %s", err)
 		}
 		body := httpReadBody(res, t)
+
+		assertStatusCode(t, res, http.StatusOK, body)
 
 		var responseMap mapAny
 		err = json.Unmarshal(body, &responseMap)
