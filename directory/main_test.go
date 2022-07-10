@@ -15,22 +15,30 @@ const (
 	MediaTypeMergePatch       = "application/merge-patch+json"
 )
 
+const (
+	discoveryRepoBranch = "https://raw.githubusercontent.com/w3c/wot-discovery/main"
+	assertionsTemplate  = discoveryRepoBranch + "/testing/template.csv"
+	assertionsManual    = discoveryRepoBranch + "/testing/manual.csv"
+)
+
 var (
 	serverURL               string
 	testJSONPath, testXPath bool
+	templateURL, manualURL  string
 )
 
 func TestMain(m *testing.M) {
 	// CLI arguments
-	reportPath := flag.String("report", "", "Path to create report")
+	usage := flag.Bool("usage", false, "Print CLI usage help")
 	flag.BoolVar(&testJSONPath, "testJSONPath", false, "Enable JSONPath testing")
 	flag.BoolVar(&testXPath, "testXPath", false, "Enable XPath testing")
 	flag.StringVar(&serverURL, "server", "", "Base URL of the directory service")
+	flag.StringVar(&templateURL, "templateURL", assertionsTemplate, "URL to download assertions template")
+	flag.StringVar(&manualURL, "manualURL", assertionsManual, "URL to download template for assertions that are tested manually")
 	flag.Parse()
-
-	if *reportPath != "" {
-		fmt.Printf("Bad input. Report path is now hardcoded to %s\n", reportFile)
-		os.Exit(1)
+	if *usage {
+		flag.Usage()
+		return
 	}
 
 	_, err := url.Parse(serverURL)
@@ -44,7 +52,7 @@ func TestMain(m *testing.M) {
 	}
 	fmt.Printf("Server URL: %s\n", serverURL)
 
-	writeReport := initReportWriter()
+	writeReport := initReportWriter(templateURL, manualURL)
 
 	code := m.Run()
 

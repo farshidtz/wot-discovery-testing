@@ -13,22 +13,6 @@ import (
 )
 
 func TestCreateAnonymousThing(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-crud",
-		"tdd-things-crudl",
-		"tdd-things-create-anonymous-td",
-		"tdd-things-create-anonymous-contenttype",
-		"tdd-things-create-anonymous-td-resp",
-		"tdd-things-create-anonymous-td-resp",
-		"tdd-anonymous-td-local-uuid",
-		"tdd-anonymous-td-identifier",
-		"tdd-things-create-known-vs-anonymous",
-		"tdd-http-error-response",
-		"tdd-validation-syntactic",
-		"tdd-validation-result",
-		"tdd-validation-response",
-	)
 
 	td := mockedTD("") // without ID
 	b, _ := json.Marshal(td)
@@ -150,18 +134,6 @@ func TestCreateAnonymousThing(t *testing.T) {
 }
 
 func TestCreateThing(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-crud",
-		"tdd-things-crudl",
-		"tdd-things-create-known-td",
-		// "tdd-things-create-known-contenttype", // not tested
-		"tdd-things-create-known-td-resp",
-		"tdd-validation-syntactic",
-		"tdd-http-error-response",
-		"tdd-validation-result",
-		"tdd-validation-response",
-	)
 
 	id := "urn:uuid:" + uuid.NewV4().String()
 	td := mockedTD(id)
@@ -226,17 +198,6 @@ func TestCreateThing(t *testing.T) {
 }
 
 func TestRetrieveThing(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-crud",
-		"tdd-things-crudl",
-		"tdd-things-retrieve",
-		"tdd-things-default-representation",
-		"tdd-things-retrieve-resp",
-		"tdd-registrationinfo-vocab-created",
-		"tdd-registrationinfo-vocab-modified",
-		"tdd-http-head",
-	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -325,19 +286,6 @@ func TestRetrieveThing(t *testing.T) {
 }
 
 func TestUpdateThing(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-crud",
-		"tdd-things-crudl",
-		"tdd-things-update",
-		"tdd-things-update-contenttype",
-		"tdd-things-update-resp",
-		"tdd-things-update-contenttype",
-		"tdd-validation-syntactic",
-		"tdd-http-error-response",
-		"tdd-validation-result",
-		"tdd-validation-response",
-	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -433,14 +381,6 @@ func TestPatch(t *testing.T) {
 			"tdd-things-update-partial-mergepatch",
 		}
 	)
-	// initialize related assertions
-	defer reportGroup(t, requestAssertions, statusAssertions, resultAssertions,
-		[]string{
-			"tdd-validation-syntactic",
-			"tdd-http-error-response",
-			"tdd-validation-result",
-			"tdd-validation-response",
-		})
 
 	t.Run("replace title", func(t *testing.T) {
 		// add a new TD
@@ -704,13 +644,6 @@ func TestPatch(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-crud",
-		"tdd-things-crudl",
-		"tdd-things-delete",
-		"tdd-things-delete-resp",
-	)
 
 	// add a new TD
 	id := "urn:uuid:" + uuid.NewV4().String()
@@ -744,18 +677,6 @@ func TestDelete(t *testing.T) {
 }
 
 func TestListThings(t *testing.T) {
-	// initialize related assertions
-	defer report(t,
-		"tdd-things-list-only",
-		"tdd-things-crudl",
-		"tdd-things-list-method",
-		"tdd-things-default-representation",
-		"tdd-things-list-resp",
-		"tdd-registrationinfo-vocab-created",
-		"tdd-registrationinfo-vocab-modified",
-		"tdd-anonymous-td-identifier",
-		"tdd-http-head",
-	)
 
 	var response *http.Response
 	var body []byte

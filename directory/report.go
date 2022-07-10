@@ -12,12 +12,7 @@ import (
 	"testing"
 )
 
-const (
-	assertionsTemplateURL = "https://raw.githubusercontent.com/w3c/wot-discovery/main/testing/template.csv"
-	templateFile          = "report/template.csv"
-	reportFile            = "report/tdd-auto.csv"
-	manualReportFile      = "report/tdd-manual.csv"
-)
+const reportFile = "report/tdd-auto.csv"
 
 var header = []string{"ID", "Status", "Comment"}
 
@@ -29,14 +24,15 @@ type result struct {
 	skipped []string
 }
 
-func initReportWriter() (commit func()) {
+func initReportWriter(templateURL, manualURL string) (commit func()) {
 	err := os.MkdirAll("report", 0755)
 	if err != nil {
 		fmt.Printf("Error creating report directory: %s\n", err)
 		os.Exit(1)
 	}
 
-	tddAssertions := loadAssertions()
+	assertionsList := loadAssertions(templateURL)
+	manualAssertionsList := loadAssertions(manualURL)
 
 	// prepare the slice so tests can append to it
 	results = make(map[string]result)
@@ -55,26 +51,30 @@ func initReportWriter() (commit func()) {
 		})
 		writeCSVReport(reportFile, resultsSlice)
 
-		// Generate manual testing report
-		// find untested assertions
-		var manualList [][]string
-		for _, id := range tddAssertions {
-			if _, found := results[id]; !found {
-				manualList = append(manualList, []string{id, "null", ""})
-			}
-		}
-		writeCSVReport(manualReportFile, manualList)
-
 		// find invalid assertions
 		var invalidAssertions []string
 		for i := range resultsSlice {
 			id := resultsSlice[i][0]
-			if !inSlice(tddAssertions, id) {
+			if !inSlice(assertionsList, id) {
 				invalidAssertions = append(invalidAssertions, id)
 			}
 		}
 		if len(invalidAssertions) > 0 {
-			fmt.Printf("\nWarning: The following tested assertions do not exist in the list of normative assertions: %v\n\n", invalidAssertions)
+			fmt.Printf("\nWarning: The following tested assertions do not exist in the list of normative assertions: %v\n\n",
+				invalidAssertions)
+		}
+
+		// find tested assertions that expected to done manually
+		var invalidManual []string
+		for i := range resultsSlice {
+			id := resultsSlice[i][0]
+			if inSlice(manualAssertionsList, id) {
+				invalidManual = append(invalidManual, id)
+			}
+		}
+		if len(invalidManual) > 0 {
+			fmt.Printf("\nError: The following tested assertions were in the manual list: %v\n\n",
+				invalidManual)
 		}
 	}
 }
@@ -82,16 +82,20 @@ func initReportWriter() (commit func()) {
 // loadAssertions returns the list of assertions.
 // It will read from a local file.
 // If the local file is not available, it will be downloaded from the source
-func loadAssertions() []string {
+func loadAssertions(templateURL string) []string {
+	urlParts := strings.Split(templateURL, "/")
+	templateFile := "report/" + urlParts[len(urlParts)-1]
+
 	if _, err := os.Stat(templateFile); errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Downloading assertions from", assertionsTemplateURL)
-		resp, err := http.Get(assertionsTemplateURL)
+		fmt.Println("Downloading assertions from", templateURL)
+		resp, err := http.Get(templateURL)
 		if err != nil {
 			fmt.Printf("Error downloading assertions template: %s\n", err)
 			os.Exit(1)
 		}
 		defer resp.Body.Close()
 
+		fmt.Println("Saving assertions to", templateFile)
 		file, err := os.Create(templateFile)
 		if err != nil {
 			fmt.Printf("Error creating assertions template file: %s\n", err)
@@ -99,19 +103,21 @@ func loadAssertions() []string {
 		}
 		defer file.Close()
 
-		totalBytes, err := io.Copy(file, resp.Body)
+		_, err = io.Copy(file, resp.Body)
 		if err != nil {
 			fmt.Printf("Error copying http response to assertions template file: %s\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Wrote %d bytes to %s\n", totalBytes, templateFile)
 	}
 
+	var err error
+	fmt.Println("Reading assertions from", templateFile)
 	file, err := os.Open(templateFile)
 	if err != nil {
 		fmt.Printf("Error opening assertions template file: %s\n", err)
 		os.Exit(1)
 	}
+	defer file.Close()
 
 	records, err := csv.NewReader(file).ReadAll()
 	if err != nil {
@@ -119,15 +125,12 @@ func loadAssertions() []string {
 		os.Exit(1)
 	}
 
-	var tddAssertions []string
+	var assertionIDs []string
 	for _, record := range records {
-		id := record[0]
-		if strings.HasPrefix(id, "tdd-") {
-			tddAssertions = append(tddAssertions, id)
-		}
+		assertionIDs = append(assertionIDs, record[0])
 	}
 
-	return tddAssertions
+	return assertionIDs
 }
 
 func insertRecord(t *testing.T, name string, assertions []string) {
@@ -219,13 +222,6 @@ func report(t *testing.T, assertions ...string) {
 	}
 
 	insertRecord(t, t.Name(), assertions)
-}
-
-// report at the end of tests. Execute with defer statement.
-func reportGroup(t *testing.T, assertionGroups ...[]string) {
-	for _, ag := range assertionGroups {
-		report(t, ag...)
-	}
 }
 
 func inSlice(s []string, e string) bool {

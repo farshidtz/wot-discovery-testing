@@ -234,14 +234,6 @@ func TestXPath(t *testing.T) {
 }
 
 func TestSPARQL(t *testing.T) {
-	defer report(t,
-		"tdd-search-sparql",
-		"tdd-search-sparql-method-get",
-		"tdd-search-sparql-resp-select-ask",
-		"tdd-search-sparql-method-post",
-		"tdd-search-sparql-federation",
-		"tdd-http-head", // need to skip this if SPARQL GET isn't implemented
-	)
 
 	const query = `select * { ?s ?p ?o }limit 5`
 	const federatedQuery = `select * {
