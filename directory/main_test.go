@@ -25,6 +25,7 @@ var (
 	serverURL               string
 	testJSONPath, testXPath bool
 	templateURL, manualURL  string
+	ignoreUnknownEvents     bool
 )
 
 func TestMain(m *testing.M) {
@@ -35,6 +36,7 @@ func TestMain(m *testing.M) {
 	flag.StringVar(&serverURL, "server", "", "Base URL of the directory service")
 	flag.StringVar(&templateURL, "templateURL", assertionsTemplate, "URL to download assertions template")
 	flag.StringVar(&manualURL, "manualURL", assertionsManual, "URL to download template for assertions that are tested manually")
+	flag.BoolVar(&ignoreUnknownEvents, "ignoreUnknownEvents", false, "Ignore unknown events instead of failing the tests")
 	flag.Parse()
 	if *usage {
 		flag.Usage()
