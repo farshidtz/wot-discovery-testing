@@ -64,8 +64,8 @@ docker run --rm --net=host wot-discovery-testing --server=http://localhost:8081
 ```
 
 ##### Report
-To get the report, mount a volume on where the report is being generated. E.g.:
+To get the report, mount a volume on where the report is generated. E.g.:
 ```
-docker run --rm -v $(pwd)/report:/report wot-discovery-testing --server=http://directory:8081
+docker run --rm -v $(pwd)/report:/home/report wot-discovery-testing --server=http://directory:8081
 ```
 where `$(pwd)/report` is the path to the directory on the host.
